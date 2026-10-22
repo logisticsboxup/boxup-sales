@@ -157,6 +157,8 @@ function buildOrders(headers, rows){
     const courier = g(r, ix.courier);
     let st;
     if(/deliver/i.test(delivTxt) || /deliver/i.test(statusTxt)) st = 'delivered';
+    else if(/return|rto/i.test(delivTxt)) st = 'returned';
+    else if(/transit/i.test(delivTxt)) st = 'transit';
     else if(/partly|partial/i.test(statusTxt)) st = 'partly';
     else if(/dispatch|out|picked|transit|shipped/i.test(statusTxt) && !/ready/i.test(statusTxt) || (dispAt && !/ready/i.test(statusTxt))) st = 'transit';
     else if(/ready/i.test(statusTxt)) st = 'ready';
@@ -176,7 +178,7 @@ function buildOrders(headers, rows){
 }
 
 const ST = {
-  delivered: ['Delivered', 's-del'], transit: ['Dispatched', 's-tr'], partly: ['Partly dispatched', 's-pt'],
+  delivered: ['Delivered', 's-del'], returned: ['Returned (RTO)', 's-pt'], transit: ['Dispatched', 's-tr'], partly: ['Partly dispatched', 's-pt'],
   ready: ['Ready for dispatch', 's-rd'], held: ['Not dispatched', 's-no'], other: ['', 's-no']
 };
 const stChip = o => { const [t, c] = ST[o.st] || ST.other; return `<span class="st ${c}">${esc(t || o.statusTxt)}</span>`; };
