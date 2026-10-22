@@ -272,13 +272,33 @@ function downloadExcel(){
 }
 
 /* ---------- load ---------- */
+const CACHE_KEY = 'boxup.sales.v1';
+let loading = false;
 async function load(){
-  $('upd').textContent = 'Loading…';
+  if(loading) return; loading = true;
+  if(!ORDERS.length) $('upd').textContent = 'Loading…';
+  else $('upd').textContent = $('upd').textContent.replace(/ · refreshing…$/, '') + ' · refreshing…';
   try{
     const res = await fetch(LOG_URL + '?action=sales&t=' + Date.now());
     let d = null; try{ d = await res.json(); }catch(e){}
     if(!d || d.ok === undefined) throw new Error('The Google Sheet script does not have the Sales feed yet. Add the "Sales feed" file to the script and deploy a new version.');
     if(!d.ok) throw new Error(d.error || 'Sheet error');
+    try{ localStorage.setItem(CACHE_KEY, JSON.stringify({at: Date.now(), headers: d.headers, rows: d.rows})); }catch(e){}
+    showData(d);
+    $('err').hidden = true;
+    $('dot').style.background = '#2E7D32';
+    $('upd').textContent = 'Live · updated ' + new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  }catch(e){
+    $('dot').style.background = '#E0A43A';
+    $('upd').textContent = ORDERS.length ? 'Showing saved data · could not refresh' : 'Not updated';
+    $('err').hidden = false;
+    $('err').textContent = e.message === 'Failed to fetch' ? 'Could not reach the Google Sheet. Check the internet.' : e.message;
+    if(!ORDERS.length) $('rows').innerHTML = '<tr><td colspan="8" class="empty">No data yet.</td></tr>';
+  }finally{ loading = false; }
+}
+
+/* puts a feed answer on screen (used for the saved copy and for fresh data) */
+function showData(d){
     const selN = SEL && SEL.n;
     ORDERS = buildOrders(d.headers || [], d.rows || []);
     SEL = ORDERS.find(o => o.n === selN) || null;
@@ -286,18 +306,10 @@ async function load(){
     const crs = [...new Set(ORDERS.map(o => o.courier).filter(Boolean))].sort((a, b) => a.localeCompare(b));
     const keep = (sel, list, label) => { const v = sel.value; sel.innerHTML = `<option value="">${label}: All</option>` + list.map(x => `<option>${esc(x)}</option>`).join(''); sel.value = list.includes(v) ? v : ''; };
     keep($('fCompany'), cos, 'Company'); keep($('fCourier'), crs, 'Courier');
-    $('err').hidden = true;
-    $('dot').style.background = '#2E7D32';
-    $('upd').textContent = 'Live · updated ' + new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
     applyFilters();
-  }catch(e){
-    $('dot').style.background = '#E0A43A';
-    $('upd').textContent = 'Not updated';
-    $('err').hidden = false;
-    $('err').textContent = e.message === 'Failed to fetch' ? 'Could not reach the Google Sheet. Check the internet.' : e.message;
-    if(!ORDERS.length) $('rows').innerHTML = '<tr><td colspan="8" class="empty">No data yet.</td></tr>';
-  }
 }
+
+
 
 $('q').addEventListener('input', applyFilters);
 ['from','to','fCompany','fCourier'].forEach(id => $(id).addEventListener('change', applyFilters));
@@ -313,7 +325,17 @@ $('rows').addEventListener('click', e => {
 $('dlBtn').addEventListener('click', downloadExcel);
 $('reload').addEventListener('click', load);
 // default: last 30 days
-(function(){ const t = new Date(), f = new Date(Date.now() - 30*86400000); const iso = d => d.toISOString().slice(0,10); $('from').value = iso(f); $('to').value = iso(t); })();
+(function(){ const t = new Date(), f = new Date(Date.now() - 30*86400000); const iso = d => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); $('from').value = iso(f); $('to').value = iso(t); })();
+/* open instantly with the last data this browser saw, then refresh in the background */
+(function(){
+  try{
+    const c = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
+    if(c && c.rows && c.rows.length){
+      showData(c);
+      $('upd').textContent = 'Saved data from ' + new Date(c.at).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}) + ' · refreshing…';
+    }
+  }catch(e){}
+})();
 load();
 setInterval(() => { if(!document.hidden) load(); }, 60000);   // refresh every minute
 </script>
