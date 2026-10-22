@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BoxUp Sales Order Tracker</title>
+<link rel="icon" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root{--forest:#16311F;--cream:#F3EFE4;--ink:#161512;--muted:#7A776C;--line:#e4ded0;--danger:#9E2B25;}
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--cream);font-family:'Inter',Arial,sans-serif;color:var(--ink);}
+  .wrap{max-width:1500px;margin:0 auto;padding:22px 22px 40px;}
+  .top{display:flex;align-items:center;gap:14px;margin-bottom:16px;}
+  .top img{width:54px;height:54px;border-radius:10px;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.08);}
+  .top small{display:block;font-size:11.5px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;font-weight:600;}
+  .top h1{margin:0;font:700 26px 'Playfair Display',Georgia,serif;color:var(--forest);}
+  .live{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);}
+  .live i{width:9px;height:9px;border-radius:50%;background:#bbb;display:inline-block;}
+  .live button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 12px;font:600 12.5px 'Inter';cursor:pointer;color:var(--forest);}
+  .search{background:#fff;border-radius:14px;box-shadow:0 6px 20px rgba(0,0,0,.07);padding:14px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+  .search input[type=search]{flex:1;min-width:280px;border:2px solid var(--forest);border-radius:10px;padding:11px 14px;font:15px 'Inter';outline:none;}
+  .search select,.search input[type=date]{border:1px solid #d8d2c0;border-radius:8px;padding:10px 10px;font:13px 'Inter';background:#fff;color:var(--ink);max-width:220px;}
+  .search .lbl{font-size:12px;color:var(--muted);font-weight:600;}
+  .chips{display:flex;gap:8px;margin:14px 0;flex-wrap:wrap;}
+  .chip{background:#fff;border:1px solid #d8d2c0;border-radius:20px;padding:6px 14px;font:600 12.5px 'Inter';cursor:pointer;color:var(--ink);}
+  .chip.on{background:var(--forest);color:#fff;border-color:var(--forest);}
+  .tiles{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:14px;}
+  .tile{background:#fff;border-radius:12px;padding:12px 14px;border:1px solid var(--line);}
+  .tile b{display:block;font-size:10.5px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;}
+  .tile span{font-size:26px;font-weight:800;color:var(--forest);}
+  .main{display:flex;gap:18px;align-items:flex-start;}
+  .card{flex:1;min-width:0;background:#fff;border-radius:14px;box-shadow:0 6px 20px rgba(0,0,0,.07);overflow:hidden;}
+  .ch{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #eee;font-size:13px;gap:10px;}
+  .ch b{font-size:15px;color:var(--forest);} .ch span{color:var(--muted);}
+  .dl{background:#e6f4ea;color:#137333;border:1px solid #a8d5b5;border-radius:8px;padding:7px 12px;font:700 12.5px 'Inter';cursor:pointer;}
+  .tbl{overflow:auto;max-height:68vh;}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  th{background:var(--forest);color:#fff;text-align:left;padding:9px 10px;font-size:11px;position:sticky;top:0;z-index:1;white-space:nowrap;}
+  td{padding:9px 10px;border-bottom:1px solid #eee;vertical-align:top;}
+  td small{display:block;color:var(--muted);}
+  tr.row{cursor:pointer;} tr.row:hover td{background:#FAF7EF;} tr.row.sel td{background:#EEF4EF;}
+  .c{text-align:center;} .nw{white-space:nowrap;}
+  .hub{background:#111;color:#fff;font-weight:800;font-size:10px;border-radius:3px;padding:1px 6px;}
+  a{color:#1155cc;}
+  .mu{color:#aaa;}
+  .st{border-radius:12px;padding:3px 10px;font-weight:700;font-size:11.5px;white-space:nowrap;display:inline-block;}
+  .s-del{background:#e6f4ea;color:#2E7D32;} .s-tr{background:#e8f0fe;color:#1a56b8;} .s-rd{background:#fff3dc;color:#8a5a00;} .s-pt{background:#fde8d7;color:#9a4a10;} .s-no{background:#f1f1f1;color:#555;}
+  .det{width:420px;flex:0 0 420px;background:#fff;border-radius:14px;box-shadow:0 6px 20px rgba(0,0,0,.07);padding:16px 18px;font-size:13px;position:sticky;top:12px;}
+  .det h3{margin:0 0 2px;font:700 19px 'Playfair Display',Georgia,serif;color:var(--forest);}
+  .det .sub{color:var(--muted);}
+  .det .kv{margin-top:10px;line-height:1.55;}
+  .tl{margin-top:14px;border-left:2px solid #ddd;padding-left:14px;}
+  .tl div{position:relative;margin-bottom:12px;}
+  .tl div:before{content:"";position:absolute;left:-21px;top:3px;width:12px;height:12px;border-radius:50%;background:#ccc;}
+  .tl div.ok:before{background:#2E7D32;}
+  .tl small{display:block;color:var(--muted);}
+  .btns{margin-top:6px;display:flex;flex-wrap:wrap;gap:6px;}
+  .btn{border:1px solid #d8d2c0;background:#fff;border-radius:8px;padding:7px 12px;font:600 12.5px 'Inter';cursor:pointer;color:var(--ink);text-decoration:none;}
+  .btn:disabled{opacity:.45;cursor:not-allowed;}
+  .empty{padding:30px;text-align:center;color:var(--muted);}
+  .err{background:#fbe9e8;color:var(--danger);border:1px solid #e3a19c;border-radius:10px;padding:10px 14px;margin-bottom:12px;font-weight:600;font-size:13px;}
+  .err[hidden]{display:none;}
+  .note{font-size:12px;color:var(--muted);margin-top:10px;}
+  @media (max-width: 1100px){ .main{flex-direction:column;} .det{width:100%;flex:auto;position:static;} .tiles{grid-template-columns:repeat(2,1fr);} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <img src="data:image/jpeg;base64,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" alt="BoxUp">
+    <div><small>BoxUp Luxury Gifting</small><h1>Sales Order Tracker</h1></div>
+    <div class="live"><i id="dot"></i><span id="upd">Loading…</span><button type="button" id="reload">&#8635; Refresh</button></div>
+  </div>
+  <div class="err" id="err" hidden></div>
+
+  <div class="search">
+    <input type="search" id="q" placeholder="&#128269; Search Order ID, Estimate, company, client name, phone or AWB" autocomplete="off">
+    <span class="lbl">From</span><input type="date" id="from">
+    <span class="lbl">To</span><input type="date" id="to">
+    <select id="fCompany"><option value="">Company: All</option></select>
+    <select id="fCourier"><option value="">Courier: All</option></select>
+  </div>
+
+  <div class="chips" id="chips">
+    <button type="button" class="chip on" data-f="all">All</button>
+    <button type="button" class="chip" data-f="ready">Ready for dispatch</button>
+    <button type="button" class="chip" data-f="transit">Dispatched / In transit</button>
+    <button type="button" class="chip" data-f="delivered">Delivered</button>
+    <button type="button" class="chip" data-f="b2b">B2B</button>
+    <button type="button" class="chip" data-f="b2c">B2C</button>
+    <button type="button" class="chip" data-f="intl">International</button>
+  </div>
+
+  <div class="tiles">
+    <div class="tile"><b>Orders</b><span id="tOrders">0</span></div>
+    <div class="tile"><b>Ready for dispatch</b><span id="tReady">0</span></div>
+    <div class="tile"><b>Dispatched / In transit</b><span id="tTransit">0</span></div>
+    <div class="tile"><b>Delivered</b><span id="tDel">0</span></div>
+    <div class="tile"><b>Boxes</b><span id="tBoxes">0</span></div>
+  </div>
+
+  <div class="main">
+    <div class="card">
+      <div class="ch"><div><b>Orders</b> <span id="cnt"></span></div><button type="button" class="dl" id="dlBtn">&#11015; Download Excel</button></div>
+      <div class="tbl"><table>
+        <thead><tr><th>Order ID</th><th>Company / Client</th><th class="c">Code</th><th>Courier</th><th>AWB / Tracking</th><th>Label printed</th><th>Dispatched</th><th>Status</th></tr></thead>
+        <tbody id="rows"><tr><td colspan="8" class="empty">Loading orders from the Label Log…</td></tr></tbody>
+      </table></div>
+    </div>
+    <div class="det" id="det"><div class="empty">Click an order to see its details and timeline.</div></div>
+  </div>
+  <div class="note">Live from the BoxUp Label Log Google Sheet. This page only shows data; nothing can be changed here.</div>
+</div>
+
+<script>
+const LOG_URL = 'https://script.google.com/macros/s/AKfycbxkWlpzmubWJwgFQF7cCDAegDHDFpst-j2AnoLVrk3rVnZL9CuOukEIC_GR43gUlL7e/exec';
+const SA_LINK_PREFIX = 'https://shreeanjani.co.in/tracking/?awb=';
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+let ORDERS = [], VIEW = [], FILTER = 'all', SEL = null;
+
+/* ---------- read the Label Log rows (by header name, so column order does not matter) ---------- */
+const MON = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+function parseDate(t){
+  t = String(t || '').trim(); if(!t) return null;
+  let m = t.match(/^(\d{1,2})[-\/ ]([A-Za-z]{3})[A-Za-z]*[-\/ ,]+(\d{4})(?:[ ,T]+(\d{1,2}):(\d{2}))?/);
+  if(m) return new Date(+m[3], MON[m[2].toLowerCase()] ?? 0, +m[1], +(m[4]||0), +(m[5]||0));
+  m = t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2}))?/);
+  if(m) return new Date(+m[3], +m[2]-1, +m[1], +(m[4]||0), +(m[5]||0));
+  const d = new Date(t); return isNaN(d) ? null : d;
+}
+const fmtD = d => d ? d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}) : '';
+const fmtDT = d => d ? d.toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
+
+function buildOrders(headers, rows){
+  const H = headers.map(h => String(h || '').trim().toLowerCase());
+  const col = (...names) => { for(const n of names){ const i = H.indexOf(n.toLowerCase()); if(i >= 0) return i; } return -1; };
+  const find = re => H.findIndex(h => re.test(h));
+  const ix = {
+    at: col('Logged at'), src: col('Source'), id: col('Order ID'), hub: col('City Code'), name: col('Name'), co: col('Company'),
+    phone: col('Phone'), alt: col('Alt Details'), addr: col('Address'), city: col('City'), state: col('State'), pin: col('Pincode'),
+    type: col('Shipment Type'), mode: col('Mode of Shipping'), courier: col('Courier'), trk: col('Tracking ID'), link: col('Tracking Link'),
+    boxes: col('Total Boxes'), batch: col('Batch ID'), status: col('Dispatch Status'), cat: find(/^(category|order category|b2b ?\/ ?b2c)$/),
+    dd: find(/^dispatch(ed)? date$/), dt: find(/^dispatch(ed)? time$/), dat: find(/^dispatched (at|on)$/),
+    deliv: find(/^deliver(y|ed)( status)?$/), delivOn: find(/^delivered (on|date|at)$/)
+  };
+  const g = (r, i) => i >= 0 ? String(r[i] == null ? '' : r[i]).trim() : '';
+  return rows.map((r, n) => {
+    const id = g(r, ix.id);
+    if(!id && !g(r, ix.name)) return null;
+    const statusTxt = g(r, ix.status), delivTxt = g(r, ix.deliv);
+    const dispAt = parseDate(ix.dat >= 0 ? g(r, ix.dat) : (g(r, ix.dd) + (g(r, ix.dt) ? ' ' + g(r, ix.dt) : '')));
+    const courier = g(r, ix.courier);
+    let st;
+    if(/deliver/i.test(delivTxt) || /deliver/i.test(statusTxt)) st = 'delivered';
+    else if(/partly|partial/i.test(statusTxt)) st = 'partly';
+    else if(/dispatch|out|picked|transit|shipped/i.test(statusTxt) && !/ready/i.test(statusTxt) || (dispAt && !/ready/i.test(statusTxt))) st = 'transit';
+    else if(/ready/i.test(statusTxt)) st = 'ready';
+    else st = statusTxt ? 'other' : 'held';
+    const trk = g(r, ix.trk);
+    let link = g(r, ix.link);
+    if(!link && trk && /shree\s*anjani/i.test(courier)) link = SA_LINK_PREFIX + trk.split(/[,\s]+/)[0];
+    const cat = g(r, ix.cat) || (/^boxup\s*\d/i.test(id) ? 'B2C' : 'B2B');
+    return {
+      n, id, at: parseDate(g(r, ix.at)), atText: g(r, ix.at), src: g(r, ix.src), hub: g(r, ix.hub), name: g(r, ix.name), co: g(r, ix.co),
+      phone: g(r, ix.phone), alt: g(r, ix.alt), addr: g(r, ix.addr), city: g(r, ix.city), state: g(r, ix.state), pin: g(r, ix.pin),
+      type: g(r, ix.type), mode: g(r, ix.mode), courier, trk, link: link.split(/,\s*/)[0], boxes: parseInt(g(r, ix.boxes), 10) || 1,
+      batch: g(r, ix.batch), statusTxt, st, dispAt, delivTxt, delivOn: parseDate(g(r, ix.delivOn)), cat: /b2c/i.test(cat) ? 'B2C' : 'B2B',
+      intl: /international/i.test(courier) || /international/i.test(g(r, ix.src))
+    };
+  }).filter(Boolean).sort((a, b) => (b.at ? b.at.getTime() : 0) - (a.at ? a.at.getTime() : 0) || b.n - a.n);
+}
+
+const ST = {
+  delivered: ['Delivered', 's-del'], transit: ['Dispatched', 's-tr'], partly: ['Partly dispatched', 's-pt'],
+  ready: ['Ready for dispatch', 's-rd'], held: ['Not dispatched', 's-no'], other: ['', 's-no']
+};
+const stChip = o => { const [t, c] = ST[o.st] || ST.other; return `<span class="st ${c}">${esc(t || o.statusTxt)}</span>`; };
+
+/* ---------- filters ---------- */
+function applyFilters(){
+  const q = $('q').value.trim().toLowerCase();
+  const from = $('from').value ? new Date($('from').value + 'T00:00') : null;
+  const to = $('to').value ? new Date($('to').value + 'T23:59:59') : null;
+  const co = $('fCompany').value, cr = $('fCourier').value;
+  VIEW = ORDERS.filter(o => {
+    if(from && (!o.at || o.at < from)) return false;
+    if(to && (!o.at || o.at > to)) return false;
+    if(co && o.co !== co) return false;
+    if(cr && o.courier !== cr) return false;
+    if(FILTER === 'ready' && !(o.st === 'ready' || o.st === 'held')) return false;
+    if(FILTER === 'transit' && !(o.st === 'transit' || o.st === 'partly')) return false;
+    if(FILTER === 'delivered' && o.st !== 'delivered') return false;
+    if(FILTER === 'b2b' && o.cat !== 'B2B') return false;
+    if(FILTER === 'b2c' && o.cat !== 'B2C') return false;
+    if(FILTER === 'intl' && !o.intl) return false;
+    if(q){
+      const hay = [o.id, o.name, o.co, o.phone, o.trk, o.city, o.batch, o.src].join(' ').toLowerCase();
+      if(!q.split(/\s+/).every(w => hay.includes(w))) return false;
+    }
+    return true;
+  });
+  render();
+}
+
+function render(){
+  $('tOrders').textContent = VIEW.length;
+  $('tReady').textContent = VIEW.filter(o => o.st === 'ready' || o.st === 'held').length;
+  $('tTransit').textContent = VIEW.filter(o => o.st === 'transit' || o.st === 'partly').length;
+  $('tDel').textContent = VIEW.filter(o => o.st === 'delivered').length;
+  $('tBoxes').textContent = VIEW.reduce((a, o) => a + o.boxes, 0);
+  $('cnt').textContent = `(${VIEW.length}${VIEW.length !== ORDERS.length ? ' of ' + ORDERS.length : ''})`;
+  const shown = VIEW.slice(0, 500);
+  $('rows').innerHTML = shown.length ? shown.map(o => `<tr class="row${SEL === o ? ' sel' : ''}" data-n="${o.n}">
+      <td class="nw"><b>${esc(o.id)}</b><small>${o.cat}${o.intl ? ' · Intl' : ''}</small></td>
+      <td>${esc(o.co || (o.cat === 'B2C' ? '(B2C)' : ''))}<small>${esc(o.name)}</small></td>
+      <td class="c">${o.hub ? `<span class="hub">${esc(o.hub)}</span>` : ''}</td>
+      <td>${esc(o.courier) || '<span class="mu">Not set</span>'}</td>
+      <td class="nw">${o.trk ? (o.link ? `<a href="${esc(o.link)}" target="_blank" rel="noopener">${esc(o.trk)}</a>` : esc(o.trk)) : '<span class="mu">-</span>'}</td>
+      <td class="nw">${esc(fmtD(o.at) || o.atText)}</td>
+      <td class="nw">${o.dispAt ? esc(fmtDT(o.dispAt)) : '<span class="mu">Not yet</span>'}</td>
+      <td>${stChip(o)}</td></tr>`).join('')
+    : '<tr><td colspan="8" class="empty">No orders match.</td></tr>';
+  if(VIEW.length > 500) $('rows').insertAdjacentHTML('beforeend', `<tr><td colspan="8" class="empty">Showing the newest 500. Narrow the search or dates to see more.</td></tr>`);
+  showDetail(SEL && VIEW.includes(SEL) ? SEL : null);
+}
+
+function showDetail(o){
+  SEL = o;
+  if(!o){ $('det').innerHTML = '<div class="empty">Click an order to see its details and timeline.</div>'; return; }
+  const addr = [o.addr, o.city, o.state, o.pin].filter(Boolean).join(', ');
+  const dispatched = o.st === 'transit' || o.st === 'partly' || o.st === 'delivered';
+  const msg = `BoxUp order ${o.id}${o.name ? ' for ' + o.name : ''}` + (o.courier ? `\nCourier: ${o.courier}` : '') + (o.trk ? `\nAWB: ${o.trk}` : '') + (o.link ? `\nTrack: ${o.link}` : '') + `\nStatus: ${(ST[o.st] || ST.other)[0] || o.statusTxt}`;
+  $('det').innerHTML = `<h3>${esc(o.id)}</h3>
+    <div class="sub">${esc([o.co, o.name, o.phone].filter(Boolean).join(' · '))}</div>
+    <div class="kv">${esc(addr)}${addr ? ' · ' : ''}<b>${o.boxes} box${o.boxes > 1 ? 'es' : ''}</b><br>
+      Courier <b>${esc(o.courier || 'Not set')}</b>${o.trk ? ` · AWB ${o.link ? `<a href="${esc(o.link)}" target="_blank" rel="noopener">${esc(o.trk)}</a>` : esc(o.trk)}` : ''}
+      ${o.mode ? `<br>Mode <b>${esc(o.mode)}</b>` : ''}${o.batch ? `<br><small style="color:#7A776C">Batch ${esc(o.batch)} · ${esc(o.src)}</small>` : ''}</div>
+    <div class="tl">
+      <div class="ok"><b>Label printed</b><small>${esc(fmtDT(o.at) || o.atText)}</small></div>
+      <div class="${dispatched ? 'ok' : ''}"><b>${o.st === 'partly' ? 'Partly dispatched' : 'Dispatched from gate'}</b><small>${o.dispAt ? esc(fmtDT(o.dispAt)) : (dispatched ? esc(o.statusTxt) : 'Not yet' + (o.statusTxt ? ' · ' + esc(o.statusTxt) : ''))}</small></div>
+      <div class="${dispatched ? 'ok' : ''}"><b>In transit</b><small>${dispatched ? 'with ' + esc(o.courier || 'courier') : 'waiting for dispatch'}</small></div>
+      <div class="${o.st === 'delivered' ? 'ok' : ''}"><b>Delivered</b><small>${o.st === 'delivered' ? esc(fmtD(o.delivOn) || o.delivTxt || 'Delivered') : 'waiting for courier update'}</small></div>
+    </div>
+    <div class="btns">
+      ${o.link ? `<a class="btn" href="${esc(o.link)}" target="_blank" rel="noopener">&#128279; Track on courier site</a>` : `<button class="btn" disabled>&#128279; Track on courier site</button>`}
+      <button class="btn" id="cpBtn" ${o.link || o.trk ? '' : 'disabled'}>&#128203; Copy tracking link</button>
+      <a class="btn" href="https://wa.me/?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">&#128172; Share on WhatsApp</a>
+    </div>`;
+  const cp = $('cpBtn');
+  if(cp) cp.onclick = () => { const t = o.link || o.trk; (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => { cp.textContent = '✓ Copied'; }, () => { prompt('Copy this:', t); }); };
+  document.querySelectorAll('tr.row').forEach(tr => tr.classList.toggle('sel', +tr.dataset.n === o.n));
+}
+
+/* ---------- Excel of what is on screen ---------- */
+function downloadExcel(){
+  if(typeof XLSX === 'undefined'){ alert('Excel tool did not load. Check the internet and try again.'); return; }
+  const data = [['Order ID','B2B / B2C','Company','Name','Phone','Address','City','State','Pincode','City Code','Courier','AWB / Tracking ID','Tracking Link','Total Boxes','Label printed','Dispatched','Status']];
+  VIEW.forEach(o => data.push([o.id, o.cat, o.co, o.name, o.phone, o.addr, o.city, o.state, o.pin, o.hub, o.courier, o.trk, o.link, o.boxes,
+    fmtD(o.at) || o.atText, o.dispAt ? fmtDT(o.dispAt) : '', (ST[o.st] || ST.other)[0] || o.statusTxt]));
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  ws['!cols'] = data[0].map((h, i) => ({ wch: [14,9,26,22,14,40,14,14,9,9,14,18,40,8,14,18,18][i] || 14 }));
+  ws['!autofilter'] = { ref: XLSX.utils.encode_range({ s:{r:0,c:0}, e:{r:data.length-1,c:data[0].length-1} }) };
+  const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Orders');
+  XLSX.writeFile(wb, `BoxUp Orders ${new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}).replace(/\s+/g,'-')} (${VIEW.length}).xlsx`);
+}
+
+/* ---------- load ---------- */
+async function load(){
+  $('upd').textContent = 'Loading…';
+  try{
+    const res = await fetch(LOG_URL + '?action=sales&t=' + Date.now());
+    let d = null; try{ d = await res.json(); }catch(e){}
+    if(!d || d.ok === undefined) throw new Error('The Google Sheet script does not have the Sales feed yet. Add the "Sales feed" file to the script and deploy a new version.');
+    if(!d.ok) throw new Error(d.error || 'Sheet error');
+    const selN = SEL && SEL.n;
+    ORDERS = buildOrders(d.headers || [], d.rows || []);
+    SEL = ORDERS.find(o => o.n === selN) || null;
+    const cos = [...new Set(ORDERS.map(o => o.co).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+    const crs = [...new Set(ORDERS.map(o => o.courier).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+    const keep = (sel, list, label) => { const v = sel.value; sel.innerHTML = `<option value="">${label}: All</option>` + list.map(x => `<option>${esc(x)}</option>`).join(''); sel.value = list.includes(v) ? v : ''; };
+    keep($('fCompany'), cos, 'Company'); keep($('fCourier'), crs, 'Courier');
+    $('err').hidden = true;
+    $('dot').style.background = '#2E7D32';
+    $('upd').textContent = 'Live · updated ' + new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+    applyFilters();
+  }catch(e){
+    $('dot').style.background = '#E0A43A';
+    $('upd').textContent = 'Not updated';
+    $('err').hidden = false;
+    $('err').textContent = e.message === 'Failed to fetch' ? 'Could not reach the Google Sheet. Check the internet.' : e.message;
+    if(!ORDERS.length) $('rows').innerHTML = '<tr><td colspan="8" class="empty">No data yet.</td></tr>';
+  }
+}
+
+$('q').addEventListener('input', applyFilters);
+['from','to','fCompany','fCourier'].forEach(id => $(id).addEventListener('change', applyFilters));
+$('chips').addEventListener('click', e => {
+  const b = e.target.closest('.chip'); if(!b) return;
+  FILTER = b.dataset.f; document.querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x === b)); applyFilters();
+});
+$('rows').addEventListener('click', e => {
+  if(e.target.closest('a')) return;
+  const tr = e.target.closest('tr.row'); if(!tr) return;
+  showDetail(ORDERS.find(o => o.n === +tr.dataset.n));
+});
+$('dlBtn').addEventListener('click', downloadExcel);
+$('reload').addEventListener('click', load);
+// default: last 30 days
+(function(){ const t = new Date(), f = new Date(Date.now() - 30*86400000); const iso = d => d.toISOString().slice(0,10); $('from').value = iso(f); $('to').value = iso(t); })();
+load();
+setInterval(() => { if(!document.hidden) load(); }, 60000);   // refresh every minute
+</script>
+</body>
+</html>
