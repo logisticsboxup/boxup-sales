@@ -127,6 +127,14 @@
   .sh-file{display:flex;gap:12px;align-items:center;background:#F1F8F3;border:1px solid #cfe5d2;border-radius:10px;padding:10px 12px;}
   .sh-file .xl{flex:none;width:34px;height:40px;border-radius:5px;background:#1d7a44;color:#fff;font:800 11px 'Inter';display:flex;align-items:center;justify-content:center;}
   .sh-file b{font-size:13px;word-break:break-word;} .sh-file small{display:block;color:var(--muted);font-size:12px;margin-top:2px;}
+  .sh-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .sh-opt{display:flex;gap:9px;align-items:flex-start;border:1.5px solid #d8d2c0;border-radius:10px;padding:10px 12px;cursor:pointer;font-size:13.5px;background:#fff;}
+  .sh-opt input{margin:2px 0 0;accent-color:var(--forest);flex:none;}
+  .sh-opt .ico{font-size:17px;line-height:1;flex:none;}
+  .sh-opt small{display:block;color:var(--muted);font-size:11.8px;margin-top:3px;line-height:1.35;}
+  .sh-opt.on{border-color:#e3a050;background:#FFF3E3;box-shadow:0 0 0 1px #e3a050 inset;}
+  .sh-how{font-size:12px;color:#5b4a2a;background:#FAF6EC;border-radius:8px;padding:7px 10px;margin-top:8px;line-height:1.45;}
+  @media (max-width:600px){ .sh-opts{grid-template-columns:1fr;} }
   .sh-tick{display:flex;gap:10px;align-items:flex-start;background:#FFF3E3;border:1.5px solid #e3a050;border-radius:10px;padding:10px 12px;margin-top:14px;cursor:pointer;font-size:13.5px;}
   .sh-tick input{width:17px;height:17px;accent-color:var(--forest);margin:1px 0 0;flex:none;cursor:pointer;}
   .sh-tick small{display:block;color:var(--muted);font-size:12px;margin-top:2px;}
@@ -249,7 +257,12 @@
       <div class="lb">Customer WhatsApp number</div>
       <div class="wa-row"><input type="text" class="cc" id="shCc" value="+91" aria-label="Country code" style="flex:0 0 70px;text-align:center;background:var(--cream);width:auto"><input type="tel" id="shNum" placeholder="10-digit mobile number"></div>
       <div class="sh-msg" id="shSaved">Saved for this company, so next time it fills in by itself.</div>
-      <label class="sh-tick"><input type="checkbox" id="shAttach" checked><span><b>Share the Excel file with the message</b><small>The file is saved to Google Drive and its link goes in the WhatsApp message, so the customer can open or download it from the chat.</small></span></label>
+      <div class="lb">How to send the Excel file</div>
+      <div class="sh-opts" id="shMode">
+        <label class="sh-opt on"><input type="radio" name="shMode" value="link" checked><span class="ico">&#128279;</span><span><b>Share as link</b><small>File saved to Google Drive; the link goes in the message. Opens the customer's chat directly.</small></span></label>
+        <label class="sh-opt"><input type="radio" name="shMode" value="file"><span class="ico">&#128206;</span><span><b>Attach Excel file</b><small>The Excel file itself is attached in WhatsApp, with the message as its caption.</small></span></label>
+      </div>
+      <div class="sh-how" id="shHow"></div>
       <div class="lb">Message (you can edit)</div>
       <textarea id="shTxt" spellcheck="false"></textarea>
       <div class="sh-msg" id="shStatus"></div>
@@ -419,6 +432,7 @@ function downloadExcel(){
 
 /* ---------- Share file with the customer on WhatsApp ---------- */
 var SH = null, SH_CONTACTS = null;
+const shMode = () => (document.querySelector('input[name=shMode]:checked') || {}).value || 'link';
 const shToday = () => new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
 const shSafe = t => String(t||'').replace(/[\\/:*?"<>|]+/g,' ').replace(/\s+/g,' ').trim();
 function shLoadContacts(){
@@ -434,7 +448,7 @@ function shOpen(){
   const many = Object.keys(cos).length > 1 && !$('fCompany').value;
   SH = { list: VIEW.slice(), edited: false };
   $('shCo').value = top; $('shWho').value = ''; $('shNum').value = ''; $('shCc').value = '+91';
-  $('shAttach').checked = true; $('shStatus').textContent = ''; $('shStatus').className = 'sh-msg';
+  document.querySelector('input[name=shMode][value=link]').checked = true; $('shStatus').textContent = ''; $('shStatus').className = 'sh-msg';
   if(many) { $('shStatus').textContent = 'The orders on screen are for ' + Object.keys(cos).length + ' companies. Pick one in the Company filter to send only that customer\'s orders.'; $('shStatus').className = 'sh-msg bad'; }
   $('shOv').hidden = false;
   shFill(); shRefresh();
@@ -460,8 +474,9 @@ function shText(link){
   const t = [];
   t.push(who ? `Dear ${who},` : (co ? `Dear ${co} team,` : 'Dear Sir / Madam,'), '');
   t.push('Greetings from *BoxUp Luxury Gifting* \u{1F381}', '');
-  t.push(`Please find the shipment details of your *${n} order${n>1?'s':''}*${boxes > n ? ` (${boxes} boxes)` : ''} as on ${shToday()}. The file has each recipient's courier, AWB / tracking number and tracking link.`, '');
-  if($('shAttach').checked) t.push('\u{1F4CE} *Shipment file (Excel):*', link || '[file link is added when you press Send on WhatsApp]', '');
+  const att = shMode() === 'file';
+  t.push(`Please find ${att ? 'attached ' : ''}the shipment details of your *${n} order${n>1?'s':''}*${boxes > n ? ` (${boxes} boxes)` : ''} as on ${shToday()}. The file has each recipient's courier, AWB / tracking number and tracking link.`, '');
+  if(!att) t.push('\u{1F4CE} *Shipment file (Excel):*', link || '[file link is added when you press Send on WhatsApp]', '');
   if(couriers) t.push(`Courier: ${couriers}`);
   t.push('You can track every parcel using the tracking link in the file.', '');
   t.push('For any help, just reply here or call 9663993971.', '');
@@ -481,7 +496,12 @@ function shRefresh(){
   const couriers = [...new Set(SH.list.map(o => o.courier).filter(Boolean))].join(', ');
   $('shFile').textContent = shFileName();
   $('shFileSub').textContent = `${SH.list.length} order${SH.list.length>1?'s':''} · ${boxes} box${boxes>1?'es':''}${couriers ? ' · ' + couriers : ''}`;
-  $('shFile').parentNode.parentNode.style.opacity = $('shAttach').checked ? 1 : .5;
+  const m = shMode();
+  document.querySelectorAll('.sh-opt').forEach(l => l.classList.toggle('on', l.querySelector('input').checked));
+  $('shHow').innerHTML = m === 'file'
+    ? '<b>Then:</b> the Windows share window opens with the Excel attached &rarr; pick <b>WhatsApp</b> &rarr; pick the customer\'s chat &rarr; <b>Send</b>. The message is also copied, so paste it (Ctrl+V) if WhatsApp does not show it.'
+    : '<b>Then:</b> WhatsApp opens on the customer\'s chat with the message and file link ready &rarr; press <b>Send</b>.';
+  $('shGo').innerHTML = m === 'file' ? '&#128206; Share on WhatsApp' : 'Send on WhatsApp &#10140;';
   if(!SH.edited) $('shTxt').value = shText('');
   const num = shNumber();
   $('shGo').disabled = num === null || SH.busy;
@@ -490,6 +510,7 @@ function shRefresh(){
 }
 function shClose(){ if(SH && SH.busy) return; $('shOv').hidden = true; SH = null; }
 async function shSend(){
+  if(shMode() === 'file') return shSendFile();
   const num = shNumber(); if(num === null || !SH) return;
   // open the WhatsApp tab now (browsers block pop-ups opened after waiting), then point it at the chat
   const w = window.open('about:blank', '_blank');
@@ -498,13 +519,13 @@ async function shSend(){
   SH.busy = true; btn.disabled = true;
   try{
     const wb = ordersWorkbook(SH.list);
-    const b64 = $('shAttach').checked ? XLSX.write(wb, { bookType:'xlsx', type:'base64' }) : '';
-    st.textContent = $('shAttach').checked ? 'Saving the Excel file to Google Drive…' : 'Saving the contact…'; st.className = 'sh-msg';
+    const b64 = true ? XLSX.write(wb, { bookType:'xlsx', type:'base64' }) : '';
+    st.textContent = true ? 'Saving the Excel file to Google Drive…' : 'Saving the contact…'; st.className = 'sh-msg';
     const res = await fetch(LOG_URL, { method:'POST', headers:{ 'Content-Type':'text/plain;charset=utf-8' },
       body: JSON.stringify({ action:'salesshare', company: $('shCo').value.trim(), contact: $('shWho').value.trim(), phone: num ? '+' + num : '', fileName: shFileName(), file: b64, orders: SH.list.length }) }).then(r => r.json());
     if(!res || !res.ok) throw new Error((res && res.error) || 'The sheet did not answer.');
     SH_CONTACTS = null;   // reload saved contacts next time
-    if($('shAttach').checked){
+    if(true){
       link = res.url || '';
       if(!link) throw new Error('No file link came back.');
       const ph = '[file link is added when you press Send on WhatsApp]';
@@ -521,13 +542,41 @@ async function shSend(){
     if(SH){ SH.busy = false; shRefresh(); }
   }
 }
+/* Attach Excel file: the system share window gets the real .xlsx file + the message */
+async function shSendFile(){
+  const num = shNumber(); if(num === null || !SH) return;
+  const st = $('shStatus'), text = $('shTxt').value, name = shFileName();
+  const data = XLSX.write(ordersWorkbook(SH.list), { bookType:'xlsx', type:'array' });
+  const file = new File([data], name, { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  try{ await navigator.clipboard.writeText(text); }catch(e){}
+  // remember the contact (no file upload)
+  fetch(LOG_URL, { method:'POST', headers:{ 'Content-Type':'text/plain;charset=utf-8' },
+    body: JSON.stringify({ action:'salesshare', company: $('shCo').value.trim(), contact: $('shWho').value.trim(), phone: num ? '+' + num : '', fileName: name, file: '', orders: SH.list.length }) }).then(() => { SH_CONTACTS = null; }).catch(() => {});
+  if(navigator.canShare && navigator.canShare({ files:[file] })){
+    try{
+      await navigator.share({ files:[file], text, title: name });
+      st.textContent = '✓ Shared. If WhatsApp did not show the message, paste it (Ctrl+V) before sending.'; st.className = 'sh-msg ok';
+    }catch(err){
+      if(err && err.name === 'AbortError'){ st.textContent = 'Share window closed. Nothing was sent.'; st.className = 'sh-msg'; }
+      else { shFileFallback(file, num, text); }
+    }
+  } else shFileFallback(file, num, text);
+}
+/* browsers without file sharing: download the Excel and open the customer's chat with the message */
+function shFileFallback(file, num, text){
+  const a = document.createElement('a'); a.href = URL.createObjectURL(file); a.download = file.name;
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+  window.open((num ? 'https://wa.me/' + num : 'https://api.whatsapp.com/send') + '?text=' + encodeURIComponent(text), '_blank');
+  $('shStatus').innerHTML = 'This browser cannot attach files directly, so the Excel was <b>downloaded</b> and the customer\'s chat opened. In WhatsApp click &#128206; and attach <b>' + esc(file.name) + '</b>, then Send.';
+  $('shStatus').className = 'sh-msg bad';
+}
 $('shBtn').addEventListener('click', shOpen);
 $('shX').addEventListener('click', shClose); $('shCancel').addEventListener('click', shClose);
 $('shOv').addEventListener('click', e => { if(e.target === $('shOv')) shClose(); });
 document.addEventListener('keydown', e => { if(e.key === 'Escape' && !$('shOv').hidden) shClose(); });
 $('shCo').addEventListener('input', () => { shFill(); shRefresh(); });
 ['shWho','shNum','shCc'].forEach(id => $(id).addEventListener('input', shRefresh));
-$('shAttach').addEventListener('change', shRefresh);
+document.querySelectorAll('input[name=shMode]').forEach(r => r.addEventListener('change', () => { if(SH) SH.edited = false; shRefresh(); }));
 $('shTxt').addEventListener('input', () => { if(SH) SH.edited = true; });
 $('shGo').addEventListener('click', shSend);
 $('shCopy').addEventListener('click', () => {
