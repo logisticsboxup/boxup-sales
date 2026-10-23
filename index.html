@@ -434,7 +434,7 @@ function waStatusFor(o){
 function waText(){
   const o = WA.o, inc = k => { const c = document.querySelector(`#waChk input[data-k="${k}"]`); return c && c.checked && !c.disabled; };
   const L = [];
-  L.push('Hello from *BoxUp* \u{1F381}', '');
+  L.push('Hello from *BoxUp Luxury Gifting* \u{1F381}', '');
   L.push((inc('name') && o.name ? `Dear ${o.name}, your` : 'Your') + ` order *${o.id}* ` + WA_ST[WA.st][1]);
   const d = [];
   if(inc('co') && o.co) d.push(`\u{1F3E2} Company: ${o.co}`);
