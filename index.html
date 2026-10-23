@@ -64,6 +64,54 @@
   .err{background:#fbe9e8;color:var(--danger);border:1px solid #e3a19c;border-radius:10px;padding:10px 14px;margin-bottom:12px;font-weight:600;font-size:13px;}
   .err[hidden]{display:none;}
   .note{font-size:12px;color:var(--muted);margin-top:10px;}
+
+  /* ---------- Share on WhatsApp popup ---------- */
+  .wa-ov{position:fixed;inset:0;background:rgba(22,21,18,.45);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px;}
+  .wa-ov[hidden]{display:none;}
+  .wa-m{width:880px;max-width:100%;max-height:calc(100vh - 32px);display:flex;flex-direction:column;background:#fff;border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.25);overflow:hidden;}
+  .wa-h{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid #eee;}
+  .wa-h .ic{flex:none;width:38px;height:38px;border-radius:50%;background:#25D366;color:#fff;display:flex;align-items:center;justify-content:center;font-size:19px;}
+  .wa-h h3{margin:0;font:700 19px 'Playfair Display',Georgia,serif;color:var(--forest);}
+  .wa-h small{display:block;color:var(--muted);font-size:12.5px;}
+  .wa-h .x{margin-left:auto;flex:none;border:1px solid var(--line);background:#fff;border-radius:8px;width:32px;height:32px;font-size:16px;color:#555;cursor:pointer;}
+  .wa-b{display:grid;grid-template-columns:1fr 340px;min-height:0;overflow:auto;}
+  .wa-f{padding:14px 20px 16px;border-right:1px solid #eee;}
+  .wa-f .lb{display:flex;align-items:center;justify-content:space-between;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:14px 0 7px;}
+  .wa-f .lb:first-child{margin-top:0;}
+  .wa-f input[type=text],.wa-f input[type=tel],.wa-f input[type=date],.wa-f textarea{width:100%;border:1px solid #d8d2c0;border-radius:9px;padding:9px 11px;font:13.5px 'Inter';color:var(--ink);background:#fff;outline:none;}
+  .wa-f input:focus,.wa-f textarea:focus{border-color:var(--forest);}
+  .wa-row{display:flex;gap:8px;}
+  .wa-row[hidden]{display:none;}
+  .wa-f .wa-row input.cc{flex:0 0 70px;text-align:center;background:var(--cream);}
+  .wa-who{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px;}
+  .wa-who button,.wa-seg button{border:1px solid #d8d2c0;background:#fff;font:600 12.5px 'Inter';color:var(--ink);cursor:pointer;}
+  .wa-who button{border-radius:9px;padding:8px 6px;}
+  .wa-who button.on{border:2px solid var(--forest);background:#EEF4EF;color:var(--forest);padding:7px 5px;}
+  .wa-hint{font-size:12px;color:var(--muted);margin-top:6px;}
+  .wa-hint.bad{color:var(--danger);font-weight:600;}
+  .wa-seg{display:flex;flex-wrap:wrap;gap:7px;}
+  .wa-seg button{border-radius:20px;padding:7px 13px;}
+  .wa-seg button.on{background:var(--forest);color:#fff;border-color:var(--forest);}
+  .wa-seg button.dly{border-color:#e3a19c;color:var(--danger);}
+  .wa-seg button.dly.on{background:var(--danger);color:#fff;border-color:var(--danger);}
+  .wa-chk{display:grid;grid-template-columns:1fr 1fr;gap:7px 14px;font-size:13px;}
+  .wa-chk label,.wa-all{display:flex;align-items:center;gap:8px;cursor:pointer;}
+  .wa-chk input,.wa-all input{width:16px;height:16px;accent-color:var(--forest);margin:0;cursor:pointer;}
+  .wa-chk label.na{color:#aaa;cursor:default;}
+  .wa-all{font:700 12.5px 'Inter';color:var(--forest);text-transform:none;letter-spacing:0;border:1px solid #d8d2c0;border-radius:20px;padding:4px 11px 4px 8px;background:#fff;}
+  .wa-p{background:#EFE7DC;padding:14px 16px;display:flex;flex-direction:column;min-width:0;}
+  .wa-p .lb{display:flex;justify-content:space-between;align-items:center;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:8px;}
+  .wa-p .lb button{border:0;background:none;color:#1155cc;font:600 12.5px 'Inter';cursor:pointer;padding:0;}
+  .bub{background:#DCF8C6;border-radius:10px 2px 10px 10px;padding:10px 12px;font-size:13px;line-height:1.5;color:#111;box-shadow:0 1px 1px rgba(0,0,0,.1);white-space:pre-wrap;word-break:break-word;}
+  .bub .t{display:block;text-align:right;font-size:10.5px;color:#667;margin-top:4px;}
+  .wa-p textarea{flex:1;min-height:300px;border:2px solid var(--forest);border-radius:10px;padding:10px 12px;font:13px/1.5 'Inter';resize:vertical;background:#fff;}
+  .wa-p textarea[hidden],.bub[hidden]{display:none;}
+  .wa-ft{display:flex;align-items:center;gap:8px;padding:12px 20px;border-top:1px solid #eee;background:#FAF8F2;flex-wrap:wrap;}
+  .wa-ft .nt{font-size:12px;color:var(--muted);margin-right:auto;}
+  .wa-ft button{border:1px solid #d8d2c0;background:#fff;border-radius:9px;padding:9px 14px;font:700 13px 'Inter';color:var(--ink);cursor:pointer;}
+  .wa-ft .go{background:#25D366;border-color:#1fb457;color:#fff;}
+  .wa-ft .go:disabled{opacity:.5;cursor:not-allowed;}
+  @media (max-width: 820px){ .wa-b{grid-template-columns:1fr;} .wa-f{border-right:0;border-bottom:1px solid #eee;} .wa-who{grid-template-columns:1fr;} }
   @media (max-width: 1100px){ .main{flex-direction:column;} .det{width:100%;flex:auto;position:static;} .tiles{grid-template-columns:repeat(2,1fr);} }
 </style>
 </head>
@@ -113,6 +161,57 @@
     <div class="det" id="det"><div class="empty">Click an order to see its details and timeline.</div></div>
   </div>
   <div class="note">Live from the BoxUp Label Log Google Sheet. This page only shows data; nothing can be changed here.</div>
+</div>
+
+<div class="wa-ov" id="waOv" hidden>
+  <div class="wa-m" role="dialog" aria-modal="true" aria-labelledby="waTitle">
+    <div class="wa-h"><div class="ic">&#128172;</div><div><h3 id="waTitle">Share on WhatsApp</h3><small id="waSub"></small></div><button type="button" class="x" id="waX" aria-label="Close">&#10005;</button></div>
+    <div class="wa-b">
+      <div class="wa-f">
+        <div class="lb">Send to</div>
+        <div class="wa-who" id="waWho">
+          <button type="button" data-w="cust">Customer (from sheet)</button>
+          <button type="button" data-w="other">Sales person / other number</button>
+          <button type="button" data-w="pick">Choose in WhatsApp</button>
+        </div>
+        <div class="wa-row" id="waNumRow"><input type="text" class="cc" id="waCc" value="+91" aria-label="Country code"><input type="tel" id="waNum" placeholder="10-digit mobile number" aria-label="Mobile number"></div>
+        <div class="wa-hint" id="waHint"></div>
+
+        <div class="lb">Status to share</div>
+        <div class="wa-seg" id="waSeg">
+          <button type="button" data-s="ready">Ready for dispatch</button>
+          <button type="button" data-s="dispatched">Dispatched</button>
+          <button type="button" data-s="transit">In transit</button>
+          <button type="button" data-s="ofd">Out for delivery</button>
+          <button type="button" data-s="delivered">Delivered</button>
+          <button type="button" data-s="delayed" class="dly">Delayed</button>
+        </div>
+
+        <div class="lb">Expected delivery <span style="text-transform:none;letter-spacing:0;font-weight:500">(optional)</span></div>
+        <input type="date" id="waEta">
+
+        <div class="lb"><span>Include in message</span><label class="wa-all"><input type="checkbox" id="waAll">Select all</label></div>
+        <div class="wa-chk" id="waChk">
+          <label><input type="checkbox" data-k="awb" checked>Courier &amp; AWB</label>
+          <label><input type="checkbox" data-k="link" checked>Tracking link</label>
+          <label><input type="checkbox" data-k="boxes" checked>No. of boxes</label>
+          <label><input type="checkbox" data-k="ddate" checked>Dispatch date</label>
+          <label><input type="checkbox" data-k="co" checked>Company name</label>
+          <label><input type="checkbox" data-k="name" checked>Customer name</label>
+          <label><input type="checkbox" data-k="addr">Delivery address</label>
+        </div>
+
+        <div class="lb">Note (optional)</div>
+        <textarea id="waNote" rows="2" placeholder="e.g. Please keep someone available to receive the boxes."></textarea>
+      </div>
+      <div class="wa-p">
+        <div class="lb"><span>Message preview</span><button type="button" id="waEdit">&#9998; Edit text</button></div>
+        <div class="bub" id="waBub"></div>
+        <textarea id="waTxt" hidden aria-label="Message text"></textarea>
+      </div>
+    </div>
+    <div class="wa-ft"><span class="nt">Only the message changes. The sheet is not edited.</span><button type="button" id="waCancel">Cancel</button><button type="button" id="waCopy">&#128203; Copy message</button><button type="button" class="go" id="waGo">Send on WhatsApp &#10140;</button></div>
+  </div>
 </div>
 
 <script>
@@ -236,7 +335,6 @@ function showDetail(o){
   if(!o){ $('det').innerHTML = '<div class="empty">Click an order to see its details and timeline.</div>'; return; }
   const addr = [o.addr, o.city, o.state, o.pin].filter(Boolean).join(', ');
   const dispatched = o.st === 'transit' || o.st === 'partly' || o.st === 'delivered';
-  const msg = `BoxUp order ${o.id}${o.name ? ' for ' + o.name : ''}` + (o.courier ? `\nCourier: ${o.courier}` : '') + (o.trk ? `\nAWB: ${o.trk}` : '') + (o.link ? `\nTrack: ${o.link}` : '') + `\nStatus: ${(ST[o.st] || ST.other)[0] || o.statusTxt}`;
   $('det').innerHTML = `<h3>${esc(o.id)}</h3>
     <div class="sub">${esc([o.co, o.name, o.phone].filter(Boolean).join(' · '))}</div>
     <div class="kv">${esc(addr)}${addr ? ' · ' : ''}<b>${o.boxes} box${o.boxes > 1 ? 'es' : ''}</b><br>
@@ -251,8 +349,9 @@ function showDetail(o){
     <div class="btns">
       ${o.link ? `<a class="btn" href="${esc(o.link)}" target="_blank" rel="noopener">&#128279; Track on courier site</a>` : `<button class="btn" disabled>&#128279; Track on courier site</button>`}
       <button class="btn" id="cpBtn" ${o.link || o.trk ? '' : 'disabled'}>&#128203; Copy tracking link</button>
-      <a class="btn" href="https://wa.me/?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">&#128172; Share on WhatsApp</a>
+      <button class="btn" id="waBtn">&#128172; Share on WhatsApp</button>
     </div>`;
+  $('waBtn').onclick = () => waOpen(o);
   const cp = $('cpBtn');
   if(cp) cp.onclick = () => { const t = o.link || o.trk; (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => { cp.textContent = '✓ Copied'; }, () => { prompt('Copy this:', t); }); };
   document.querySelectorAll('tr.row').forEach(tr => tr.classList.toggle('sel', +tr.dataset.n === o.n));
@@ -310,6 +409,117 @@ function showData(d){
 }
 
 
+
+/* ---------- Share on WhatsApp popup ---------- */
+const WA_ST = {
+  ready:      ['Ready for dispatch', 'is packed and *ready for dispatch*.'],
+  dispatched: ['Dispatched', 'has been *dispatched*.'],
+  transit:    ['In transit', 'is *in transit* and on its way to you.'],
+  ofd:        ['Out for delivery', 'is *out for delivery* today.'],
+  delivered:  ['Delivered', 'has been *delivered*. Thank you for choosing BoxUp!'],
+  delayed:    ['Delayed', 'is slightly *delayed*. We are sorry for the wait and are following up with the courier.']
+};
+const WA_OTHER_KEY = 'boxup.sales.waOther';
+let WA = null;   // {o, who, st, edited}
+
+function waDigits(t){
+  let d = String(t || '').split(/[,\/;]| or /i)[0].replace(/\D/g, '');
+  if(d.length === 12 && d.startsWith('91')) d = d.slice(2);
+  if(d.length === 11 && d.startsWith('0')) d = d.slice(1);
+  return d;
+}
+function waStatusFor(o){
+  return o.st === 'delivered' ? 'delivered' : o.st === 'returned' ? 'delayed' : (o.st === 'transit' || o.st === 'partly') ? 'dispatched' : 'ready';
+}
+function waText(){
+  const o = WA.o, inc = k => { const c = document.querySelector(`#waChk input[data-k="${k}"]`); return c && c.checked && !c.disabled; };
+  const L = [];
+  L.push('Hello from *BoxUp* \u{1F381}', '');
+  L.push((inc('name') && o.name ? `Dear ${o.name}, your` : 'Your') + ` order *${o.id}* ` + WA_ST[WA.st][1]);
+  const d = [];
+  if(inc('co') && o.co) d.push(`\u{1F3E2} Company: ${o.co}`);
+  if(inc('awb') && o.courier) d.push(`\u{1F69A} Courier: ${o.courier}`);
+  if(inc('awb') && o.trk) d.push(`\u{1F4E6} AWB: ${o.trk}`);
+  if(inc('boxes')) d.push(`\u{1F4E6} Boxes: ${o.boxes}`);
+  const addr = [o.addr, o.city, o.state, o.pin].filter(Boolean).join(', ');
+  if(inc('addr') && addr) d.push(`\u{1F4CD} Address: ${addr}`);
+  if(inc('ddate') && o.dispAt) d.push(`\u{1F4C5} Dispatched: ${fmtD(o.dispAt)}`);
+  const eta = $('waEta').value;
+  if(eta && WA.st !== 'delivered') d.push(`\u{23F3} Expected delivery: ${fmtD(new Date(eta + 'T00:00'))}`);
+  if(d.length) L.push('', ...d);
+  if(inc('link') && o.link && WA.st !== 'delivered') L.push('', `Track: ${o.link}`);
+  const note = $('waNote').value.trim();
+  if(note) L.push('', note);
+  return L.join('\n');
+}
+function waBubble(t){   // WhatsApp-style *bold* and clickable links
+  return esc(t).replace(/\*([^*\n]+)\*/g, '<b>$1</b>').replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+}
+function waNumber(){
+  if(WA.who === 'pick') return '';
+  const cc = $('waCc').value.replace(/\D/g, '') || '91', n = waDigits($('waNum').value);
+  return n.length >= 8 ? cc + n : null;
+}
+function waRefresh(){
+  document.querySelectorAll('#waWho button').forEach(b => b.classList.toggle('on', b.dataset.w === WA.who));
+  document.querySelectorAll('#waSeg button').forEach(b => b.classList.toggle('on', b.dataset.s === WA.st));
+  $('waNumRow').hidden = WA.who === 'pick';
+  const boxes = [...document.querySelectorAll('#waChk input')].filter(c => !c.disabled);
+  const on = boxes.filter(c => c.checked).length;
+  $('waAll').checked = on === boxes.length; $('waAll').indeterminate = on > 0 && on < boxes.length;
+  if(!WA.edited){ const t = waText(); $('waTxt').value = t; $('waBub').innerHTML = waBubble(t) + `<span class="t">${new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}</span>`; }
+  const num = waNumber(), hint = $('waHint');
+  hint.className = 'wa-hint';
+  if(WA.who === 'pick') hint.textContent = 'WhatsApp opens with the message ready; choose the chat or group there.';
+  else if(num === null){ hint.textContent = WA.who === 'cust' ? 'No mobile number for this order in the sheet. Type one, or choose in WhatsApp.' : 'Type the mobile number to send to.'; hint.classList.add('bad'); }
+  else hint.textContent = 'Opens this person\'s WhatsApp chat with the message ready; press Send there.';
+  $('waGo').disabled = num === null;
+}
+function waOpen(o){
+  WA = { o, who: 'cust', st: waStatusFor(o), edited: false };
+  $('waSub').textContent = [o.id, o.co || o.name, o.boxes + ' box' + (o.boxes > 1 ? 'es' : '')].filter(Boolean).join(' · ');
+  $('waNum').value = waDigits(o.phone);
+  $('waEta').value = ''; $('waNote').value = '';
+  const avail = { awb: !!(o.courier || o.trk), link: !!o.link, boxes: true, ddate: !!o.dispAt, co: !!o.co, name: !!o.name, addr: !!(o.addr || o.city) };
+  document.querySelectorAll('#waChk input').forEach(c => {
+    const ok = avail[c.dataset.k]; c.disabled = !ok; c.parentElement.classList.toggle('na', !ok);
+    c.checked = ok && c.dataset.k !== 'addr';
+  });
+  $('waTxt').hidden = true; $('waBub').hidden = false; $('waEdit').innerHTML = '&#9998; Edit text';
+  $('waOv').hidden = false;
+  waRefresh();
+}
+function waClose(){ $('waOv').hidden = true; WA = null; }
+
+$('waWho').addEventListener('click', e => {
+  const b = e.target.closest('button'); if(!b || !WA) return;
+  if(WA.who === 'other'){ try{ localStorage.setItem(WA_OTHER_KEY, $('waNum').value); }catch(err){} }
+  WA.who = b.dataset.w;
+  if(WA.who === 'cust') $('waNum').value = waDigits(WA.o.phone);
+  if(WA.who === 'other'){ let v = ''; try{ v = localStorage.getItem(WA_OTHER_KEY) || ''; }catch(err){} $('waNum').value = v; $('waNum').focus(); }
+  waRefresh();
+});
+$('waSeg').addEventListener('click', e => { const b = e.target.closest('button'); if(!b || !WA) return; WA.st = b.dataset.s; waRefresh(); });
+$('waChk').addEventListener('change', waRefresh);
+$('waAll').addEventListener('change', () => { document.querySelectorAll('#waChk input').forEach(c => { if(!c.disabled) c.checked = $('waAll').checked; }); waRefresh(); });
+['waEta','waNote','waNum','waCc'].forEach(id => $(id).addEventListener('input', () => WA && waRefresh()));
+$('waEdit').addEventListener('click', () => {
+  if($('waTxt').hidden){ $('waTxt').hidden = false; $('waBub').hidden = true; $('waEdit').innerHTML = '&#8635; Back to auto text'; WA.edited = true; $('waTxt').focus(); }
+  else { $('waTxt').hidden = true; $('waBub').hidden = false; $('waEdit').innerHTML = '&#9998; Edit text'; WA.edited = false; waRefresh(); }
+});
+$('waGo').addEventListener('click', () => {
+  const num = waNumber(); if(num === null) return;
+  if(WA.who === 'other'){ try{ localStorage.setItem(WA_OTHER_KEY, $('waNum').value); }catch(err){} }
+  const text = $('waTxt').value;
+  window.open((num ? 'https://wa.me/' + num : 'https://api.whatsapp.com/send') + '?text=' + encodeURIComponent(text), '_blank', 'noopener');
+});
+$('waCopy').addEventListener('click', () => {
+  const t = $('waTxt').value, b = $('waCopy');
+  (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => { b.innerHTML = '&#10003; Copied'; setTimeout(() => { b.innerHTML = '&#128203; Copy message'; }, 1500); }, () => { prompt('Copy this:', t); });
+});
+$('waX').addEventListener('click', waClose); $('waCancel').addEventListener('click', waClose);
+$('waOv').addEventListener('click', e => { if(e.target === $('waOv')) waClose(); });
+document.addEventListener('keydown', e => { if(e.key === 'Escape' && !$('waOv').hidden) waClose(); });
 
 $('q').addEventListener('input', applyFilters);
 ['from','to','fCompany','fCourier'].forEach(id => $(id).addEventListener('change', applyFilters));
