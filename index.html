@@ -111,6 +111,29 @@
   .wa-ft button{border:1px solid #d8d2c0;background:#fff;border-radius:9px;padding:9px 14px;font:700 13px 'Inter';color:var(--ink);cursor:pointer;}
   .wa-ft .go{background:#25D366;border-color:#1fb457;color:#fff;}
   .wa-ft .go:disabled{opacity:.5;cursor:not-allowed;}
+  /* ---------- Share file with customer ---------- */
+  .ch-btns{display:flex;gap:8px;flex-wrap:wrap;}
+  .shf{background:var(--forest);color:#fff;border:1px solid var(--forest);border-radius:8px;padding:7px 12px;font:700 12.5px 'Inter';cursor:pointer;}
+  .shf:disabled{opacity:.5;cursor:not-allowed;}
+  .sh-m{width:680px;}
+  .sh-m .wa-ft{flex-wrap:nowrap;} .sh-m .wa-ft .nt{white-space:nowrap;}
+  @media (max-width:640px){ .sh-m .wa-ft{flex-wrap:wrap;} }
+  .sh-b{padding:14px 20px 16px;overflow:auto;}
+  .sh-b .lb{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:14px 0 6px;}
+  .sh-b input[type=text],.sh-b input[type=tel],.sh-b textarea{width:100%;border:1px solid #d8d2c0;border-radius:9px;padding:9px 11px;font:13.5px 'Inter';color:var(--ink);background:#fff;outline:none;box-sizing:border-box;}
+  .sh-b input:focus,.sh-b textarea:focus{border-color:var(--forest);}
+  .sh-b textarea{min-height:260px;font:13px/1.5 'Inter';resize:vertical;background:#FFFDF8;}
+  .sh-g{display:grid;grid-template-columns:1fr 1fr;gap:0 12px;}
+  .sh-file{display:flex;gap:12px;align-items:center;background:#F1F8F3;border:1px solid #cfe5d2;border-radius:10px;padding:10px 12px;}
+  .sh-file .xl{flex:none;width:34px;height:40px;border-radius:5px;background:#1d7a44;color:#fff;font:800 11px 'Inter';display:flex;align-items:center;justify-content:center;}
+  .sh-file b{font-size:13px;word-break:break-word;} .sh-file small{display:block;color:var(--muted);font-size:12px;margin-top:2px;}
+  .sh-tick{display:flex;gap:10px;align-items:flex-start;background:#FFF3E3;border:1.5px solid #e3a050;border-radius:10px;padding:10px 12px;margin-top:14px;cursor:pointer;font-size:13.5px;}
+  .sh-tick input{width:17px;height:17px;accent-color:var(--forest);margin:1px 0 0;flex:none;cursor:pointer;}
+  .sh-tick small{display:block;color:var(--muted);font-size:12px;margin-top:2px;}
+  .sh-msg{font-size:12.5px;margin-top:8px;color:var(--muted);} .sh-msg.bad{color:var(--danger);font-weight:600;} .sh-msg.ok{color:#137333;font-weight:600;}
+  #shCc{flex:0 0 76px !important;width:76px !important;text-align:center;background:var(--cream);}
+  #shNum{flex:1 1 auto;}
+  @media (max-width:600px){ .sh-g{grid-template-columns:1fr;} }
   @media (max-width: 820px){ .wa-b{grid-template-columns:1fr;} .wa-f{border-right:0;border-bottom:1px solid #eee;} .wa-who{grid-template-columns:1fr;} }
   @media (max-width: 1100px){ .main{flex-direction:column;} .det{width:100%;flex:auto;position:static;} .tiles{grid-template-columns:repeat(2,1fr);} }
 </style>
@@ -152,7 +175,7 @@
 
   <div class="main">
     <div class="card">
-      <div class="ch"><div><b>Orders</b> <span id="cnt"></span></div><button type="button" class="dl" id="dlBtn">&#11015; Download Excel</button></div>
+      <div class="ch"><div><b>Orders</b> <span id="cnt"></span></div><div class="ch-btns"><button type="button" class="dl" id="dlBtn">&#11015; Download Excel</button><button type="button" class="shf" id="shBtn">&#128228; Share file</button></div></div>
       <div class="tbl"><table>
         <thead><tr><th>Order ID</th><th>Company / Client</th><th class="c">Code</th><th>Courier</th><th>AWB / Tracking</th><th>Label printed</th><th>Dispatched</th><th>Status</th></tr></thead>
         <tbody id="rows"><tr><td colspan="8" class="empty">Loading orders from the Label Log…</td></tr></tbody>
@@ -211,6 +234,27 @@
       </div>
     </div>
     <div class="wa-ft"><span class="nt">Only the message changes. The sheet is not edited.</span><button type="button" id="waCancel">Cancel</button><button type="button" id="waCopy">&#128203; Copy message</button><button type="button" class="go" id="waGo">Send on WhatsApp &#10140;</button></div>
+  </div>
+</div>
+
+<div class="wa-ov" id="shOv" hidden>
+  <div class="wa-m sh-m" role="dialog" aria-modal="true" aria-labelledby="shTitle">
+    <div class="wa-h"><div class="ic">&#128228;</div><div><h3 id="shTitle">Share order file with customer</h3><small>Sends the orders on screen to the customer on WhatsApp. Filter by company first.</small></div><button type="button" class="x" id="shX" aria-label="Close">&#10005;</button></div>
+    <div class="sh-b">
+      <div class="sh-file"><div class="xl">XLS</div><div><b id="shFile"></b><small id="shFileSub"></small></div></div>
+      <div class="sh-g">
+        <div><div class="lb">Customer (company)</div><input type="text" id="shCo" autocomplete="off"></div>
+        <div><div class="lb">Contact person</div><input type="text" id="shWho" placeholder="e.g. Ritika" autocomplete="off"></div>
+      </div>
+      <div class="lb">Customer WhatsApp number</div>
+      <div class="wa-row"><input type="text" class="cc" id="shCc" value="+91" aria-label="Country code" style="flex:0 0 70px;text-align:center;background:var(--cream);width:auto"><input type="tel" id="shNum" placeholder="10-digit mobile number"></div>
+      <div class="sh-msg" id="shSaved">Saved for this company, so next time it fills in by itself.</div>
+      <label class="sh-tick"><input type="checkbox" id="shAttach" checked><span><b>Share the Excel file with the message</b><small>The file is saved to Google Drive and its link goes in the WhatsApp message, so the customer can open or download it from the chat.</small></span></label>
+      <div class="lb">Message (you can edit)</div>
+      <textarea id="shTxt" spellcheck="false"></textarea>
+      <div class="sh-msg" id="shStatus"></div>
+    </div>
+    <div class="wa-ft"><span class="nt">Then press Send in WhatsApp.</span><button type="button" id="shCancel">Cancel</button><button type="button" id="shCopy">&#128203; Copy message</button><button type="button" class="go" id="shGo">Send on WhatsApp &#10140;</button></div>
   </div>
 </div>
 
@@ -358,17 +402,138 @@ function showDetail(o){
 }
 
 /* ---------- Excel of what is on screen ---------- */
-function downloadExcel(){
-  if(typeof XLSX === 'undefined'){ alert('Excel tool did not load. Check the internet and try again.'); return; }
-  const data = [['Order ID','B2B / B2C','Company','Name','Phone','Address','City','State','Pincode','City Code','Courier','AWB / Tracking ID','Tracking Link','Total Boxes','Label printed','Dispatched','Status']];
-  VIEW.forEach(o => data.push([o.id, o.cat, o.co, o.name, o.phone, o.addr, o.city, o.state, o.pin, o.hub, o.courier, o.trk, o.link, o.boxes,
-    fmtD(o.at) || o.atText, o.dispAt ? fmtDT(o.dispAt) : '', (ST[o.st] || ST.other)[0] || o.statusTxt]));
+/* customer-facing columns only (no B2B / B2C, Label printed, Dispatched or Status) */
+function ordersWorkbook(list){
+  const data = [['Order ID','Company','Name','Phone','Address','City','State','Pincode','City Code','Courier','AWB / Tracking ID','Tracking Link','Total Boxes']];
+  list.forEach(o => data.push([o.id, o.co, o.name, o.phone, o.addr, o.city, o.state, o.pin, o.hub, o.courier, o.trk, o.link, o.boxes]));
   const ws = XLSX.utils.aoa_to_sheet(data);
-  ws['!cols'] = data[0].map((h, i) => ({ wch: [14,9,26,22,14,40,14,14,9,9,14,18,40,8,14,18,18][i] || 14 }));
+  ws['!cols'] = data[0].map((h, i) => ({ wch: [14,26,22,14,40,14,14,9,9,14,18,40,8][i] || 14 }));
   ws['!autofilter'] = { ref: XLSX.utils.encode_range({ s:{r:0,c:0}, e:{r:data.length-1,c:data[0].length-1} }) };
   const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Orders');
-  XLSX.writeFile(wb, `BoxUp Orders ${new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}).replace(/\s+/g,'-')} (${VIEW.length}).xlsx`);
+  return wb;
 }
+function downloadExcel(){
+  if(typeof XLSX === 'undefined'){ alert('Excel tool did not load. Check the internet and try again.'); return; }
+  XLSX.writeFile(ordersWorkbook(VIEW), `BoxUp Orders ${new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}).replace(/\s+/g,'-')} (${VIEW.length}).xlsx`);
+}
+
+/* ---------- Share file with the customer on WhatsApp ---------- */
+var SH = null, SH_CONTACTS = null;
+const shToday = () => new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+const shSafe = t => String(t||'').replace(/[\\/:*?"<>|]+/g,' ').replace(/\s+/g,' ').trim();
+function shLoadContacts(){
+  if(SH_CONTACTS) return Promise.resolve(SH_CONTACTS);
+  return fetch(LOG_URL + '?action=contacts&t=' + Date.now()).then(r => r.json()).then(d => { SH_CONTACTS = (d && d.ok && d.list) || []; return SH_CONTACTS; }).catch(() => (SH_CONTACTS = []));
+}
+function shFind(co){ const k = String(co||'').trim().toLowerCase(); return (SH_CONTACTS || []).find(c => String(c.company||'').trim().toLowerCase() === k); }
+function shOpen(){
+  if(!VIEW.length){ alert('No orders on screen to share.'); return; }
+  if(typeof XLSX === 'undefined'){ alert('Excel tool did not load. Check the internet and try again.'); return; }
+  const cos = {}; VIEW.forEach(o => { if(o.co) cos[o.co] = (cos[o.co] || 0) + 1; });
+  const top = $('fCompany').value || Object.keys(cos).sort((a,b) => cos[b] - cos[a])[0] || '';
+  const many = Object.keys(cos).length > 1 && !$('fCompany').value;
+  SH = { list: VIEW.slice(), edited: false };
+  $('shCo').value = top; $('shWho').value = ''; $('shNum').value = ''; $('shCc').value = '+91';
+  $('shAttach').checked = true; $('shStatus').textContent = ''; $('shStatus').className = 'sh-msg';
+  if(many) { $('shStatus').textContent = 'The orders on screen are for ' + Object.keys(cos).length + ' companies. Pick one in the Company filter to send only that customer\'s orders.'; $('shStatus').className = 'sh-msg bad'; }
+  $('shOv').hidden = false;
+  shFill(); shRefresh();
+  shLoadContacts().then(() => { if(SH) { shFill(); shRefresh(); } });
+}
+function shFill(){
+  const c = shFind($('shCo').value);
+  $('shSaved').textContent = c ? 'Saved contact for this company filled in.' : 'Saved for this company, so next time it fills in by itself.';
+  if(!c) return;
+  if(!$('shWho').value) $('shWho').value = c.contact || '';
+  if(!$('shNum').value && c.phone){
+    const d = String(c.phone).replace(/\D/g,'');
+    if(d.length > 10){ $('shCc').value = '+' + d.slice(0, d.length - 10); $('shNum').value = d.slice(-10); } else $('shNum').value = d;
+  }
+}
+function shFileName(){
+  return `${shSafe($('shCo').value) || 'BoxUp'} - BoxUp Shipment Details ${shToday().replace(/\s+/g,'-')} (${SH.list.length} order${SH.list.length>1?'s':''}).xlsx`;
+}
+function shText(link){
+  const L = SH.list, n = L.length, who = $('shWho').value.trim(), co = $('shCo').value.trim();
+  const couriers = [...new Set(L.map(o => o.courier).filter(Boolean))].join(', ');
+  const boxes = L.reduce((a,o) => a + (o.boxes || 1), 0);
+  const t = [];
+  t.push(who ? `Dear ${who},` : (co ? `Dear ${co} team,` : 'Dear Sir / Madam,'), '');
+  t.push('Greetings from *BoxUp Luxury Gifting* \u{1F381}', '');
+  t.push(`Please find the shipment details of your *${n} order${n>1?'s':''}*${boxes > n ? ` (${boxes} boxes)` : ''} as on ${shToday()}. The file has each recipient's courier, AWB / tracking number and tracking link.`, '');
+  if($('shAttach').checked) t.push('\u{1F4CE} *Shipment file (Excel):*', link || '[file link is added when you press Send on WhatsApp]', '');
+  if(couriers) t.push(`Courier: ${couriers}`);
+  t.push('You can track every parcel using the tracking link in the file.', '');
+  t.push('For any help, just reply here or call 9663993971.', '');
+  t.push('Warm regards,', 'Team BoxUp Luxury Gifting');
+  return t.join('\n');
+}
+function shNumber(){
+  const cc = $('shCc').value.replace(/\D/g,''), d = $('shNum').value.replace(/\D/g,'');
+  if(!d) return '';
+  if(cc === '91' && d.length !== 10) return null;
+  if(d.length < 6) return null;
+  return cc + d;
+}
+function shRefresh(){
+  if(!SH) return;
+  const boxes = SH.list.reduce((a,o) => a + (o.boxes || 1), 0);
+  const couriers = [...new Set(SH.list.map(o => o.courier).filter(Boolean))].join(', ');
+  $('shFile').textContent = shFileName();
+  $('shFileSub').textContent = `${SH.list.length} order${SH.list.length>1?'s':''} · ${boxes} box${boxes>1?'es':''}${couriers ? ' · ' + couriers : ''}`;
+  $('shFile').parentNode.parentNode.style.opacity = $('shAttach').checked ? 1 : .5;
+  if(!SH.edited) $('shTxt').value = shText('');
+  const num = shNumber();
+  $('shGo').disabled = num === null || SH.busy;
+  if(num === null && !SH.busy){ $('shStatus').textContent = 'Check the WhatsApp number (10 digits for India).'; $('shStatus').className = 'sh-msg bad'; }
+  else if($('shStatus').textContent.startsWith('Check the WhatsApp')){ $('shStatus').textContent = ''; }
+}
+function shClose(){ if(SH && SH.busy) return; $('shOv').hidden = true; SH = null; }
+async function shSend(){
+  const num = shNumber(); if(num === null || !SH) return;
+  // open the WhatsApp tab now (browsers block pop-ups opened after waiting), then point it at the chat
+  const w = window.open('about:blank', '_blank');
+  let text = $('shTxt').value, link = '';
+  const st = $('shStatus'), btn = $('shGo');
+  SH.busy = true; btn.disabled = true;
+  try{
+    const wb = ordersWorkbook(SH.list);
+    const b64 = $('shAttach').checked ? XLSX.write(wb, { bookType:'xlsx', type:'base64' }) : '';
+    st.textContent = $('shAttach').checked ? 'Saving the Excel file to Google Drive…' : 'Saving the contact…'; st.className = 'sh-msg';
+    const res = await fetch(LOG_URL, { method:'POST', headers:{ 'Content-Type':'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action:'salesshare', company: $('shCo').value.trim(), contact: $('shWho').value.trim(), phone: num ? '+' + num : '', fileName: shFileName(), file: b64, orders: SH.list.length }) }).then(r => r.json());
+    if(!res || !res.ok) throw new Error((res && res.error) || 'The sheet did not answer.');
+    SH_CONTACTS = null;   // reload saved contacts next time
+    if($('shAttach').checked){
+      link = res.url || '';
+      if(!link) throw new Error('No file link came back.');
+      const ph = '[file link is added when you press Send on WhatsApp]';
+      text = text.includes(ph) ? text.replace(ph, link) : text + '\n\n\u{1F4CE} Shipment file (Excel): ' + link;
+      $('shTxt').value = text;
+    }
+    const url = (num ? 'https://wa.me/' + num : 'https://api.whatsapp.com/send') + '?text=' + encodeURIComponent(text);
+    if(w && !w.closed) w.location.href = url; else window.open(url, '_blank');
+    st.textContent = '✓ WhatsApp opened with the message' + (link ? ' and file link' : '') + '. Press Send there.'; st.className = 'sh-msg ok';
+  }catch(err){
+    if(w && !w.closed) w.close();
+    st.textContent = 'Could not share: ' + (err.message || err) + ' Check the internet and try again.'; st.className = 'sh-msg bad';
+  }finally{
+    if(SH){ SH.busy = false; shRefresh(); }
+  }
+}
+$('shBtn').addEventListener('click', shOpen);
+$('shX').addEventListener('click', shClose); $('shCancel').addEventListener('click', shClose);
+$('shOv').addEventListener('click', e => { if(e.target === $('shOv')) shClose(); });
+document.addEventListener('keydown', e => { if(e.key === 'Escape' && !$('shOv').hidden) shClose(); });
+$('shCo').addEventListener('input', () => { shFill(); shRefresh(); });
+['shWho','shNum','shCc'].forEach(id => $(id).addEventListener('input', shRefresh));
+$('shAttach').addEventListener('change', shRefresh);
+$('shTxt').addEventListener('input', () => { if(SH) SH.edited = true; });
+$('shGo').addEventListener('click', shSend);
+$('shCopy').addEventListener('click', () => {
+  const t = $('shTxt').value, b = $('shCopy');
+  (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => { b.innerHTML = '&#10003; Copied'; setTimeout(() => { b.innerHTML = '&#128203; Copy message'; }, 1500); }, () => { prompt('Copy this:', t); });
+});
 
 /* ---------- load ---------- */
 const CACHE_KEY = 'boxup.sales.v1';
