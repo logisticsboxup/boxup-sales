@@ -217,6 +217,8 @@
           <button type="button" data-s="delivered">Delivered</button>
           <button type="button" data-s="delayed" class="dly">Delayed</button>
         </div>
+        <div id="waSavedWrap" hidden><div class="lb">Saved message <span style="text-transform:none;letter-spacing:0;font-weight:500">(from the Logistics Hub)</span></div>
+        <select id="waSaved" style="width:100%;border:1px solid #d8d2c0;border-radius:9px;padding:9px 11px;font:13.5px 'Inter';background:#fff"></select></div>
 
         <div class="lb">Expected delivery <span style="text-transform:none;letter-spacing:0;font-weight:500">(optional)</span></div>
         <input type="date" id="waEta">
@@ -645,11 +647,23 @@ function waDigits(t){
 function waStatusFor(o){
   return o.st === 'delivered' ? 'delivered' : o.st === 'returned' ? 'delayed' : (o.st === 'transit' || o.st === 'partly') ? 'dispatched' : 'ready';
 }
+/* Saved messages from the BoxUp Logistics Hub (Settings > WhatsApp messages), if this page runs inside it */
+function hubTemplates(){ try{ const t = JSON.parse(localStorage.getItem('boxup.waTemplates') || 'null'); return Array.isArray(t) ? t.filter(x => x && x.text) : []; }catch(e){ return []; } }
+function hubFill(t, o){
+  const map = { name: o.name || 'Customer', order: o.id, courier: o.courier || '', awb: o.trk || '', link: o.link || '', boxes: o.boxes, company: o.co || '', city: o.city || '' };
+  return String(t).replace(/\{(\w+)\}/g, (m, k) => map[k.toLowerCase()] !== undefined ? map[k.toLowerCase()] : m);
+}
+function hubStatusTemplate(st){ const label = (WA_ST[st] || [''])[0].toLowerCase(); return hubTemplates().find(x => String(x.name).trim().toLowerCase() === label); }
+function hubCustomTemplates(){ const names = Object.values(WA_ST).map(v => v[0].toLowerCase()); return hubTemplates().filter(x => !names.includes(String(x.name).trim().toLowerCase())); }
+
 function waText(){
   const o = WA.o, inc = k => { const c = document.querySelector(`#waChk input[data-k="${k}"]`); return c && c.checked && !c.disabled; };
   const L = [];
+  const pick = $('waSaved') && !$('waSavedWrap').hidden ? $('waSaved').value : '';
+  if(pick !== ''){ const t = hubCustomTemplates()[+pick]; const note0 = $('waNote').value.trim(); return hubFill(t.text, o) + (note0 ? '\n\n' + note0 : ''); }
   L.push('Hello from *BoxUp Luxury Gifting* \u{1F381}', '');
-  L.push((inc('name') && o.name ? `Dear ${o.name}, your` : 'Your') + ` order *${o.id}* ` + WA_ST[WA.st][1]);
+  const stT = hubStatusTemplate(WA.st);
+  L.push(stT ? hubFill(stT.text, o) : (inc('name') && o.name ? `Dear ${o.name}, your` : 'Your') + ` order *${o.id}* ` + WA_ST[WA.st][1]);
   const d = [];
   if(inc('co') && o.co) d.push(`\u{1F3E2} Company: ${o.co}`);
   if(inc('awb') && o.courier) d.push(`\u{1F69A} Courier: ${o.courier}`);
@@ -694,6 +708,9 @@ function waOpen(o){
   $('waSub').textContent = [o.id, o.co || o.name, o.boxes + ' box' + (o.boxes > 1 ? 'es' : '')].filter(Boolean).join(' · ');
   $('waNum').value = waDigits(o.phone);
   $('waEta').value = ''; $('waNote').value = '';
+  const custom = hubCustomTemplates();
+  $('waSavedWrap').hidden = !custom.length;
+  $('waSaved').innerHTML = '<option value="">Status message (above)</option>' + custom.map((t, i) => `<option value="${i}">${esc(t.name)}</option>`).join('');
   const avail = { awb: !!(o.courier || o.trk), link: !!o.link, boxes: true, ddate: !!o.dispAt, co: !!o.co, name: !!o.name, addr: !!(o.addr || o.city) };
   document.querySelectorAll('#waChk input').forEach(c => {
     const ok = avail[c.dataset.k]; c.disabled = !ok; c.parentElement.classList.toggle('na', !ok);
@@ -713,6 +730,7 @@ $('waWho').addEventListener('click', e => {
   if(WA.who === 'other'){ let v = ''; try{ v = localStorage.getItem(WA_OTHER_KEY) || ''; }catch(err){} $('waNum').value = v; $('waNum').focus(); }
   waRefresh();
 });
+$('waSaved').addEventListener('change', () => WA && waRefresh());
 $('waSeg').addEventListener('click', e => { const b = e.target.closest('button'); if(!b || !WA) return; WA.st = b.dataset.s; waRefresh(); });
 $('waChk').addEventListener('change', waRefresh);
 $('waAll').addEventListener('change', () => { document.querySelectorAll('#waChk input').forEach(c => { if(!c.disabled) c.checked = $('waAll').checked; }); waRefresh(); });
