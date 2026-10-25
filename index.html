@@ -778,6 +778,8 @@ $('reload').addEventListener('click', load);
     }
   }catch(e){}
 })();
+// a search sent from the BoxUp Logistics Hub (Chrome version): ?q=...
+try { const q0 = new URLSearchParams(location.search).get('q'); if(q0) $('q').value = q0; } catch(e){}
 load();
 setInterval(() => { if(!document.hidden) load(); }, 60000);   // refresh every minute
 </script>
