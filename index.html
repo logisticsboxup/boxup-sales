@@ -47,6 +47,7 @@
   a{color:#1155cc;}
   .mu{color:#aaa;}
   .st{border-radius:12px;padding:3px 10px;font-weight:700;font-size:11.5px;white-space:nowrap;display:inline-block;}
+  .s-ofd{background:#e3f1fb;color:#0b6aa8;} .s-rto{background:#fbe4e2;color:#9E2B25;} .s-rs{background:#fdf1d6;color:#9a6400;}
   .s-del{background:#e6f4ea;color:#2E7D32;} .s-tr{background:#e8f0fe;color:#1a56b8;} .s-rd{background:#fff3dc;color:#8a5a00;} .s-pt{background:#fde8d7;color:#9a4a10;} .s-no{background:#f1f1f1;color:#555;}
   .det{width:420px;flex:0 0 420px;background:#fff;border-radius:14px;box-shadow:0 6px 20px rgba(0,0,0,.07);padding:16px 18px;font-size:13px;position:sticky;top:12px;}
   .det h3{margin:0 0 2px;font:700 19px 'Playfair Display',Georgia,serif;color:var(--forest);}
@@ -65,6 +66,86 @@
   .err[hidden]{display:none;}
   .note{font-size:12px;color:var(--muted);margin-top:10px;}
 
+
+  /* ---------- Update pop-up + live tracking ---------- */
+  .det{position:relative}
+  .updbtn{position:absolute;top:18px;right:18px;background:#16311F;color:#fff;border:0;border-radius:9px;padding:8px 14px;font:700 13px 'Inter';display:flex;gap:6px;align-items:center;box-shadow:0 4px 12px rgba(22,49,31,.25);cursor:pointer}
+  .det h3{padding-right:110px}
+  .probx{display:flex;gap:8px;align-items:center;border-radius:10px;padding:8px 12px;font-size:13px;font-weight:600;margin:10px 0 2px}
+  .csl{font-size:12px;color:#7A776C;margin-top:6px}
+  .uov{position:fixed;inset:0;background:rgba(16,28,21,.55);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;z-index:80;padding:16px}
+  .uov[hidden]{display:none}
+  .udlg{width:720px;max-width:100%;max-height:calc(100vh - 32px);overflow:auto;background:#fffdf8;border-radius:20px;box-shadow:0 30px 80px rgba(0,0,0,.35);font-family:'Inter'}
+  .udlg.sm{width:460px}
+  .uh{background:linear-gradient(135deg,#16311F,#22492f);color:#fff;padding:18px 24px;display:flex;align-items:center;gap:14px}
+  .uh .ic{width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:19px;flex:none}
+  .uh h3{margin:0;font:700 20px 'Fraunces',Georgia,serif;letter-spacing:.2px}.uh .s{font-size:12.5px;opacity:.78;margin-top:3px}
+  .uh .now{margin-left:auto;text-align:right;font-size:10.5px;letter-spacing:.8px;text-transform:uppercase;opacity:.92;white-space:nowrap}
+  .uh .now b{display:inline-block;margin-top:5px;background:#d9ad56;color:#16311F;border-radius:20px;padding:5px 12px;font-size:12.5px;letter-spacing:0;text-transform:none}
+  .uh .x{margin-left:auto;background:none;border:0;color:#fff;opacity:.75;font-size:18px;cursor:pointer}
+  .ub{padding:20px 24px 4px}
+  .ulb{font-size:11px;font-weight:800;letter-spacing:.9px;text-transform:uppercase;color:#8a8577}
+  .lrow{display:flex;align-items:center;gap:8px;margin-bottom:16px}
+  .pen{margin-left:auto;height:32px;min-width:32px;border-radius:16px;border:1.5px solid #e4dccb;background:#fff;color:#16311F;font:700 13px 'Inter';padding:0 9px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .pen.on{background:#16311F;color:#fff;border-color:#16311F;padding:0 13px}
+  .ddw{position:relative}
+  .dd{border:1.5px solid #e4dccb;background:#fff;border-radius:20px;padding:7px 14px;font:700 12.5px 'Inter';color:#6c685c;display:flex;align-items:center;gap:6px;cursor:pointer}
+  .dd .cv{font-size:10px;opacity:.7}.dd.set{border-color:var(--c);background:var(--bg);color:var(--c)}
+  .ddm{position:absolute;right:0;top:40px;width:260px;background:#fff;border-radius:14px;box-shadow:0 18px 44px rgba(0,0,0,.22);border:1px solid #ece6d8;padding:6px;z-index:5}
+  .ddm[hidden]{display:none}
+  .ddh{font-size:10.5px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:#8a8577;padding:8px 10px 6px}
+  .ddi{display:flex;gap:10px;align-items:center;padding:9px 10px;border-radius:10px;cursor:pointer}.ddi:hover,.ddi.on{background:#faf6ec}
+  .ddi.clr{border-top:1px solid #f0ebdf;margin-top:4px;border-radius:0 0 10px 10px}
+  .ddi i{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:15px;flex:none}
+  .ddi b{font-size:13.5px;color:#2b2a25}.ddi small{display:block;font-size:11.5px;color:#8a8577}
+  .flow{position:relative;display:grid;grid-template-columns:repeat(6,1fr);margin:0 0 22px}
+  .flow:before{content:"";position:absolute;left:8.3%;right:8.3%;top:17px;height:3px;background:#e7e2d4;border-radius:3px}
+  .flow .bar{position:absolute;left:8.3%;top:17px;height:3px;background:#1E7B3C;border-radius:3px;transition:width .2s}
+  .stp{position:relative;text-align:center;background:none;border:0;padding:0;font-family:inherit;cursor:default}
+  .flow.edit .stp{cursor:pointer}
+  .stp .d{width:36px;height:36px;border-radius:50%;margin:0 auto;background:#fff;border:2.5px solid #d6d0bf;display:flex;align-items:center;justify-content:center;font-size:15px;color:#a09b8c;position:relative;z-index:1;transition:all .15s}
+  .flow.edit .stp .d{border-style:dashed}
+  .stp.done .d{background:#1E7B3C;border-color:#1E7B3C;border-style:solid;color:#fff}
+  .stp.on .d{background:#fff;border-color:#1E7B3C;border-style:solid;color:#1E7B3C;box-shadow:0 0 0 6px rgba(30,123,60,.15);transform:scale(1.12)}
+  .flow.edit .stp:hover .d{border-color:#1E7B3C;color:#1E7B3C}
+  .stp span{display:block;margin-top:10px;font-size:12.5px;font-weight:600;color:#6c685c;line-height:1.25}
+  .stp.on span{color:#16311F;font-weight:800}.stp.done span{color:#2b3a30}
+  .ehint{font-size:12px;color:#1E7B3C;font-weight:600;margin:-10px 0 16px;text-align:center}
+  .usep{height:1px;background:#ece6d8;margin:0 0 16px}
+  .ug2{display:grid;grid-template-columns:1fr 1fr;gap:14px 16px}
+  .uf2 label{display:block;font-size:11px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:#8a8577;margin-bottom:6px}
+  .uin{width:100%;box-sizing:border-box;border:1px solid #ddd6c4;border-radius:10px;padding:11px 13px;font:14px 'Inter';background:#fff;color:#1d2a21}
+  .uin::placeholder{color:#b2ac9c}.uspan2{grid-column:span 2}
+  .ufoot{display:flex;align-items:center;gap:10px;padding:14px 24px;background:#f6f2e7;margin-top:18px;border-top:1px solid #ece6d8;flex-wrap:wrap}
+  .ufoot .hint{font-size:12px;color:#7A776C;flex:1;min-width:160px}
+  .ufoot .btn{padding:10px 16px;font-size:13.5px;border-radius:10px}.ufoot .g,.cff .g{background:#16311F;color:#fff;border-color:#16311F}
+  .ufoot .pin{width:96px;letter-spacing:4px;text-align:center;padding:9px 10px}
+  .uerr{color:#9E2B25;font-weight:700;font-size:13px;padding:0 24px}
+  .cfb{padding:18px 22px;color:#3a372f;font-size:14px;line-height:1.55}
+  .cfb ul{margin:10px 0 0;padding:0;list-style:none}.cfb li{display:flex;gap:9px;margin:7px 0;font-size:13.5px}.cfb li b{color:#1E7B3C}
+  .safe{margin-top:14px;background:#eef5f1;border:1px solid #cfe3d6;border-radius:10px;padding:10px 12px;font-size:12.5px;color:#1f4a30}
+  .cff{display:flex;gap:10px;padding:0 22px 20px}.cff .btn{flex:1;padding:12px;font-size:14px;border-radius:10px;justify-content:center;display:flex}
+  .lg{background:#fff;border-radius:10px;padding:6px 10px;font:900 italic 14px 'Inter';color:#f07d00;letter-spacing:.5px;flex:none}
+  .lnow{display:flex;gap:14px;align-items:stretch;flex-wrap:wrap}
+  .stc{flex:1 1 220px;border-radius:14px;background:#eaf1fb;border:1px solid #cddcf3;padding:14px 16px}
+  .stc .l{font-size:11px;font-weight:800;letter-spacing:.8px;color:#4d6a91;text-transform:uppercase}
+  .stc .v{font:800 24px 'Inter';color:#1d4f91;margin-top:4px;letter-spacing:.3px}
+  .stc .u{margin-top:8px;font-size:12.5px;color:#1E7B3C;font-weight:700}
+  .stc.del{background:#e6f4ea;border-color:#c6e5cf}.stc.del .v,.stc.del .l{color:#1E7B3C}
+  .stc.bad{background:#fbe4e2;border-color:#f0c4bf}.stc.bad .v,.stc.bad .l{color:#9E2B25}
+  .rt{flex:1.4 1 300px;border-radius:14px;background:#fff;border:1px solid #ece6d8;padding:14px 16px;display:flex;align-items:center;gap:12px}
+  .rt .c{flex:1;text-align:center}.rt .c small{display:block;font-size:11px;font-weight:800;letter-spacing:.8px;color:#8a8577;text-transform:uppercase}
+  .rt .c b{font-size:14px;color:#22201b}.rt .c span{display:block;font-size:12px;color:#8a8577;margin-top:2px}.rt .ar{color:#d0c9b6;font-size:22px}
+  .lsec{font-size:11px;font-weight:800;letter-spacing:.9px;text-transform:uppercase;color:#8a8577;margin:20px 0 12px}
+  .ltl{border-left:2px solid #e4ddcc;margin-left:8px;padding-left:18px}
+  .lev{position:relative;padding-bottom:14px}.lev:before{content:"";position:absolute;left:-25px;top:4px;width:12px;height:12px;border-radius:50%;background:#fff;border:2.5px solid #2a6fd6}
+  .lev.first:before{background:#2a6fd6}
+  .lev b{font-size:14px;color:#22201b}.lev small{display:block;font-size:12.5px;color:#7a776c;margin-top:2px}
+  .lcn{display:flex;gap:12px;align-items:center;background:#f6f2e7;border-radius:12px;padding:11px 14px;font-size:13px;color:#4a473f;flex-wrap:wrap}
+  .lcn b{color:#22201b}.lcn a{margin-left:auto;font-weight:700;color:#16311F;text-decoration:none}
+  .lload{display:flex;align-items:center;gap:12px;justify-content:center;padding:50px 0;color:#7a776c;font-weight:600}
+  .lspin{width:20px;height:20px;border:3px solid #e4ddcc;border-top-color:#16311F;border-radius:50%;animation:lsp 1s linear infinite}@keyframes lsp{to{transform:rotate(360deg)}}
+  @media (max-width:640px){ .flow{grid-template-columns:repeat(3,1fr);row-gap:16px} .flow:before,.flow .bar{display:none} .ug2{grid-template-columns:1fr} .uspan2{grid-column:auto} .det h3{padding-right:0;margin-top:40px} }
   /* ---------- Share on WhatsApp popup ---------- */
   .wa-ov{position:fixed;inset:0;background:rgba(22,21,18,.45);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px;}
   .wa-ov[hidden]{display:none;}
@@ -167,7 +248,9 @@
     <button type="button" class="chip on" data-f="all">All</button>
     <button type="button" class="chip" data-f="ready">Ready for dispatch</button>
     <button type="button" class="chip" data-f="transit">Dispatched / In transit</button>
+    <button type="button" class="chip" data-f="ofd">Out for delivery</button>
     <button type="button" class="chip" data-f="delivered">Delivered</button>
+    <button type="button" class="chip" data-f="prob">Problems</button>
     <button type="button" class="chip" data-f="b2b">B2B</button>
     <button type="button" class="chip" data-f="b2c">B2C</button>
     <button type="button" class="chip" data-f="intl">International</button>
@@ -191,7 +274,7 @@
     </div>
     <div class="det" id="det"><div class="empty">Click an order to see its details and timeline.</div></div>
   </div>
-  <div class="note">Live from the BoxUp Label Log Google Sheet. This page only shows data; nothing can be changed here.</div>
+  <div class="note">Live from the BoxUp Label Log Google Sheet. Use &#9998; Update on an order to change its status (needs the PIN).</div>
 </div>
 
 <div class="wa-ov" id="waOv" hidden>
@@ -273,6 +356,7 @@
   </div>
 </div>
 
+<div class="uov" id="uov" hidden></div>
 <script>
 const LOG_URL = 'https://script.google.com/macros/s/AKfycbxkWlpzmubWJwgFQF7cCDAegDHDFpst-j2AnoLVrk3rVnZL9CuOukEIC_GR43gUlL7e/exec';
 const SA_LINK_PREFIX = 'https://shreeanjani.co.in/tracking/?awb=';
@@ -304,7 +388,8 @@ function buildOrders(headers, rows){
     type: col('Shipment Type'), mode: col('Mode of Shipping'), courier: col('Courier'), trk: col('Tracking ID'), link: col('Tracking Link'),
     boxes: col('Total Boxes'), batch: col('Batch ID'), status: col('Dispatch Status'), cat: find(/^(category|order category|b2b ?\/ ?b2c)$/),
     dd: find(/^dispatch(ed)? date$/), dt: find(/^dispatch(ed)? time$/), dat: find(/^dispatched (at|on)$/),
-    deliv: find(/^deliver(y|ed)( status)?$/), delivOn: find(/^delivered (on|date|at)$/)
+    deliv: find(/^deliver(y|ed)( status)?$/), delivOn: find(/^delivered (on|date|at)$/),
+    os: col('Order Status'), pr: col('Problem'), note: col('Status Note'), upd: col('Status Updated'), cs: col('Courier Status')
   };
   const g = (r, i) => i >= 0 ? String(r[i] == null ? '' : r[i]).trim() : '';
   return rows.map((r, n) => {
@@ -325,7 +410,17 @@ function buildOrders(headers, rows){
     let link = g(r, ix.link);
     if(!link && trk && /shree\s*anjani/i.test(courier)) link = SA_LINK_PREFIX + trk.split(/[,\s]+/)[0];
     const cat = g(r, ix.cat) || (/^boxup\s*\d/i.test(id) ? 'B2C' : 'B2B');
+    // order journey: the saved Order Status, never behind what the gate or courier already show
+    const osT = g(r, ix.os), prT = g(r, ix.pr);
+    const old = st === 'delivered' ? 'Delivered' : (st === 'transit' || st === 'partly') ? (/transit/i.test(delivTxt) ? 'In Transit' : 'Dispatched') : 'Ready';
+    let step = STEPS.indexOf(osT) > STEPS.indexOf(old) ? osT : old;
+    let problem = PROBS.includes(prT) ? prT : (st === 'returned' ? 'RTO' : '');
+    if(step === 'Delivered' && problem !== 'RTO') problem = problem === 'Escalated' ? problem : '';
+    if(step === 'Delivered') st = 'delivered';
+    else if(problem === 'RTO') st = 'returned';
+    else if(step !== 'Ready' && st !== 'partly') st = 'transit';
     return {
+      step, problem, note: g(r, ix.note), upd: g(r, ix.upd), cs: g(r, ix.cs),
       n, id, at: parseDate(g(r, ix.at)), atText: g(r, ix.at), src: g(r, ix.src), hub: g(r, ix.hub), name: g(r, ix.name), co: g(r, ix.co),
       phone: g(r, ix.phone), alt: g(r, ix.alt), addr: g(r, ix.addr), city: g(r, ix.city), state: g(r, ix.state), pin: g(r, ix.pin),
       type: g(r, ix.type), mode: g(r, ix.mode), courier, trk, link: link.split(/,\s*/)[0], boxes: parseInt(g(r, ix.boxes), 10) || 1,
@@ -339,7 +434,12 @@ const ST = {
   delivered: ['Delivered', 's-del'], returned: ['Returned (RTO)', 's-pt'], transit: ['Dispatched', 's-tr'], partly: ['Partly dispatched', 's-pt'],
   ready: ['Ready for dispatch', 's-rd'], held: ['Not dispatched', 's-no'], other: ['', 's-no']
 };
-const stChip = o => { const [t, c] = ST[o.st] || ST.other; return `<span class="st ${c}">${esc(t || o.statusTxt)}</span>`; };
+const STEPS = ['Ready', 'Dispatched', 'In Transit', 'At Destination', 'Out for Delivery', 'Delivered'];
+const PROBS = ['Rescheduled', 'RTO', 'Escalated'];
+const STEP_CLS = {'Ready':'s-rd', 'Dispatched':'s-tr', 'In Transit':'s-tr', 'At Destination':'s-tr', 'Out for Delivery':'s-ofd', 'Delivered':'s-del', 'Rescheduled':'s-rs', 'RTO':'s-rto', 'Escalated':'s-rto'};
+const PROB_INFO = {Rescheduled:['&#8635;', '#b7791f', '#fdf3df', 'New delivery date'], RTO:['&#8617;', '#9E2B25', '#fbe7e5', 'Returned to origin'], Escalated:['&#9888;', '#c0392b', '#fbe7e5', 'Raised with courier']};
+const stLabel = o => o.problem || (o.st === 'partly' && o.step === 'Dispatched' ? 'Partly dispatched' : o.step === 'Ready' ? 'Ready for dispatch' : o.step);
+const stChip = o => `<span class="st ${STEP_CLS[o.problem || o.step] || 's-no'}">${esc(stLabel(o))}</span>`;
 
 /* ---------- filters ---------- */
 function applyFilters(){
@@ -355,6 +455,8 @@ function applyFilters(){
     if(FILTER === 'ready' && !(o.st === 'ready' || o.st === 'held')) return false;
     if(FILTER === 'transit' && !(o.st === 'transit' || o.st === 'partly')) return false;
     if(FILTER === 'delivered' && o.st !== 'delivered') return false;
+    if(FILTER === 'ofd' && o.step !== 'Out for Delivery') return false;
+    if(FILTER === 'prob' && !o.problem) return false;
     if(FILTER === 'b2b' && o.cat !== 'B2B') return false;
     if(FILTER === 'b2c' && o.cat !== 'B2C') return false;
     if(FILTER === 'intl' && !o.intl) return false;
@@ -393,23 +495,34 @@ function showDetail(o){
   SEL = o;
   if(!o){ $('det').innerHTML = '<div class="empty">Click an order to see its details and timeline.</div>'; return; }
   const addr = [o.addr, o.city, o.state, o.pin].filter(Boolean).join(', ');
-  const dispatched = o.st === 'transit' || o.st === 'partly' || o.st === 'delivered';
-  $('det').innerHTML = `<h3>${esc(o.id)}</h3>
+  const k = STEPS.indexOf(o.step);
+  const sub = {
+    'Ready': esc(fmtDT(o.at) || o.atText) + ' · label printed',
+    'Dispatched': o.dispAt ? esc(fmtDT(o.dispAt)) : (k >= 1 ? (!o.statusTxt || /ready/i.test(o.statusTxt) ? 'marked in Order Tracker' : esc(o.statusTxt)) : 'Not yet' + (o.statusTxt ? ' · ' + esc(o.statusTxt) : '')),
+    'In Transit': k >= 2 ? 'with ' + esc(o.courier || 'courier') : 'waiting for dispatch',
+    'At Destination': k >= 3 ? 'reached the delivery city' : 'not reached yet',
+    'Out for Delivery': k >= 4 ? 'with the delivery boy' : 'waiting',
+    'Delivered': k >= 5 ? esc(fmtD(o.delivOn) || o.delivTxt || 'Delivered') : 'waiting for courier update'
+  };
+  const pi = o.problem && PROB_INFO[o.problem];
+  const saTrack = /shree\s*anjani/i.test(o.courier) && o.trk;
+  $('det').innerHTML = `<button class="updbtn" id="updBtn">&#9998; Update</button><h3>${esc(o.id)}</h3>
     <div class="sub">${esc([o.co, o.name, o.phone].filter(Boolean).join(' · '))}</div>
     <div class="kv">${esc(addr)}${addr ? ' · ' : ''}<b>${o.boxes} box${o.boxes > 1 ? 'es' : ''}</b><br>
       Courier <b>${esc(o.courier || 'Not set')}</b>${o.trk ? ` · AWB ${o.link ? `<a href="${esc(o.link)}" target="_blank" rel="noopener">${esc(o.trk)}</a>` : esc(o.trk)}` : ''}
       ${o.mode ? `<br>Mode <b>${esc(o.mode)}</b>` : ''}${o.batch ? `<br><small style="color:#7A776C">Batch ${esc(o.batch)} · ${esc(o.src)}</small>` : ''}</div>
-    <div class="tl">
-      <div class="ok"><b>Label printed</b><small>${esc(fmtDT(o.at) || o.atText)}</small></div>
-      <div class="${dispatched ? 'ok' : ''}"><b>${o.st === 'partly' ? 'Partly dispatched' : 'Dispatched from gate'}</b><small>${o.dispAt ? esc(fmtDT(o.dispAt)) : (dispatched ? esc(o.statusTxt) : 'Not yet' + (o.statusTxt ? ' · ' + esc(o.statusTxt) : ''))}</small></div>
-      <div class="${dispatched ? 'ok' : ''}"><b>In transit</b><small>${dispatched ? 'with ' + esc(o.courier || 'courier') : 'waiting for dispatch'}</small></div>
-      <div class="${o.st === 'delivered' ? 'ok' : ''}"><b>Delivered</b><small>${o.st === 'delivered' ? esc(fmtD(o.delivOn) || o.delivTxt || 'Delivered') : 'waiting for courier update'}</small></div>
-    </div>
+    ${pi ? `<div class="probx" style="background:${pi[2]};color:${pi[1]}">${pi[0]} ${esc(o.problem)} · ${pi[3]}</div>` : ''}
+    ${o.note ? `<div class="csl">&#128221; ${esc(o.note)}</div>` : ''}
+    ${o.cs ? `<div class="csl">&#128666; Courier says: ${esc(o.cs)}</div>` : ''}
+    ${o.upd ? `<div class="csl">&#9998; Updated ${esc(o.upd)}</div>` : ''}
+    <div class="tl">${STEPS.map((s, i) => `<div class="${i <= k ? 'ok' : ''}"><b>${s === 'Ready' ? 'Label printed' : s === 'Dispatched' ? (o.st === 'partly' ? 'Partly dispatched' : 'Dispatched from gate') : s}</b><small>${sub[s]}</small></div>`).join('')}</div>
     <div class="btns">
-      ${o.link ? `<a class="btn" href="${esc(o.link)}" target="_blank" rel="noopener">&#128279; Track on courier site</a>` : `<button class="btn" disabled>&#128279; Track on courier site</button>`}
+      ${saTrack ? `<button class="btn" id="trkBtn">&#128279; Track on courier site</button>` : o.link ? `<a class="btn" href="${esc(o.link)}" target="_blank" rel="noopener">&#128279; Track on courier site</a>` : `<button class="btn" disabled>&#128279; Track on courier site</button>`}
       <button class="btn" id="cpBtn" ${o.link || o.trk ? '' : 'disabled'}>&#128203; Copy tracking link</button>
       <button class="btn" id="waBtn">&#128172; Share on WhatsApp</button>
     </div>`;
+  $('updBtn').onclick = () => updOpen(o);
+  if($('trkBtn')) $('trkBtn').onclick = () => trkConfirm(o);
   $('waBtn').onclick = () => waOpen(o);
   const cp = $('cpBtn');
   if(cp) cp.onclick = () => { const t = o.link || o.trk; (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => { cp.textContent = '✓ Copied'; }, () => { prompt('Copy this:', t); }); };
@@ -586,6 +699,133 @@ $('shCopy').addEventListener('click', () => {
   (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => { b.innerHTML = '&#10003; Copied'; setTimeout(() => { b.innerHTML = '&#128203; Copy message'; }, 1500); }, () => { prompt('Copy this:', t); });
 });
 
+
+/* ---------- Update pop-up (status, problem, courier, dates, note) ---------- */
+const PIN_KEY = 'boxup.sales.pin';
+let UP = null;   // {o, step, problem, edit, open}
+function ov(html){ const v = $('uov'); v.innerHTML = html; v.hidden = !html; }
+$('uov').addEventListener('mousedown', e => { if(e.target.id === 'uov') ov(''); });
+document.addEventListener('keydown', e => { if(e.key === 'Escape' && !$('uov').hidden) ov(''); });
+const isoD = d => d ? d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0') : '';
+function updOpen(o){ UP = {o, step:o.step, problem:o.problem, edit:false, open:false}; updDraw(true); }
+function updDraw(first){
+  const o = UP.o, k = STEPS.indexOf(UP.step), pi = UP.problem && PROB_INFO[UP.problem];
+  const ICON = {'Ready':'&#128230;', 'Dispatched':'&#128666;', 'In Transit':'&#10148;', 'At Destination':'&#128205;', 'Out for Delivery':'&#128757;', 'Delivered':'&#10003;'};
+  const keep = first ? null : {c:$('uCo').value, a:$('uAwb').value, d:$('uDisp').value, v:$('uDel').value, n:$('uNote').value, p:$('uPin') ? $('uPin').value : ''};
+  const couriers = [...new Set(['Shree Anjani', 'DTDC', 'Delhivery', 'Blue Dart', 'Shadowfax', 'Porter', 'Self delivery'].concat(ORDERS.map(x => x.courier).filter(Boolean)))];
+  const savedPin = (() => { try { return localStorage.getItem(PIN_KEY) || ''; } catch(e){ return ''; } })();
+  ov(`<div class="udlg">
+    <div class="uh"><span class="ic">&#9998;</span><div><h3>Update ${esc(o.id)}</h3><div class="s">${esc([o.co, o.name].filter(Boolean).join(' · '))} · saves to the Label Log</div></div>
+      <div class="now">Current status<br><b>${esc(UP.problem || UP.step)}</b></div></div>
+    <div class="ub">
+      <div class="lrow"><div class="ulb">Where is this order?</div>
+        <button class="pen${UP.edit ? ' on' : ''}" id="uPen" title="Change status">&#9998;${UP.edit ? '&nbsp; Editing' : ''}</button>
+        <div class="ddw"><button class="dd${pi ? ' set' : ''}" id="uDd" style="${pi ? `--c:${pi[1]};--bg:${pi[2]}` : ''}">${pi ? pi[0] + '&nbsp; ' + esc(UP.problem) : '&#9888;&nbsp; Something went wrong?'} <span class="cv">&#9662;</span></button>
+          <div class="ddm" id="uDdm" ${UP.open ? '' : 'hidden'}><div class="ddh">Mark a problem</div>
+            ${PROBS.map(p => `<div class="ddi${UP.problem === p ? ' on' : ''}" data-p="${p}"><i style="background:${PROB_INFO[p][2]};color:${PROB_INFO[p][1]}">${PROB_INFO[p][0]}</i><div><b>${p}</b><small>${PROB_INFO[p][3]}</small></div></div>`).join('')}
+            <div class="ddi clr" data-p=""><i style="background:#eef5f1;color:#1E7B3C">&#10003;</i><div><b>No problem</b><small>Clear the problem mark</small></div></div></div></div></div>
+      <div class="flow${UP.edit ? ' edit' : ''}"><div class="bar" style="width:${Math.max(0, k) / 5 * 83.4}%"></div>
+        ${STEPS.map((s, i) => `<button class="stp ${i < k ? 'done' : i === k ? 'on' : ''}" data-s="${s}" type="button"><div class="d">${i < k ? '&#10003;' : ICON[s]}</div><span>${s}</span></button>`).join('')}</div>
+      ${UP.edit ? '<div class="ehint">Click a step to move the order there</div>' : ''}
+      <div class="usep"></div>
+      <div class="ug2">
+        <div class="uf2"><label>Courier</label><select class="uin" id="uCo"><option value="">Not set</option>${couriers.map(c => `<option${(keep ? keep.c : o.courier) === c ? ' selected' : ''}>${esc(c)}</option>`).join('')}</select></div>
+        <div class="uf2"><label>AWB / Tracking ID</label><input class="uin" id="uAwb" value="${esc(keep ? keep.a : o.trk)}" placeholder="tracking number"></div>
+        <div class="uf2"><label>Dispatch date</label><input class="uin" type="date" id="uDisp" value="${esc(keep ? keep.d : isoD(o.dispAt))}"></div>
+        <div class="uf2"><label>${UP.problem === 'Rescheduled' ? 'New delivery date' : 'Delivered date'}</label><input class="uin" type="date" id="uDel" value="${esc(keep ? keep.v : isoD(o.delivOn))}"></div>
+        <div class="uf2 uspan2"><label>Note (optional)</label><input class="uin" id="uNote" value="${esc(keep ? keep.n : o.note)}" placeholder="e.g. customer asked to deliver after 4 pm" maxlength="300"></div>
+      </div>
+    </div>
+    <div class="uerr" id="uErr"></div>
+    <div class="ufoot"><span class="hint">&#128337; Saved with time in the Label Log</span>
+      ${savedPin ? '' : `<input class="uin pin" id="uPin" type="password" inputmode="numeric" maxlength="6" placeholder="PIN" value="${esc(keep ? keep.p : '')}">`}
+      <button class="btn" id="uCancel">Cancel</button><button class="btn g" id="uSave">Save update</button></div>
+  </div>`);
+  $('uPen').onclick = () => { UP.edit = !UP.edit; updDraw(); };
+  $('uDd').onclick = e => { e.stopPropagation(); UP.open = !UP.open; $('uDdm').hidden = !UP.open; };
+  $('uDdm').onclick = e => { const it = e.target.closest('[data-p]'); if(!it) return; UP.problem = it.dataset.p; UP.open = false; updDraw(); };
+  document.querySelector('#uov .flow').onclick = e => { const b = e.target.closest('[data-s]'); if(!b || !UP.edit) return; UP.step = b.dataset.s; if(UP.step === 'Delivered' && !$('uDel').value) $('uDel').value = isoD(new Date()); updDraw(); };
+  document.querySelector('#uov .udlg').addEventListener('click', e => { if(UP.open && !e.target.closest('.ddw')){ UP.open = false; $('uDdm').hidden = true; } });
+  $('uCancel').onclick = () => ov('');
+  $('uSave').onclick = updSave;
+}
+async function updSave(){
+  const o = UP.o, btn = $('uSave');
+  let pin = ''; try { pin = localStorage.getItem(PIN_KEY) || ''; } catch(e){}
+  if(!pin) pin = ($('uPin') && $('uPin').value.trim()) || '';
+  if(!pin){ $('uErr').textContent = 'Type the 4-digit PIN to save.'; $('uPin') && $('uPin').focus(); return; }
+  const q = {action:'orderset', pin, id:o.id, status:UP.step, problem:UP.problem, courier:$('uCo').value, awb:$('uAwb').value.trim(), disp:$('uDisp').value, deliv:$('uDel').value, note:$('uNote').value.trim(), t:Date.now()};
+  btn.disabled = true; btn.textContent = 'Saving…'; $('uErr').textContent = '';
+  try {
+    const d = await fetch(LOG_URL + '?' + new URLSearchParams(q)).then(r => r.json());
+    if(!d.ok){
+      if(d.pin){ try { localStorage.removeItem(PIN_KEY); } catch(e){} updDraw(); $('uErr').textContent = 'Wrong PIN. Try again.'; return; }
+      throw new Error(d.error || 'Could not save');
+    }
+    try { localStorage.setItem(PIN_KEY, pin); } catch(e){}
+    Object.assign(o, {step:UP.step, problem:UP.problem, courier:q.courier || o.courier, trk:q.awb || o.trk, note:q.note, upd:(d.at || '') + ' · Order Tracker',
+      dispAt:q.disp ? new Date(q.disp + 'T00:00') : o.dispAt, delivOn:q.deliv ? new Date(q.deliv + 'T00:00') : null});
+    if(/shree\s*anjani/i.test(o.courier) && o.trk) o.link = SA_LINK_PREFIX + o.trk.split(/[,\s]+/)[0];
+    o.st = o.step === 'Delivered' ? 'delivered' : o.problem === 'RTO' ? 'returned' : o.step === 'Ready' ? 'ready' : 'transit';
+    ov(''); applyFilters();
+    setTimeout(load, 1500);
+  } catch(e){ $('uErr').textContent = (e.message === 'Failed to fetch' ? 'Could not reach the Google Sheet. Check the internet.' : e.message); }
+  finally { const b = $('uSave'); if(b){ b.disabled = false; b.textContent = 'Save update'; } }
+}
+
+/* ---------- Track on courier site: confirm, then live status from Shree Anjani ---------- */
+function trkConfirm(o){
+  const awb = o.trk.split(/[,\s]+/)[0];
+  ov(`<div class="udlg sm"><div class="uh"><span class="ic">&#128279;</span><div><h3>Track with Shree Anjani?</h3><div class="s">AWB ${esc(awb)} · ${esc(o.id)}</div></div></div>
+    <div class="cfb">BoxUp will check the live status on the Shree Anjani tracking system:
+      <ul><li><b>&#10003;</b>Shows where the parcel is now, with every scan</li><li><b>&#10003;</b>Updates the order status in the Label Log</li><li><b>&#10003;</b>Opens the courier website only if you ask</li></ul>
+      <div class="safe">&#128274; Safe: only the AWB number is sent. No login, no payment. Shree Anjani never asks for bank details, OTP or UPI payment.</div></div>
+    <div class="cff"><button class="btn" id="tNo">Cancel</button><button class="btn g" id="tOk">OK, track now</button></div></div>`);
+  $('tNo').onclick = () => ov('');
+  $('tOk').onclick = () => trkLive(o, awb);
+}
+const saD = t => { const d = t ? new Date(t) : null; return d && !isNaN(d) ? d.toLocaleString('en-IN', {day:'2-digit', month:'short', year:'numeric', hour:'numeric', minute:'2-digit'}) : ''; };
+const tc = t => String(t || '').toLowerCase().replace(/-/g, ' ').replace(/\s+/g, ' ').trim().replace(/\b\w/g, c => c.toUpperCase());
+async function trkLive(o, awb){
+  const head = `<div class="uh"><span class="lg">SHREE ANJANI</span><div><h3>Live tracking · ${esc(awb)}</h3><div class="s">${esc([o.id, o.co || o.name, o.boxes + ' box' + (o.boxes > 1 ? 'es' : '')].filter(Boolean).join(' · '))}</div></div><button class="x" id="tX">&#10005;</button></div>`;
+  ov(`<div class="udlg">${head}<div class="lload"><span class="lspin"></span>Checking Shree Anjani…</div></div>`);
+  $('tX').onclick = () => ov('');
+  let r = null;
+  try { r = await fetch(LOG_URL + '?' + new URLSearchParams({action:'satrack', awb, id:o.id, t:Date.now()})).then(x => x.json()); } catch(e){}
+  if(!r || !r.ok){
+    ov(`<div class="udlg">${head}<div class="ub"><div class="lload" style="flex-direction:column">${esc((r && r.error) || 'Could not reach Shree Anjani right now.')}<br><small>You can still open their website.</small></div></div>
+      <div class="ufoot"><span class="hint"></span><a class="btn" href="${esc(SA_LINK_PREFIX + awb)}" target="_blank" rel="noopener">&#8599; Open courier website</a><button class="btn g" id="tDone">Done</button></div></div>`);
+    $('tX').onclick = $('tDone').onclick = () => ov(''); return;
+  }
+  const d = r.data || {}, b = d.booking || {}, m = r.mapped || {};
+  const scans = (d.booking_tracking || []).slice().sort((x, y) => String(y.created_at || '').localeCompare(String(x.created_at || '')));
+  const lc = d.last_center_details || {};
+  const raw = String(b.status_name || 'BOOKED').toUpperCase();
+  const cls = m.step === 'Delivered' ? 'del' : m.problem ? 'bad' : '';
+  const shown = m.problem || m.step;
+  const ev = scans.map((x, i) => `<div class="lev${i === 0 ? ' first' : ''}"><b>${esc(tc(x.status_name) === 'Out' ? 'Out from ' + tc(x.scanned_center_name) : tc(x.status_name) + ' · ' + tc(x.scanned_center_name))}</b><small>${x.to_center_name ? 'to ' + esc(tc(x.to_center_name)) + ' · ' : ''}${esc(saD(x.created_at))}</small></div>`).join('')
+    + `<div class="lev"><b>Booked</b><small>${esc(tc(b.from_center_name))} · ${esc(saD(b.booking_date))}</small></div>`;
+  const dest = String(b.to_center_name || '');
+  ov(`<div class="udlg">${head}<div class="ub">
+      <div class="lnow"><div class="stc ${cls}"><div class="l">Current status</div><div class="v">${esc(raw)}</div>${r.saved && shown ? `<div class="u">&#10003; Label Log updated: ${esc(shown)}</div>` : `<div class="u" style="color:#7a776c">Not saved: order not found in the Label Log</div>`}</div>
+        <div class="rt"><div class="c"><small>Booked at</small><b>${esc(tc(b.from_center_name))}</b><span>${esc(saD(b.booking_date))}</span></div><span class="ar">&#10140;</span>
+          <div class="c"><small>Destination</small><b>${esc(tc(dest))}</b><span>${m.step === 'Delivered' ? 'delivered' : ['At Destination', 'Out for Delivery'].includes(m.step) ? 'reached' : 'not reached yet'}</span></div></div></div>
+      <div class="lsec">Tracking history</div><div class="ltl">${ev}</div>
+      ${lc.center_name ? `<div class="lsec">Branch</div><div class="lcn">&#128222;<div><b>${esc(tc(lc.center_name))}</b>${lc.manager_name ? ' · Manager ' + esc(tc(lc.manager_name)) : ''}</div>${lc.mobile || lc.phone_number ? `<a href="tel:${esc(lc.mobile || lc.phone_number)}">${esc(lc.mobile || lc.phone_number)}</a>` : ''}</div>` : ''}
+    </div>
+    <div class="ufoot"><span class="hint">&#8635; Checked ${esc(r.at || 'just now')}. All Shree Anjani orders are also checked every hour.</span>
+      <a class="btn" href="${esc(SA_LINK_PREFIX + awb)}" target="_blank" rel="noopener">&#8599; Open courier website</a><button class="btn" id="tWa">&#128172; Share on WhatsApp</button><button class="btn g" id="tDone">Done</button></div></div>`);
+  if(r.saved && m.step){
+    if(STEPS.indexOf(m.step) > STEPS.indexOf(o.step)) o.step = m.step;
+    if(m.problem || m.step === 'Delivered') o.problem = m.problem;
+    o.cs = raw + ' · ' + (r.at || '');
+    o.st = o.step === 'Delivered' ? 'delivered' : o.problem === 'RTO' ? 'returned' : o.step === 'Ready' ? 'ready' : 'transit';
+    applyFilters();
+  }
+  $('tX').onclick = $('tDone').onclick = () => ov('');
+  $('tWa').onclick = () => { ov(''); waOpen(o); };
+}
+
 /* ---------- load ---------- */
 const CACHE_KEY = 'boxup.sales.v1';
 let loading = false;
@@ -645,7 +885,9 @@ function waDigits(t){
   return d;
 }
 function waStatusFor(o){
-  return o.st === 'delivered' ? 'delivered' : o.st === 'returned' ? 'delayed' : (o.st === 'transit' || o.st === 'partly') ? 'dispatched' : 'ready';
+  if(o.step === 'Delivered') return 'delivered';
+  if(o.problem) return 'delayed';
+  return o.step === 'Out for Delivery' ? 'ofd' : (o.step === 'In Transit' || o.step === 'At Destination') ? 'transit' : o.step === 'Dispatched' ? 'dispatched' : 'ready';
 }
 /* Saved messages from the BoxUp Logistics Hub (Settings > WhatsApp messages), if this page runs inside it */
 function hubTemplates(){ try{ const t = JSON.parse(localStorage.getItem('boxup.waTemplates') || 'null'); return Array.isArray(t) ? t.filter(x => x && x.text) : []; }catch(e){ return []; } }
