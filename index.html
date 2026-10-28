@@ -67,6 +67,22 @@
   .note{font-size:12px;color:var(--muted);margin-top:10px;}
 
 
+  /* ---------- Upload status sheet ---------- */
+  .upb{border:1.5px solid #16311F;background:#fff;color:#16311F;border-radius:8px;padding:7px 12px;font:700 12.5px 'Inter';cursor:pointer;margin-right:8px}
+  .drop{border:2px dashed #b9cfc0;border-radius:14px;background:#f5faf6;padding:34px 20px;text-align:center;color:#3a372f;cursor:pointer}
+  .drop.over{background:#e6f2ea;border-color:#1E7B3C}
+  .drop .ic{font-size:34px}.drop b{display:block;font-size:16px;margin:8px 0 4px;color:#16311F}.drop small{color:#7a776c;font-size:12.5px}
+  .drop .pick{display:inline-block;margin-top:14px;background:#16311F;color:#fff;border-radius:10px;padding:10px 18px;font-weight:700;font-size:13.5px}
+  .how{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}.how div{background:#fff;border:1px solid #ece6d8;border-radius:12px;padding:12px;font-size:12.5px;color:#5c5a52}.how b{display:block;color:#16311F;font-size:13px;margin-bottom:3px}
+  .sum{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}.sum div{border-radius:12px;padding:12px 14px;background:#fff;border:1px solid #ece6d8}.sum b{display:block;font-size:22px}.sum span{font-size:12px;color:#7a776c;font-weight:600}
+  .sum .c1 b{color:#1E7B3C}.sum .c2 b{color:#2a6fd6}.sum .c3{border-color:#f0d9a8;background:#fffaf0}.sum .c3 b{color:#b7791f}.sum .c4 b{color:#b83227}
+  .file{display:flex;gap:10px;align-items:center;background:#f6f2e7;border-radius:10px;padding:9px 12px;font-size:13px;margin-bottom:12px;flex-wrap:wrap}.file b{color:#16311F}.file a{margin-left:auto;color:#16311F;font-weight:700;cursor:pointer}
+  .cols{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap}.cols label{flex:1 1 180px;font-size:11px;font-weight:800;letter-spacing:.8px;color:#8a8577;text-transform:uppercase}.cols select{display:block;width:100%;margin-top:5px;border:1px solid #ddd6c4;border-radius:9px;padding:8px 10px;font:600 13px 'Inter';background:#fff}
+  .pt{width:100%;border-collapse:collapse;font-size:13px}.pt th{background:#f4f1e8;text-align:left;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:#7a776c;padding:8px 10px;position:sticky;top:0}.pt td{padding:8px 10px;border-bottom:1px solid #f0ebdf}
+  .pt .ar{color:#b2ac9c}.pt tr.nf td,.pt tr.same td{color:#8a8577}.pt tr.back td{background:#fffaf0}.pt .warn{color:#b7791f;font-weight:700;font-size:12px}
+  .tw{max-height:300px;overflow:auto;border:1px solid #ece6d8;border-radius:12px}
+  .uh.amber{background:linear-gradient(135deg,#7a4b06,#a8690c)}.btn.amb{background:#a8690c;border-color:#a8690c;color:#fff}
+  @media (max-width:640px){ .sum{grid-template-columns:1fr 1fr} .how{grid-template-columns:1fr} }
   /* ---------- Update pop-up + live tracking ---------- */
   .det{position:relative}
   .updbtn{position:absolute;top:18px;right:18px;background:#16311F;color:#fff;border:0;border-radius:9px;padding:8px 14px;font:700 13px 'Inter';display:flex;gap:6px;align-items:center;box-shadow:0 4px 12px rgba(22,49,31,.25);cursor:pointer}
@@ -266,7 +282,7 @@
 
   <div class="main">
     <div class="card">
-      <div class="ch"><div><b>Orders</b> <span id="cnt"></span></div><div class="ch-btns"><button type="button" class="dl" id="dlBtn">&#11015; Download Excel</button><button type="button" class="shf" id="shBtn">&#128228; Share file</button></div></div>
+      <div class="ch"><div><b>Orders</b> <span id="cnt"></span></div><div class="ch-btns"><button type="button" class="upb" id="upBtn">&#11014; Upload status sheet</button><button type="button" class="dl" id="dlBtn">&#11015; Download Excel</button><button type="button" class="shf" id="shBtn">&#128228; Share file</button></div></div>
       <div class="tbl"><table>
         <thead><tr><th>Order ID</th><th>Company / Client</th><th class="c">Code</th><th>Courier</th><th>AWB / Tracking</th><th>Label printed</th><th>Dispatched</th><th>Status</th></tr></thead>
         <tbody id="rows"><tr><td colspan="8" class="empty">Loading orders from the Label Log…</td></tr></tbody>
@@ -749,12 +765,41 @@ function updDraw(first){
   $('uCancel').onclick = () => ov('');
   $('uSave').onclick = updSave;
 }
+function updApply(o, U, q, d){
+  Object.assign(o, {step:U.step, problem:U.problem, courier:q.courier || o.courier, trk:q.awb || o.trk, note:q.note, upd:(d.at || '') + ' · Order Tracker',
+    dispAt:q.disp ? new Date(q.disp + 'T00:00') : o.dispAt, delivOn:q.deliv ? new Date(q.deliv + 'T00:00') : null});
+  if(/shree\s*anjani/i.test(o.courier) && o.trk) o.link = SA_LINK_PREFIX + o.trk.split(/[,\s]+/)[0];
+  o.st = o.step === 'Delivered' ? 'delivered' : o.problem === 'RTO' ? 'returned' : o.step === 'Ready' ? 'ready' : 'transit';
+}
 async function updSave(){
   const o = UP.o, btn = $('uSave');
   let pin = ''; try { pin = localStorage.getItem(PIN_KEY) || ''; } catch(e){}
   if(!pin) pin = ($('uPin') && $('uPin').value.trim()) || '';
   if(!pin){ $('uErr').textContent = 'Type the 4-digit PIN to save.'; $('uPin') && $('uPin').focus(); return; }
   const q = {action:'orderset', pin, id:o.id, status:UP.step, problem:UP.problem, courier:$('uCo').value, awb:$('uAwb').value.trim(), disp:$('uDisp').value, deliv:$('uDel').value, note:$('uNote').value.trim(), t:Date.now()};
+  const back = (o.step === 'Delivered' && UP.step !== 'Delivered') || RANK(UP.step) < RANK(o.step);
+  if(back && !UP.approved){
+    const chip = (x, y) => `<span class="st ${STEP_CLS[y || x] || 's-no'}">${esc(y || x)}</span>`;
+    const keepUP = UP;
+    ov(`<div class="udlg sm"><div class="uh amber"><span class="ic">&#9888;</span><div><h3>Approve this change</h3><div class="s">${esc(o.id)} is already ${esc(o.step)}. This moves it back.</div></div></div>
+      <div class="cfb"><div style="display:flex;gap:8px;align-items:center;font-size:14px">${chip(o.step, o.problem)} &#10140; ${chip(UP.step, UP.problem)}</div>
+        <p style="font-size:13px;color:#5c5a52;margin:14px 0 6px">Type the PIN to approve.</p>
+        <input class="uin" id="aPin" type="password" inputmode="numeric" maxlength="6" placeholder="PIN" style="width:150px;letter-spacing:4px;text-align:center"></div>
+      <div class="uerr" id="uErr"></div>
+      <div class="cff"><button class="btn" id="aNo">Cancel</button><button class="btn amb" id="aOk">Approve and save</button></div></div>`);
+    $('aPin').focus();
+    $('aNo').onclick = () => ov('');
+    $('aOk').onclick = async () => {
+      const p2 = $('aPin').value.trim(); if(!p2){ $('uErr').textContent = 'Type the PIN.'; return; }
+      q.pin = p2; $('aOk').disabled = true; $('aOk').textContent = 'Saving…';
+      try {
+        const d = await fetch(LOG_URL + '?' + new URLSearchParams(q)).then(r => r.json());
+        if(!d.ok){ $('aOk').disabled = false; $('aOk').textContent = 'Approve and save'; $('uErr').textContent = d.pin ? 'Wrong PIN. Try again.' : (d.error || 'Could not save'); return; }
+        updApply(o, keepUP, q, d); ov(''); applyFilters(); setTimeout(load, 1500);
+      } catch(e){ $('aOk').disabled = false; $('aOk').textContent = 'Approve and save'; $('uErr').textContent = 'Could not reach the Google Sheet. Check the internet.'; }
+    };
+    return;
+  }
   btn.disabled = true; btn.textContent = 'Saving…'; $('uErr').textContent = '';
   try {
     const d = await fetch(LOG_URL + '?' + new URLSearchParams(q)).then(r => r.json());
@@ -763,10 +808,7 @@ async function updSave(){
       throw new Error(d.error || 'Could not save');
     }
     try { localStorage.setItem(PIN_KEY, pin); } catch(e){}
-    Object.assign(o, {step:UP.step, problem:UP.problem, courier:q.courier || o.courier, trk:q.awb || o.trk, note:q.note, upd:(d.at || '') + ' · Order Tracker',
-      dispAt:q.disp ? new Date(q.disp + 'T00:00') : o.dispAt, delivOn:q.deliv ? new Date(q.deliv + 'T00:00') : null});
-    if(/shree\s*anjani/i.test(o.courier) && o.trk) o.link = SA_LINK_PREFIX + o.trk.split(/[,\s]+/)[0];
-    o.st = o.step === 'Delivered' ? 'delivered' : o.problem === 'RTO' ? 'returned' : o.step === 'Ready' ? 'ready' : 'transit';
+    updApply(o, UP, q, d);
     ov(''); applyFilters();
     setTimeout(load, 1500);
   } catch(e){ $('uErr').textContent = (e.message === 'Failed to fetch' ? 'Could not reach the Google Sheet. Check the internet.' : e.message); }
@@ -825,6 +867,166 @@ async function trkLive(o, awb){
   $('tX').onclick = $('tDone').onclick = () => ov('');
   $('tWa').onclick = () => { ov(''); waOpen(o); };
 }
+
+
+/* ---------- Upload status sheet: courier Excel/CSV, matched by AWB ---------- */
+let UPL = null;
+const RANK = s => STEPS.indexOf(s);
+function wordMap(t){
+  const w = String(t || '').toUpperCase().replace(/\s+/g, ' ').trim();
+  if(!w) return null;
+  if(/RTO|RETURN/.test(w)) return {s:'', p:'RTO'};
+  if(/UN.?DELIVER|NOT DELIVER|RESCHED|DOOR LOCK|CUSTOMER NOT|REFUSE|ATTEMPT/.test(w)) return {s:'Out for Delivery', p:'Rescheduled'};
+  if(/ESCALAT|LOST|DAMAGE|HOLD/.test(w)) return {s:'', p:'Escalated'};
+  if(/DELIVERED/.test(w)) return {s:'Delivered', p:''};
+  if(/OUT FOR DELIVERY|OFD|OUT FOR DEL/.test(w)) return {s:'Out for Delivery', p:''};
+  if(/DESTINATION|REACHED|ARRIVED/.test(w)) return {s:'At Destination', p:''};
+  if(/TRANSIT|IN ROUTE|ON THE WAY|FORWARD|MANIFEST|OUT|BOOK|PICK/.test(w)) return {s:'In Transit', p:''};
+  if(/DISPATCH|SHIPPED/.test(w)) return {s:'Dispatched', p:''};
+  if(/READY|PENDING|NOT PICKED/.test(w)) return {s:'Ready', p:''};
+  return null;
+}
+function uplOpen(){
+  UPL = null;
+  ov(`<div class="udlg"><div class="uh"><span class="ic">&#11014;</span><div><h3>Upload status sheet</h3><div class="s">Courier's Excel or CSV with AWB numbers and their status</div></div><button class="x" id="uX">&#10005;</button></div>
+    <div class="ub"><div class="drop" id="drop"><div class="ic">&#128196;</div><b>Drop the Excel file here</b><small>.xlsx, .xls or .csv · any column order · the AWB and Status columns are found by themselves</small><br><span class="pick">Choose file</span><input type="file" id="upFile" accept=".xlsx,.xls,.csv" hidden></div>
+      <div class="how"><div><b>1. Upload</b>Shree Anjani, DTDC or any courier sheet</div><div><b>2. Check</b>See what changes before anything is saved</div><div><b>3. Update</b>One click updates every matched order</div></div>
+      <div class="uerr" id="uErr" style="padding:10px 0 0"></div></div>
+    <div class="ufoot"><span class="hint">Nothing is saved until you press Update</span><button class="btn" id="uCancel">Cancel</button></div></div>`);
+  const d = $('drop'), f = $('upFile');
+  $('uX').onclick = $('uCancel').onclick = () => ov('');
+  d.onclick = () => f.click();
+  d.ondragover = e => { e.preventDefault(); d.classList.add('over'); };
+  d.ondragleave = () => d.classList.remove('over');
+  d.ondrop = e => { e.preventDefault(); d.classList.remove('over'); if(e.dataTransfer.files[0]) uplRead(e.dataTransfer.files[0]); };
+  f.onchange = () => { if(f.files[0]) uplRead(f.files[0]); };
+}
+async function uplRead(file){
+  if(typeof XLSX === 'undefined'){ $('uErr').textContent = 'Excel tool did not load. Check the internet and try again.'; return; }
+  try {
+    const wb = XLSX.read(await file.arrayBuffer(), {type:'array', cellDates:true});
+    const sheet = wb.SheetNames[0];
+    const aoa = XLSX.utils.sheet_to_json(wb.Sheets[sheet], {header:1, raw:false, defval:''}).filter(r => r.some(c => String(c).trim()));
+    if(!aoa.length) throw new Error('The file is empty');
+    // header row: the first row that is not mostly numbers
+    const isAwb = v => /^\d{8,14}$/.test(String(v).replace(/\s|'/g, ''));
+    let hi = aoa.findIndex(r => r.filter(c => String(c).trim()).length >= 2 && !r.some(isAwb));
+    const head = hi >= 0 && hi < 5 ? aoa[hi].map(String) : aoa[0].map((_, i) => 'Column ' + (i + 1));
+    const body = aoa.slice(hi >= 0 && hi < 5 ? hi + 1 : 0);
+    const nc = Math.max(...aoa.map(r => r.length));
+    const L = i => String.fromCharCode(65 + (i % 26));
+    const score = (i, test) => body.slice(0, 300).filter(r => test(r[i])).length;
+    let awbCol = -1, best = 0;
+    for(let i = 0; i < nc; i++){ const sc = score(i, isAwb) + (/awb|docket|tracking|cn ?no|consign/i.test(head[i] || '') ? 50 : 0); if(sc > best){ best = sc; awbCol = i; } }
+    let stCol = -1; best = 0;
+    for(let i = 0; i < nc; i++){ if(i === awbCol) continue; const sc = score(i, v => wordMap(v)) + (/status/i.test(head[i] || '') ? 50 : 0); if(sc > best){ best = sc; stCol = i; } }
+    let dtCol = head.findIndex((h, i) => i !== awbCol && i !== stCol && /deliver(ed|y)? ?date|del\.? date|pod date/i.test(h));
+    UPL = {name:file.name, sheet, head, body, nc, awbCol, stCol, dtCol, L};
+    uplPreview();
+  } catch(e){ $('uErr').textContent = 'Could not read this file: ' + e.message; }
+}
+function uplAnalyse(){
+  const U = UPL, byAwb = {};
+  ORDERS.forEach(o => String(o.trk || '').split(/[,\s\/]+/).forEach(a => { a = a.trim(); if(a) byAwb[a] = byAwb[a] || o; }));
+  const out = [], seen = {};
+  U.body.forEach(r => {
+    const awb = String(r[U.awbCol] == null ? '' : r[U.awbCol]).replace(/\s|'/g, '').trim();
+    if(!awb || seen[awb]) return; seen[awb] = 1;
+    const raw = String(r[U.stCol] == null ? '' : r[U.stCol]).trim(), m = wordMap(raw);
+    const dt = U.dtCol >= 0 ? String(r[U.dtCol] || '').trim() : '';
+    const o = byAwb[awb];
+    if(!o){ out.push({kind:'nf', awb, raw}); return; }
+    if(!m){ out.push({kind:'unk', awb, raw, o}); return; }
+    const ns = m.s || o.step, np = m.p;
+    const same = ns === o.step && np === (o.problem || '');
+    const back = !same && ((o.step === 'Delivered' && ns !== 'Delivered') || RANK(ns) < RANK(o.step));
+    out.push({kind: same ? 'same' : back ? 'back' : 'up', awb, raw, o, s:ns, p:np, d:dt});
+  });
+  return out;
+}
+function uplPreview(){
+  const U = UPL, list = uplAnalyse();
+  const cnt = k => list.filter(x => x.kind === k).length;
+  U.list = list;
+  const opt = (sel, allowNone) => (allowNone ? `<option value="-1"${sel < 0 ? ' selected' : ''}>None</option>` : '') + U.head.slice(0, U.nc).concat(Array(Math.max(0, U.nc - U.head.length)).fill('')).map((h, i) => `<option value="${i}"${i === sel ? ' selected' : ''}>${U.L(i)} · ${esc(h || 'Column ' + (i + 1))}</option>`).join('');
+  const chip = x => x.p ? `<span class="st ${STEP_CLS[x.p]}">${esc(x.p)}</span>` : `<span class="st ${STEP_CLS[x.s] || 's-no'}">${esc(x.s)}</span>`;
+  const now = o => `<span class="st ${STEP_CLS[o.problem || o.step] || 's-no'}">${esc(o.problem || o.step)}</span>`;
+  const order = {back:0, up:1, unk:2, same:3, nf:4};
+  const rows = list.slice().sort((a, b) => order[a.kind] - order[b.kind]).slice(0, 400).map(x =>
+    x.kind === 'nf' ? `<tr class="nf"><td>${esc(x.awb)}</td><td colspan="3">Not found in the Label Log</td><td></td><td>${esc(x.raw)}</td><td>skipped</td></tr>`
+    : x.kind === 'unk' ? `<tr class="nf"><td>${esc(x.awb)}</td><td>${esc(x.o.id)}</td><td>${esc(x.o.city)}</td><td>${now(x.o)}</td><td class="ar">&#10140;</td><td>${esc(x.raw || '(empty)')}</td><td>status not understood, skipped</td></tr>`
+    : `<tr class="${x.kind}"><td>${esc(x.awb)}</td><td><b>${esc(x.o.id)}</b></td><td>${esc(x.o.city)}</td><td>${now(x.o)}</td><td class="ar">&#10140;</td><td>${esc(x.raw)}</td><td>${x.kind === 'same' ? 'no change' : chip(x) + (x.kind === 'back' ? ' <span class="warn">&#9888; needs approval</span>' : '')}</td></tr>`).join('');
+  const nUp = cnt('up'), nBack = cnt('back');
+  ov(`<div class="udlg" style="width:860px"><div class="uh"><span class="ic">&#11014;</span><div><h3>Check before updating</h3><div class="s">${U.body.length} rows read · matched by AWB number</div></div><button class="x" id="uX">&#10005;</button></div>
+    <div class="ub"><div class="file">&#128196; <b>${esc(U.name)}</b> · sheet "${esc(U.sheet)}" · ${U.body.length} rows<a id="uChg">Change file</a></div>
+      <div class="cols"><label>AWB column<select id="cA">${opt(U.awbCol)}</select></label><label>Status column<select id="cS">${opt(U.stCol)}</select></label><label>Delivered date (optional)<select id="cD">${opt(U.dtCol, true)}</select></label></div>
+      <div class="sum"><div class="c1"><b>${nUp}</b><span>Will be updated</span></div><div class="c2"><b>${cnt('same')}</b><span>Already the same</span></div><div class="c3"><b>${nBack}</b><span>&#9888; Change a delivered order, needs approval</span></div><div class="c4"><b>${cnt('nf') + cnt('unk')}</b><span>Not found or not understood</span></div></div>
+      <div class="tw"><table class="pt"><thead><tr><th>AWB</th><th>Order</th><th>City</th><th>Now</th><th></th><th>Sheet says</th><th>Becomes</th></tr></thead><tbody>${rows || '<tr><td colspan="7" class="nf">No rows</td></tr>'}</tbody></table></div>
+    </div>
+    <div class="uerr" id="uErr"></div>
+    <div class="ufoot"><span class="hint">${cnt('nf') + cnt('unk') ? '<a id="uNf" style="cursor:pointer;font-weight:700;color:#16311F">&#11015; Download not-found list</a>' : 'Nothing is saved until you press Update'}</span><button class="btn" id="uCancel">Cancel</button><button class="btn g" id="uGo" ${nUp + nBack ? '' : 'disabled'}>Update ${nUp + nBack} order${nUp + nBack === 1 ? '' : 's'}</button></div></div>`);
+  $('uX').onclick = $('uCancel').onclick = () => ov('');
+  $('uChg').onclick = uplOpen;
+  $('cA').onchange = e => { U.awbCol = +e.target.value; uplPreview(); };
+  $('cS').onchange = e => { U.stCol = +e.target.value; uplPreview(); };
+  $('cD').onchange = e => { U.dtCol = +e.target.value; uplPreview(); };
+  if($('uNf')) $('uNf').onclick = () => {
+    const bad = list.filter(x => x.kind === 'nf' || x.kind === 'unk');
+    const ws = XLSX.utils.aoa_to_sheet([['AWB', 'Sheet status', 'Problem', 'Order']].concat(bad.map(x => [x.awb, x.raw, x.kind === 'nf' ? 'AWB not found in the Label Log' : 'Status not understood', x.o ? x.o.id : ''])));
+    const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Not updated'); XLSX.writeFile(wb, 'BoxUp status upload - not updated.xlsx');
+  };
+  $('uGo').onclick = () => uplApprove();
+}
+function uplApprove(){
+  const back = UPL.list.filter(x => x.kind === 'back');
+  let pin = ''; try { pin = localStorage.getItem(PIN_KEY) || ''; } catch(e){}
+  const needPin = back.length || !pin;
+  if(!needPin) return uplSend(pin, []);
+  const chip = (s, p) => `<span class="st ${STEP_CLS[p || s] || 's-no'}">${esc(p || s)}</span>`;
+  ov(`<div class="udlg" style="width:600px"><div class="uh${back.length ? ' amber' : ''}"><span class="ic">${back.length ? '&#9888;' : '&#128274;'}</span><div><h3>${back.length ? 'Approve changes to delivered orders' : 'Type the PIN to update'}</h3><div class="s">${back.length ? back.length + ' order' + (back.length > 1 ? 's are' : ' is') + ' already Delivered or further along. The sheet moves ' + (back.length > 1 ? 'them' : 'it') + ' back.' : UPL.list.filter(x => x.kind === 'up').length + ' orders will be updated'}</div></div></div>
+    <div class="ub">${back.length ? `<div class="tw" style="max-height:260px"><table class="pt"><thead><tr><th></th><th>Order</th><th>AWB</th><th>Change</th></tr></thead><tbody>${back.map((x, i) => `<tr><td><input type="checkbox" class="bk" data-i="${i}" checked></td><td><b>${esc(x.o.id)}</b></td><td>${esc(x.awb)}</td><td>${chip(x.o.step, x.o.problem)} &#10140; ${chip(x.s, x.p)}</td></tr>`).join('')}</tbody></table></div>
+      <p style="font-size:13px;color:#5c5a52;margin:14px 0 6px">Untick any order you want to keep as it is. Type the PIN to approve.</p>` : ''}
+      <input class="uin" id="uPin2" type="password" inputmode="numeric" maxlength="6" placeholder="PIN" style="width:150px;letter-spacing:4px;text-align:center"></div>
+    <div class="uerr" id="uErr"></div>
+    <div class="ufoot"><span class="hint">${back.length ? 'The other ' + UPL.list.filter(x => x.kind === 'up').length + ' orders update either way' : ''}</span>
+      ${back.length ? '<button class="btn" id="uKeep">Keep them as they are</button>' : '<button class="btn" id="uBack">Back</button>'}<button class="btn ${back.length ? 'amb' : 'g'}" id="uOk">${back.length ? 'Approve and update' : 'Update'}</button></div></div>`);
+  $('uPin2').focus();
+  const go = keepAll => {
+    const p2 = $('uPin2').value.trim();
+    if(!p2){ $('uErr').textContent = 'Type the PIN.'; return; }
+    const okBack = keepAll ? [] : back.filter((x, i) => document.querySelector(`.bk[data-i="${i}"]`).checked);
+    uplSend(p2, okBack);
+  };
+  $('uOk').onclick = () => go(false);
+  if($('uKeep')) $('uKeep').onclick = () => go(true);
+  if($('uBack')) $('uBack').onclick = uplPreview;
+}
+async function uplSend(pin, okBack){
+  const todo = UPL.list.filter(x => x.kind === 'up').concat(okBack);
+  ov(`<div class="udlg sm"><div class="uh"><span class="ic">&#11014;</span><div><h3>Updating orders…</h3><div class="s" id="uProg">0 of ${todo.length}</div></div></div><div class="lload"><span class="lspin"></span>Saving to the Label Log</div><div class="uerr" id="uErr"></div></div>`);
+  let done = 0, missing = [];
+  try {
+    for(let i = 0; i < todo.length; i += 40){
+      const part = todo.slice(i, i + 40).map(x => ({id:x.o.id, s:x.s, p:x.p, c:x.raw, d:x.d}));
+      const r = await fetch(LOG_URL + '?' + new URLSearchParams({action:'bulkset', pin, items:JSON.stringify(part), t:Date.now()})).then(x => x.json());
+      if(!r.ok){
+        if(r.pin){ try { localStorage.removeItem(PIN_KEY); } catch(e){} uplApprove(); $('uErr').textContent = 'Wrong PIN. Try again.'; return; }
+        throw new Error(r.error || 'Could not save');
+      }
+      try { localStorage.setItem(PIN_KEY, pin); } catch(e){}
+      missing = missing.concat(r.missing || []);
+      todo.slice(i, i + 40).forEach(x => { x.o.step = x.s; x.o.problem = x.p; x.o.cs = x.raw; x.o.st = x.s === 'Delivered' ? 'delivered' : x.p === 'RTO' ? 'returned' : x.s === 'Ready' ? 'ready' : 'transit'; });
+      done += part.length; $('uProg').textContent = done + ' of ' + todo.length;
+    }
+    applyFilters();
+    ov(`<div class="udlg sm"><div class="uh"><span class="ic">&#10003;</span><div><h3>${done - missing.length} orders updated</h3><div class="s">${esc(UPL.name)}</div></div></div>
+      <div class="cfb">The new statuses are saved in the Label Log and show in the list now.${missing.length ? `<div class="safe" style="background:#fbe4e2;border-color:#f0c4bf;color:#9E2B25">${missing.length} could not be found any more: ${esc(missing.slice(0, 8).join(', '))}${missing.length > 8 ? '…' : ''}</div>` : ''}</div>
+      <div class="cff"><button class="btn g" id="uDone">Done</button></div></div>`);
+    $('uDone').onclick = () => ov('');
+    setTimeout(load, 1500);
+  } catch(e){ $('uErr').textContent = (e.message === 'Failed to fetch' ? 'Could not reach the Google Sheet. Check the internet.' : e.message) + (done ? ` (${done} were saved)` : ''); }
+}
+$('upBtn').onclick = uplOpen;
 
 /* ---------- load ---------- */
 const CACHE_KEY = 'boxup.sales.v1';
