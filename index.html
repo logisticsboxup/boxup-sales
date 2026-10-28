@@ -253,10 +253,10 @@
   <div class="err" id="err" hidden></div>
 
   <div class="search">
-    <input type="search" id="q" placeholder="&#128269; Search Order ID, Estimate, company, client name, phone or AWB" autocomplete="off">
+    <input type="search" id="q" placeholder="&#128269; Search Order ID, Estimate, sender company, recipient, phone or AWB" autocomplete="off">
     <span class="lbl">From</span><input type="date" id="from">
     <span class="lbl">To</span><input type="date" id="to">
-    <select id="fCompany"><option value="">Company: All</option></select>
+    <select id="fCompany" title="Sender Company (your client)"><option value="">Sender Company: All</option></select>
     <select id="fCourier"><option value="">Courier: All</option></select>
   </div>
 
@@ -284,7 +284,7 @@
     <div class="card">
       <div class="ch"><div><b>Orders</b> <span id="cnt"></span></div><div class="ch-btns"><button type="button" class="upb" id="upBtn">&#11014; Upload status sheet</button><button type="button" class="dl" id="dlBtn">&#11015; Download Excel</button><button type="button" class="shf" id="shBtn">&#128228; Share file</button></div></div>
       <div class="tbl"><table>
-        <thead><tr><th>Order ID</th><th>Company / Client</th><th class="c">Code</th><th>Courier</th><th>AWB / Tracking</th><th>Label printed</th><th>Dispatched</th><th>Status</th></tr></thead>
+        <thead><tr><th>Order ID</th><th>Sender Company / Recipient</th><th class="c">Code</th><th>Courier</th><th>AWB / Tracking</th><th>Label printed</th><th>Dispatched</th><th>Status</th></tr></thead>
         <tbody id="rows"><tr><td colspan="8" class="empty">Loading orders from the Label Log…</td></tr></tbody>
       </table></div>
     </div>
@@ -399,7 +399,7 @@ function buildOrders(headers, rows){
   const col = (...names) => { for(const n of names){ const i = H.indexOf(n.toLowerCase()); if(i >= 0) return i; } return -1; };
   const find = re => H.findIndex(h => re.test(h));
   const ix = {
-    at: col('Logged at'), src: col('Source'), id: col('Order ID'), hub: col('City Code'), name: col('Name'), co: col('Company'),
+    at: col('Logged at'), src: col('Source'), id: col('Order ID'), hub: col('City Code'), name: col('Name'), co: col('Company'), sender: col('Sender Company', 'Sender'),
     phone: col('Phone'), alt: col('Alt Details'), addr: col('Address'), city: col('City'), state: col('State'), pin: col('Pincode'),
     type: col('Shipment Type'), mode: col('Mode of Shipping'), courier: col('Courier'), trk: col('Tracking ID'), link: col('Tracking Link'),
     boxes: col('Total Boxes'), batch: col('Batch ID'), status: col('Dispatch Status'), cat: find(/^(category|order category|b2b ?\/ ?b2c)$/),
@@ -437,7 +437,7 @@ function buildOrders(headers, rows){
     else if(step !== 'Ready' && st !== 'partly') st = 'transit';
     return {
       step, problem, note: g(r, ix.note), upd: g(r, ix.upd), cs: g(r, ix.cs),
-      n, id, at: parseDate(g(r, ix.at)), atText: g(r, ix.at), src: g(r, ix.src), hub: g(r, ix.hub), name: g(r, ix.name), co: g(r, ix.co),
+      n, id, at: parseDate(g(r, ix.at)), atText: g(r, ix.at), src: g(r, ix.src), hub: g(r, ix.hub), name: g(r, ix.name), co: g(r, ix.co), sender: g(r, ix.sender), client: g(r, ix.sender) || g(r, ix.co),
       phone: g(r, ix.phone), alt: g(r, ix.alt), addr: g(r, ix.addr), city: g(r, ix.city), state: g(r, ix.state), pin: g(r, ix.pin),
       type: g(r, ix.type), mode: g(r, ix.mode), courier, trk, link: link.split(/,\s*/)[0], boxes: parseInt(g(r, ix.boxes), 10) || 1,
       batch: g(r, ix.batch), statusTxt, st, dispAt, delivTxt, delivOn: parseDate(g(r, ix.delivOn)), cat: /b2c/i.test(cat) ? 'B2C' : 'B2B',
@@ -466,7 +466,7 @@ function applyFilters(){
   VIEW = ORDERS.filter(o => {
     if(from && (!o.at || o.at < from)) return false;
     if(to && (!o.at || o.at > to)) return false;
-    if(co && o.co !== co) return false;
+    if(co && o.client !== co) return false;   // Sender Company is the client reference (falls back to Company)
     if(cr && o.courier !== cr) return false;
     if(FILTER === 'ready' && !(o.st === 'ready' || o.st === 'held')) return false;
     if(FILTER === 'transit' && !(o.st === 'transit' || o.st === 'partly')) return false;
@@ -477,7 +477,7 @@ function applyFilters(){
     if(FILTER === 'b2c' && o.cat !== 'B2C') return false;
     if(FILTER === 'intl' && !o.intl) return false;
     if(q){
-      const hay = [o.id, o.name, o.co, o.phone, o.trk, o.city, o.batch, o.src].join(' ').toLowerCase();
+      const hay = [o.id, o.name, o.sender, o.co, o.phone, o.trk, o.city, o.batch, o.src].join(' ').toLowerCase();
       if(!q.split(/\s+/).every(w => hay.includes(w))) return false;
     }
     return true;
@@ -495,7 +495,7 @@ function render(){
   const shown = VIEW.slice(0, 500);
   $('rows').innerHTML = shown.length ? shown.map(o => `<tr class="row${SEL === o ? ' sel' : ''}" data-n="${o.n}">
       <td class="nw"><b>${esc(o.id)}</b><small>${o.cat}${o.intl ? ' · Intl' : ''}</small></td>
-      <td>${esc(o.co || (o.cat === 'B2C' ? '(B2C)' : ''))}<small>${esc(o.name)}</small></td>
+      <td>${esc(o.client || (o.cat === 'B2C' ? '(B2C)' : ''))}<small>${esc([o.sender && o.co ? o.co : '', o.name].filter(Boolean).join(' · '))}</small></td>
       <td class="c">${o.hub ? `<span class="hub">${esc(o.hub)}</span>` : ''}</td>
       <td>${esc(o.courier) || '<span class="mu">Not set</span>'}</td>
       <td class="nw">${o.trk ? (o.link ? `<a href="${esc(o.link)}" target="_blank" rel="noopener">${esc(o.trk)}</a>` : esc(o.trk)) : '<span class="mu">-</span>'}</td>
@@ -523,7 +523,7 @@ function showDetail(o){
   const pi = o.problem && PROB_INFO[o.problem];
   const saTrack = /shree\s*anjani/i.test(o.courier) && o.trk;
   $('det').innerHTML = `<button class="updbtn" id="updBtn">&#9998; Update</button><h3>${esc(o.id)}</h3>
-    <div class="sub">${esc([o.co, o.name, o.phone].filter(Boolean).join(' · '))}</div>
+    <div class="sub">${esc([o.sender ? 'Sender: ' + o.sender : '', o.co, o.name, o.phone].filter(Boolean).join(' · '))}</div>
     <div class="kv">${esc(addr)}${addr ? ' · ' : ''}<b>${o.boxes} box${o.boxes > 1 ? 'es' : ''}</b><br>
       Courier <b>${esc(o.courier || 'Not set')}</b>${o.trk ? ` · AWB ${o.link ? `<a href="${esc(o.link)}" target="_blank" rel="noopener">${esc(o.trk)}</a>` : esc(o.trk)}` : ''}
       ${o.mode ? `<br>Mode <b>${esc(o.mode)}</b>` : ''}${o.batch ? `<br><small style="color:#7A776C">Batch ${esc(o.batch)} · ${esc(o.src)}</small>` : ''}</div>
@@ -574,7 +574,7 @@ function shFind(co){ const k = String(co||'').trim().toLowerCase(); return (SH_C
 function shOpen(){
   if(!VIEW.length){ alert('No orders on screen to share.'); return; }
   if(typeof XLSX === 'undefined'){ alert('Excel tool did not load. Check the internet and try again.'); return; }
-  const cos = {}; VIEW.forEach(o => { if(o.co) cos[o.co] = (cos[o.co] || 0) + 1; });
+  const cos = {}; VIEW.forEach(o => { if(o.client) cos[o.client] = (cos[o.client] || 0) + 1; });
   const top = $('fCompany').value || Object.keys(cos).sort((a,b) => cos[b] - cos[a])[0] || '';
   const many = Object.keys(cos).length > 1 && !$('fCompany').value;
   SH = { list: VIEW.slice(), edited: false };
@@ -1059,10 +1059,10 @@ function showData(d){
     const selN = SEL && SEL.n;
     ORDERS = buildOrders(d.headers || [], d.rows || []);
     SEL = ORDERS.find(o => o.n === selN) || null;
-    const cos = [...new Set(ORDERS.map(o => o.co).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+    const cos = [...new Set(ORDERS.map(o => o.client).filter(Boolean))].sort((a, b) => a.localeCompare(b));
     const crs = [...new Set(ORDERS.map(o => o.courier).filter(Boolean))].sort((a, b) => a.localeCompare(b));
     const keep = (sel, list, label) => { const v = sel.value; sel.innerHTML = `<option value="">${label}: All</option>` + list.map(x => `<option>${esc(x)}</option>`).join(''); sel.value = list.includes(v) ? v : ''; };
-    keep($('fCompany'), cos, 'Company'); keep($('fCourier'), crs, 'Courier');
+    keep($('fCompany'), cos, 'Sender Company'); keep($('fCourier'), crs, 'Courier');
     applyFilters();
 }
 
