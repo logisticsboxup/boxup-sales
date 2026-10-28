@@ -24,6 +24,8 @@
   .search input[type=search]{flex:1;min-width:280px;border:2px solid var(--forest);border-radius:10px;padding:11px 14px;font:15px 'Inter';outline:none;}
   .search select,.search input[type=date]{border:1px solid #d8d2c0;border-radius:8px;padding:10px 10px;font:13px 'Inter';background:#fff;color:var(--ink);max-width:220px;}
   .search .lbl{font-size:12px;color:var(--muted);font-weight:600;}
+  .gob{background:#16311F;color:#fff;border:0;border-radius:9px;padding:0 18px;min-height:40px;font:700 13.5px 'Inter';cursor:pointer}
+  .search input.bad{border-color:#c0392b!important;background:#fdeeee}
   .chips{display:flex;gap:8px;margin:14px 0;flex-wrap:wrap;}
   .chip{background:#fff;border:1px solid #d8d2c0;border-radius:20px;padding:6px 14px;font:600 12.5px 'Inter';cursor:pointer;color:var(--ink);}
   .chip.on{background:var(--forest);color:#fff;border-color:var(--forest);}
@@ -256,6 +258,8 @@
     <input type="search" id="q" placeholder="&#128269; Search Order ID, Estimate, sender company, recipient, phone or AWB" autocomplete="off">
     <span class="lbl">From</span><input type="date" id="from">
     <span class="lbl">To</span><input type="date" id="to">
+    <select id="qDate" title="Quick dates"><option value="">Quick dates</option><option value="today">Today</option><option value="yday">Yesterday</option><option value="7">Last 7 days</option><option value="30">Last 30 days</option><option value="month">This month</option><option value="all">All dates</option></select>
+    <button type="button" id="goBtn" class="gob">Go</button>
     <select id="fCompany" title="Sender Company (your client)"><option value="">Sender Company: All</option></select>
     <select id="fCourier"><option value="">Courier: All</option></select>
   </div>
@@ -290,7 +294,7 @@
     </div>
     <div class="det" id="det"><div class="empty">Click an order to see its details and timeline.</div></div>
   </div>
-  <div class="note">Live from the BoxUp Label Log Google Sheet. Use &#9998; Update on an order to change its status (needs the PIN).</div>
+  <div class="note">Live from the BoxUp Label Log Google Sheet. Use &#9998; Update on an order to change its status. Refreshes every 10 seconds.</div>
 </div>
 
 <div class="wa-ov" id="waOv" hidden>
@@ -460,8 +464,10 @@ const stChip = o => `<span class="st ${STEP_CLS[o.problem || o.step] || 's-no'}"
 /* ---------- filters ---------- */
 function applyFilters(){
   const q = $('q').value.trim().toLowerCase();
-  const from = $('from').value ? new Date($('from').value + 'T00:00') : null;
-  const to = $('to').value ? new Date($('to').value + 'T23:59:59') : null;
+  const okD = id => { const v = $(id).value, y = +String(v).slice(0, 4), good = !v || (/^\d{4}-\d{2}-\d{2}$/.test(v) && y >= 2020 && y <= 2100); $(id).classList.toggle('bad', !good); return good && v ? v : ''; };
+  const fv = okD('from'), tv = okD('to');
+  const from = fv ? new Date(fv + 'T00:00') : null;
+  const to = tv ? new Date(tv + 'T23:59:59') : null;
   const co = $('fCompany').value, cr = $('fCourier').value;
   VIEW = ORDERS.filter(o => {
     if(from && (!o.at || o.at < from)) return false;
@@ -754,7 +760,6 @@ function updDraw(first){
     </div>
     <div class="uerr" id="uErr"></div>
     <div class="ufoot"><span class="hint">&#128337; Saved with time in the Label Log</span>
-      ${savedPin ? '' : `<input class="uin pin" id="uPin" type="password" inputmode="numeric" maxlength="6" placeholder="PIN" value="${esc(keep ? keep.p : '')}">`}
       <button class="btn" id="uCancel">Cancel</button><button class="btn g" id="uSave">Save update</button></div>
   </div>`);
   $('uPen').onclick = () => { UP.edit = !UP.edit; updDraw(); };
@@ -773,9 +778,7 @@ function updApply(o, U, q, d){
 }
 async function updSave(){
   const o = UP.o, btn = $('uSave');
-  let pin = ''; try { pin = localStorage.getItem(PIN_KEY) || ''; } catch(e){}
-  if(!pin) pin = ($('uPin') && $('uPin').value.trim()) || '';
-  if(!pin){ $('uErr').textContent = 'Type the 4-digit PIN to save.'; $('uPin') && $('uPin').focus(); return; }
+  const pin = '';
   const q = {action:'orderset', pin, id:o.id, status:UP.step, problem:UP.problem, courier:$('uCo').value, awb:$('uAwb').value.trim(), disp:$('uDisp').value, deliv:$('uDel').value, note:$('uNote').value.trim(), t:Date.now()};
   const back = (o.step === 'Delivered' && UP.step !== 'Delivered') || RANK(UP.step) < RANK(o.step);
   if(back && !UP.approved){
@@ -783,15 +786,12 @@ async function updSave(){
     const keepUP = UP;
     ov(`<div class="udlg sm"><div class="uh amber"><span class="ic">&#9888;</span><div><h3>Approve this change</h3><div class="s">${esc(o.id)} is already ${esc(o.step)}. This moves it back.</div></div></div>
       <div class="cfb"><div style="display:flex;gap:8px;align-items:center;font-size:14px">${chip(o.step, o.problem)} &#10140; ${chip(UP.step, UP.problem)}</div>
-        <p style="font-size:13px;color:#5c5a52;margin:14px 0 6px">Type the PIN to approve.</p>
-        <input class="uin" id="aPin" type="password" inputmode="numeric" maxlength="6" placeholder="PIN" style="width:150px;letter-spacing:4px;text-align:center"></div>
+</div>
       <div class="uerr" id="uErr"></div>
       <div class="cff"><button class="btn" id="aNo">Cancel</button><button class="btn amb" id="aOk">Approve and save</button></div></div>`);
-    $('aPin').focus();
     $('aNo').onclick = () => ov('');
     $('aOk').onclick = async () => {
-      const p2 = $('aPin').value.trim(); if(!p2){ $('uErr').textContent = 'Type the PIN.'; return; }
-      q.pin = p2; $('aOk').disabled = true; $('aOk').textContent = 'Saving…';
+      q.pin = ""; $('aOk').disabled = true; $('aOk').textContent = 'Saving…';
       try {
         const d = await fetch(LOG_URL + '?' + new URLSearchParams(q)).then(r => r.json());
         if(!d.ok){ $('aOk').disabled = false; $('aOk').textContent = 'Approve and save'; $('uErr').textContent = d.pin ? 'Wrong PIN. Try again.' : (d.error || 'Could not save'); return; }
@@ -979,23 +979,17 @@ function uplPreview(){
 }
 function uplApprove(){
   const back = UPL.list.filter(x => x.kind === 'back');
-  let pin = ''; try { pin = localStorage.getItem(PIN_KEY) || ''; } catch(e){}
-  const needPin = back.length || !pin;
-  if(!needPin) return uplSend(pin, []);
+  if(!back.length) return uplSend('', []);
   const chip = (s, p) => `<span class="st ${STEP_CLS[p || s] || 's-no'}">${esc(p || s)}</span>`;
   ov(`<div class="udlg" style="width:600px"><div class="uh${back.length ? ' amber' : ''}"><span class="ic">${back.length ? '&#9888;' : '&#128274;'}</span><div><h3>${back.length ? 'Approve changes to delivered orders' : 'Type the PIN to update'}</h3><div class="s">${back.length ? back.length + ' order' + (back.length > 1 ? 's are' : ' is') + ' already Delivered or further along. The sheet moves ' + (back.length > 1 ? 'them' : 'it') + ' back.' : UPL.list.filter(x => x.kind === 'up').length + ' orders will be updated'}</div></div></div>
     <div class="ub">${back.length ? `<div class="tw" style="max-height:260px"><table class="pt"><thead><tr><th></th><th>Order</th><th>AWB</th><th>Change</th></tr></thead><tbody>${back.map((x, i) => `<tr><td><input type="checkbox" class="bk" data-i="${i}" checked></td><td><b>${esc(x.o.id)}</b></td><td>${esc(x.awb)}</td><td>${chip(x.o.step, x.o.problem)} &#10140; ${chip(x.s, x.p)}</td></tr>`).join('')}</tbody></table></div>
-      <p style="font-size:13px;color:#5c5a52;margin:14px 0 6px">Untick any order you want to keep as it is. Type the PIN to approve.</p>` : ''}
-      <input class="uin" id="uPin2" type="password" inputmode="numeric" maxlength="6" placeholder="PIN" style="width:150px;letter-spacing:4px;text-align:center"></div>
+      <p style="font-size:13px;color:#5c5a52;margin:14px 0 6px">Untick any order you want to keep as it is.</p>` : ''}</div>
     <div class="uerr" id="uErr"></div>
     <div class="ufoot"><span class="hint">${back.length ? 'The other ' + UPL.list.filter(x => x.kind === 'up').length + ' orders update either way' : ''}</span>
       ${back.length ? '<button class="btn" id="uKeep">Keep them as they are</button>' : '<button class="btn" id="uBack">Back</button>'}<button class="btn ${back.length ? 'amb' : 'g'}" id="uOk">${back.length ? 'Approve and update' : 'Update'}</button></div></div>`);
-  $('uPin2').focus();
   const go = keepAll => {
-    const p2 = $('uPin2').value.trim();
-    if(!p2){ $('uErr').textContent = 'Type the PIN.'; return; }
     const okBack = keepAll ? [] : back.filter((x, i) => document.querySelector(`.bk[data-i="${i}"]`).checked);
-    uplSend(p2, okBack);
+    uplSend('', okBack);
   };
   $('uOk').onclick = () => go(false);
   if($('uKeep')) $('uKeep').onclick = () => go(true);
@@ -1031,17 +1025,18 @@ $('upBtn').onclick = uplOpen;
 /* ---------- load ---------- */
 const CACHE_KEY = 'boxup.sales.v1';
 let loading = false;
+let LAST_SIG = '';
 async function load(){
   if(loading) return; loading = true;
   if(!ORDERS.length) $('upd').textContent = 'Loading…';
-  else $('upd').textContent = $('upd').textContent.replace(/ · refreshing…$/, '') + ' · refreshing…';
   try{
     const res = await fetch(LOG_URL + '?action=sales&t=' + Date.now());
     let d = null; try{ d = await res.json(); }catch(e){}
     if(!d || d.ok === undefined) throw new Error('The Google Sheet script does not have the Sales feed yet. Add the "Sales feed" file to the script and deploy a new version.');
     if(!d.ok) throw new Error(d.error || 'Sheet error');
     try{ localStorage.setItem(CACHE_KEY, JSON.stringify({at: Date.now(), headers: d.headers, rows: d.rows})); }catch(e){}
-    showData(d);
+    const sig = JSON.stringify([d.headers, d.rows]);
+    if(sig !== LAST_SIG){ LAST_SIG = sig; showData(d); }
     $('err').hidden = true;
     $('dot').style.background = '#2E7D32';
     $('upd').textContent = 'Live · updated ' + new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
@@ -1199,6 +1194,22 @@ document.addEventListener('keydown', e => { if(e.key === 'Escape' && !$('waOv').
 
 $('q').addEventListener('input', applyFilters);
 ['from','to','fCompany','fCourier'].forEach(id => $(id).addEventListener('change', applyFilters));
+// dates apply while typing, on Enter and with Go (the change event alone waits until the box loses focus)
+['from','to'].forEach(id => { $(id).addEventListener('input', () => { $('qDate').value = ''; applyFilters(); }); $(id).addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); applyFilters(); } }); });
+$('q').addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); applyFilters(); } });
+$('goBtn').onclick = applyFilters;
+$('qDate').onchange = () => {
+  const v = $('qDate').value, iso = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  const t = new Date(); let f = null, to = t;
+  if(v === 'today') f = t;
+  else if(v === 'yday'){ f = new Date(Date.now() - 86400000); to = f; }
+  else if(v === '7') f = new Date(Date.now() - 6 * 86400000);
+  else if(v === '30') f = new Date(Date.now() - 29 * 86400000);
+  else if(v === 'month') f = new Date(t.getFullYear(), t.getMonth(), 1);
+  if(v === 'all'){ $('from').value = ''; $('to').value = ''; }
+  else if(f){ $('from').value = iso(f); $('to').value = iso(to); }
+  applyFilters();
+};
 $('chips').addEventListener('click', e => {
   const b = e.target.closest('.chip'); if(!b) return;
   FILTER = b.dataset.f; document.querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x === b)); applyFilters();
@@ -1225,7 +1236,7 @@ $('reload').addEventListener('click', load);
 // a search sent from the BoxUp Logistics Hub (Chrome version): ?q=...
 try { const q0 = new URLSearchParams(location.search).get('q'); if(q0) $('q').value = q0; } catch(e){}
 load();
-setInterval(() => { if(!document.hidden) load(); }, 60000);   // refresh every minute
+setInterval(() => { if(!document.hidden && !document.querySelector('#uov:not([hidden]) .udlg')) load(); }, 10000);   // refresh every 10 seconds
 </script>
 </body>
 </html>
