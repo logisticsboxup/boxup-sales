@@ -403,7 +403,7 @@ function buildOrders(headers, rows){
   const col = (...names) => { for(const n of names){ const i = H.indexOf(n.toLowerCase()); if(i >= 0) return i; } return -1; };
   const find = re => H.findIndex(h => re.test(h));
   const ix = {
-    at: col('Logged at'), src: col('Source'), id: col('Order ID'), hub: col('City Code'), name: col('Name'), co: col('Company'), sender: col('Sender Company', 'Sender'),
+    at: col('Logged at'), src: col('Source'), id: col('Order ID'), hub: col('City Code'), name: col('Name'), co: col('Company'), sender: col('Sender Company', 'Sender'), ostatus: col('Order Status'),
     phone: col('Phone'), alt: col('Alt Details'), addr: col('Address'), city: col('City'), state: col('State'), pin: col('Pincode'),
     type: col('Shipment Type'), mode: col('Mode of Shipping'), courier: col('Courier'), trk: col('Tracking ID'), link: col('Tracking Link'),
     boxes: col('Total Boxes'), batch: col('Batch ID'), status: col('Dispatch Status'), cat: find(/^(category|order category|b2b ?\/ ?b2c)$/),
@@ -415,6 +415,7 @@ function buildOrders(headers, rows){
   return rows.map((r, n) => {
     const id = g(r, ix.id);
     if(!id && !g(r, ix.name)) return null;
+    if(/^cancel/i.test(g(r, ix.ostatus))) return null;   // cancelled in Manage Orders: not shown
     const statusTxt = g(r, ix.status), delivTxt = g(r, ix.deliv);
     const dispAt = parseDate(ix.dat >= 0 ? g(r, ix.dat) : (g(r, ix.dd) + (g(r, ix.dt) ? ' ' + g(r, ix.dt) : '')));
     const courier = g(r, ix.courier);
