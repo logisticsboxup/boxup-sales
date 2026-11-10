@@ -6,8 +6,8 @@
 <title>BoxUp Order Tracker</title>
 <link rel="icon" href="favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+
 <style>
   :root{--forest:#16311F;--cream:#F3EFE4;--ink:#161512;--muted:#7A776C;--line:#e4ded0;--danger:#9E2B25;}
   *{box-sizing:border-box;}
@@ -294,7 +294,7 @@
     </div>
     <div class="det" id="det"><div class="empty">Click an order to see its details and timeline.</div></div>
   </div>
-  <div class="note">Live from the BoxUp Label Log Google Sheet. Use &#9998; Update on an order to change its status. Refreshes every 10 seconds.</div>
+  <div class="note">Live from the BoxUp Label Log Google Sheet. Use &#9998; Update on an order to change its status. Checks for new data every 20 seconds.</div>
 </div>
 
 <div class="wa-ov" id="waOv" hidden>
@@ -563,7 +563,15 @@ function ordersWorkbook(list){
   const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Orders');
   return wb;
 }
-function downloadExcel(){
+/* the Excel tool (900 KB) loads after the page is on screen, not before */
+let XLSX_P = null;
+function needXLSX(){
+  if(window.XLSX) return Promise.resolve(true);
+  if(!XLSX_P) XLSX_P = new Promise(res => { const sc = document.createElement('script'); sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'; sc.onload = () => res(true); sc.onerror = () => { XLSX_P = null; res(false); }; document.head.appendChild(sc); });
+  return XLSX_P;
+}
+async function downloadExcel(){
+  await needXLSX();
   if(typeof XLSX === 'undefined'){ alert('Excel tool did not load. Check the internet and try again.'); return; }
   XLSX.writeFile(ordersWorkbook(VIEW), `BoxUp Orders ${new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}).replace(/\s+/g,'-')} (${VIEW.length}).xlsx`);
 }
@@ -648,6 +656,7 @@ function shRefresh(){
 }
 function shClose(){ if(SH && SH.busy) return; $('shOv').hidden = true; SH = null; }
 async function shSend(){
+  await needXLSX();
   if(shMode() === 'file') return shSendFile();
   const num = shNumber(); if(num === null || !SH) return;
   // open the WhatsApp tab now (browsers block pop-ups opened after waiting), then point it at the chat
@@ -903,6 +912,7 @@ function uplOpen(){
   f.onchange = () => { if(f.files[0]) uplRead(f.files[0]); };
 }
 async function uplRead(file){
+  await needXLSX();
   if(typeof XLSX === 'undefined'){ $('uErr').textContent = 'Excel tool did not load. Check the internet and try again.'; return; }
   try {
     const wb = XLSX.read(await file.arrayBuffer(), {type:'array', cellDates:true});
@@ -1027,14 +1037,22 @@ $('upBtn').onclick = uplOpen;
 const CACHE_KEY = 'boxup.sales.v1';
 let loading = false;
 let LAST_SIG = '';
+let LAST_BUILT = '';
 async function load(){
   if(loading) return; loading = true;
   if(!ORDERS.length) $('upd').textContent = 'Loading…';
   try{
-    const res = await fetch(LOG_URL + '?action=sales&t=' + Date.now());
+    const ac = new AbortController(), tm = setTimeout(() => ac.abort(), 45000);
+    let res; try{ res = await fetch(LOG_URL + '?action=sales' + (LAST_BUILT && ORDERS.length ? '&since=' + encodeURIComponent(LAST_BUILT) : '') + '&t=' + Date.now(), {signal: ac.signal}); } finally { clearTimeout(tm); }
     let d = null; try{ d = await res.json(); }catch(e){}
+    if(d && d.ok && d.same){
+      $('err').hidden = true; $('dot').style.background = '#2E7D32';
+      $('upd').textContent = 'Live · checked ' + new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+      return;
+    }
     if(!d || d.ok === undefined) throw new Error('The Google Sheet script does not have the Sales feed yet. Add the "Sales feed" file to the script and deploy a new version.');
     if(!d.ok) throw new Error(d.error || 'Sheet error');
+    LAST_BUILT = d.built || '';
     try{ localStorage.setItem(CACHE_KEY, JSON.stringify({at: Date.now(), headers: d.headers, rows: d.rows})); }catch(e){}
     const sig = JSON.stringify([d.headers, d.rows]);
     if(sig !== LAST_SIG){ LAST_SIG = sig; showData(d); }
@@ -1045,7 +1063,7 @@ async function load(){
     $('dot').style.background = '#E0A43A';
     $('upd').textContent = ORDERS.length ? 'Showing saved data · could not refresh' : 'Not updated';
     $('err').hidden = false;
-    $('err').textContent = e.message === 'Failed to fetch' ? 'Could not reach the Google Sheet. Check the internet.' : e.message;
+    $('err').textContent = e.name === 'AbortError' ? 'The Google Sheet is slow right now. Showing saved data; it will try again.' : e.message === 'Failed to fetch' ? 'Could not reach the Google Sheet. Check the internet.' : e.message;
     if(!ORDERS.length) $('rows').innerHTML = '<tr><td colspan="8" class="empty">No data yet.</td></tr>';
   }finally{ loading = false; }
 }
@@ -1237,7 +1255,9 @@ $('reload').addEventListener('click', load);
 // a search sent from the BoxUp Logistics Hub (Chrome version): ?q=...
 try { const q0 = new URLSearchParams(location.search).get('q'); if(q0) $('q').value = q0; } catch(e){}
 load();
-setInterval(() => { if(!document.hidden && !document.querySelector('#uov:not([hidden]) .udlg')) load(); }, 10000);   // refresh every 10 seconds
+setInterval(() => { if(!document.hidden && !document.querySelector('#uov:not([hidden]) .udlg')) load(); }, 20000);   // check every 20 seconds (only new data is downloaded)
+document.addEventListener('visibilitychange', () => { if(!document.hidden) load(); });   // coming back to the tab: check right away
+window.addEventListener('load', () => setTimeout(needXLSX, 4000));
 </script>
 </body>
 </html>
