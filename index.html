@@ -243,6 +243,70 @@
   @media (max-width:600px){ .sh-g{grid-template-columns:1fr;} }
   @media (max-width: 820px){ .wa-b{grid-template-columns:1fr;} .wa-f{border-right:0;border-bottom:1px solid #eee;} .wa-who{grid-template-columns:1fr;} }
   @media (max-width: 1100px){ .main{flex-direction:column;} .det{width:100%;flex:auto;position:static;} .tiles{grid-template-columns:repeat(2,1fr);} }
+
+  /* ---------- View: Company / Individual, Grid / List ---------- */
+  .vw{display:flex;gap:8px;align-items:center;margin-left:auto}
+  .vw .vl{font:700 11px 'Inter';color:var(--muted);letter-spacing:.6px;text-transform:uppercase}
+  .seg{display:inline-flex;border:1.5px solid #d9d2c0;border-radius:10px;overflow:hidden;background:#fff;height:40px}
+  .seg button{border:0;background:#fff;padding:0 13px;font:600 13px 'Inter';color:#555;display:flex;align-items:center;gap:6px;cursor:pointer;border-right:1px solid #e4ded0}
+  .seg button:last-child{border-right:0}
+  .seg button.on{background:var(--forest);color:#fff}
+  #alt{overflow:auto;max-height:68vh;padding:14px}
+  .cg,.og{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+  .cc{border:1px solid #e4ded0;border-radius:12px;padding:14px;background:#fffdf8;display:flex;flex-direction:column}
+  .cc .t{display:flex;align-items:center;gap:10px;cursor:pointer}
+  .av{width:40px;height:40px;flex:0 0 40px;border-radius:10px;background:var(--forest);color:#F3EFE4;display:grid;place-items:center;font:800 14px 'Inter'}
+  .cc h4{margin:0;font:700 15px 'Inter';color:var(--ink);word-break:break-word}.cc .t small{color:var(--muted);font-size:12px}
+  .cc .big{font:800 26px 'Playfair Display',Georgia,serif;margin:10px 0 2px;color:var(--forest)}
+  .cc .big small{font:600 13px 'Inter';color:var(--muted)}
+  .sbar{display:flex;height:8px;border-radius:5px;overflow:hidden;background:#eee;margin:8px 0}
+  .sbar i{display:block}
+  .lgd{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:#555;font-weight:600}
+  .lgd span:before{content:"";display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px;background:var(--c)}
+  .cc .ft{display:flex;justify-content:space-between;gap:8px;margin-top:auto;padding-top:10px;font-size:12px;color:var(--muted);border-top:1px dashed #e4ded0}
+  .cc .ft{margin-top:10px}
+  .lnkb{border:0;background:none;color:var(--forest);font:700 12.5px 'Inter';cursor:pointer;padding:0;white-space:nowrap}
+  .sndb{margin-top:10px;width:100%;border:0;border-radius:9px;background:#25D366;color:#fff;font:700 13px 'Inter';padding:9px;cursor:pointer}
+  .sndb.sm{width:auto;margin:0;padding:6px 10px;font-size:12px}
+  .oc{border:1px solid #e4ded0;border-radius:12px;padding:12px 13px;background:#fff;cursor:pointer}
+  .oc:hover{background:#FAF7EF}.oc.sel{background:#EEF4EF;border-color:#9cc3a6}
+  .oc .r1{display:flex;justify-content:space-between;align-items:center;gap:6px}
+  .oc .id{font:700 13.5px 'Inter'}.oc .nm{font-size:14px;font-weight:600;margin:7px 0 2px}
+  .oc .co{font-size:12px;color:var(--muted)}
+  .oc .r3{display:flex;justify-content:space-between;gap:6px;margin-top:9px;font-size:12px;color:#555;border-top:1px dashed #e4ded0;padding-top:8px}
+  .ctb{width:100%;border-collapse:collapse;font-size:13px}
+  .ctb th{background:var(--forest);color:#fff;text-align:left;padding:9px 10px;font-size:11px;position:sticky;top:0;z-index:1;white-space:nowrap}
+  .ctb td{padding:9px 10px;border-bottom:1px solid #eee;vertical-align:middle}
+  .ctb .cn{display:flex;align-items:center;gap:9px;font-weight:700;cursor:pointer}
+  .ctb .av{width:30px;height:30px;flex-basis:30px;font-size:11px;border-radius:8px}
+  .ctb .mini{display:flex;height:7px;width:140px;border-radius:4px;overflow:hidden;background:#eee}
+  .ctb .mini i{display:block}
+  .ctb tr.sub td{background:#fbf9f3;font-size:12.5px;color:#444;cursor:pointer}
+  .ctb tr.sub td:first-child{padding-left:52px}
+  .ctb .car{color:#999;width:12px;display:inline-block}
+  .alt-empty{padding:40px;text-align:center;color:var(--muted)}
+  .main.wide .det{display:none}
+  /* send tracking link pop-up */
+  .ctov{position:fixed;inset:0;background:rgba(10,20,14,.55);display:grid;place-items:center;z-index:200;padding:16px}
+  .ctov[hidden]{display:none}
+  .ctbx{width:640px;max-width:100%;max-height:calc(100vh - 32px);display:flex;flex-direction:column;background:#fff;border-radius:16px;box-shadow:0 30px 80px rgba(0,0,0,.4);overflow:hidden;font-family:'Inter',Arial,sans-serif}
+  .ctbx .ph{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid #eee}
+  .ctbx .ph h3{margin:0;font:700 18px 'Inter'}.ctbx .ph small{color:var(--muted)}
+  .ctbx .ph .x{margin-left:auto;border:1px solid #ddd;background:#fff;border-radius:8px;width:30px;height:30px;cursor:pointer}
+  .ctbx .pb{padding:16px 20px;display:grid;gap:12px;overflow:auto}
+  .ctbx .k2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .ctbx .bx{background:var(--cream);border-radius:10px;padding:9px 12px;min-width:0}
+  .ctbx small.h{display:block;font:700 10.5px 'Inter';letter-spacing:.6px;color:var(--muted);text-transform:uppercase}
+  .ctbx .code{font:800 18px 'Inter';letter-spacing:2px;color:var(--forest)}
+  .ctbx .bx a{font-size:13px;word-break:break-all}
+  .ctbx input,.ctbx textarea{width:100%;box-sizing:border-box;border:1px solid #d8d2c0;border-radius:8px;padding:9px 10px;font:14px 'Inter';margin-top:4px;color:var(--ink)}
+  .ctbx textarea{background:#e7f8ec;border-color:#bfe7cb;min-height:230px;line-height:1.5;resize:vertical}
+  .ctbx .pf{display:flex;gap:8px;padding:14px 20px;border-top:1px solid #eee;background:#faf9f5;flex-wrap:wrap}
+  .ctbx .pf button{flex:1;border-radius:9px;padding:10px;font:700 13.5px 'Inter';border:1px solid #d8d2c0;background:#fff;cursor:pointer;min-width:150px}
+  .ctbx .pf .wa{background:#25D366;border-color:#25D366;color:#fff}.ctbx .pf .em{background:var(--forest);border-color:var(--forest);color:#fff}
+  .ctbx .pf button:disabled{opacity:.5;cursor:default}
+  .ctbx .msg{font-size:12.5px;color:var(--muted)}.ctbx .msg.bad{color:var(--danger);font-weight:600}
+  @media (max-width:700px){ .vw{margin-left:0} .ctbx .k2{grid-template-columns:1fr} }
 </style>
 </head>
 <body>
@@ -262,6 +326,10 @@
     <button type="button" id="goBtn" class="gob">Go</button>
     <select id="fCompany" title="Sender Company (your client)"><option value="">Sender Company: All</option></select>
     <select id="fCourier"><option value="">Courier: All</option></select>
+    <div class="vw" id="vw"><span class="vl">View</span>
+      <div class="seg" id="vBy"><button type="button" data-v="co">&#127970; Company</button><button type="button" data-v="in">&#128100; Individual</button></div>
+      <div class="seg" id="vLay"><button type="button" data-v="grid">&#9638; Grid</button><button type="button" data-v="list">&#9776; List</button></div>
+    </div>
   </div>
 
   <div class="chips" id="chips">
@@ -284,10 +352,11 @@
     <div class="tile"><b>Boxes</b><span id="tBoxes">0</span></div>
   </div>
 
-  <div class="main">
+  <div class="main" id="mainBox">
     <div class="card">
-      <div class="ch"><div><b>Orders</b> <span id="cnt"></span></div><div class="ch-btns"><button type="button" class="upb" id="upBtn">&#11014; Upload status sheet</button><button type="button" class="dl" id="dlBtn">&#11015; Download Excel</button><button type="button" class="shf" id="shBtn">&#128228; Share file</button></div></div>
-      <div class="tbl"><table>
+      <div class="ch"><div><b id="cardT">Orders</b> <span id="cnt"></span></div><div class="ch-btns"><button type="button" class="upb" id="upBtn">&#11014; Upload status sheet</button><button type="button" class="dl" id="dlBtn">&#11015; Download Excel</button><button type="button" class="shf" id="shBtn">&#128228; Share file</button></div></div>
+      <div id="alt" hidden></div>
+      <div class="tbl" id="tblWrap"><table>
         <thead><tr><th>Order ID</th><th>Sender Company / Recipient</th><th class="c">Code</th><th>Courier</th><th>AWB / Tracking</th><th>Label printed</th><th>Dispatched</th><th>Status</th></tr></thead>
         <tbody id="rows"><tr><td colspan="8" class="empty">Loading orders from the Label Log…</td></tr></tbody>
       </table></div>
@@ -296,6 +365,17 @@
   </div>
   <div class="note">Live from the BoxUp Label Log Google Sheet. Use &#9998; Update on an order to change its status. Checks for new data every 20 seconds.</div>
 </div>
+
+<div class="ctov" id="ctOv" hidden><div class="ctbx" role="dialog" aria-label="Send tracking link">
+  <div class="ph"><div class="av" id="ctAv">B</div><div><h3 id="ctTitle">Send tracking link</h3><small>The company's own page and access code. It sees only its own orders.</small></div><button type="button" class="x" id="ctX">&#10005;</button></div>
+  <div class="pb">
+    <div class="k2"><div class="bx"><small class="h">Access code</small><div class="code" id="ctCode">Loading…</div></div><div class="bx"><small class="h">Tracking link</small><a id="ctLink" target="_blank" rel="noopener"></a></div></div>
+    <div class="k2"><label><small class="h">WhatsApp number</small><input id="ctNum" inputmode="tel" placeholder="10-digit mobile number"></label><label><small class="h">Email</small><input id="ctMail" type="email" placeholder="client@company.com"></label></div>
+    <label><small class="h">Message (you can edit it)</small><textarea id="ctTxt"></textarea></label>
+    <div class="msg" id="ctMsg"></div>
+  </div>
+  <div class="pf"><button type="button" class="wa" id="ctWa">&#128172; Send on WhatsApp</button><button type="button" class="em" id="ctEm">&#9993;&#65039; Send by email</button><button type="button" id="ctCp">&#10697; Copy message</button></div>
+</div></div>
 
 <div class="wa-ov" id="waOv" hidden>
   <div class="wa-m" role="dialog" aria-modal="true" aria-labelledby="waTitle">
@@ -473,7 +553,7 @@ function applyFilters(){
   VIEW = ORDERS.filter(o => {
     if(from && (!o.at || o.at < from)) return false;
     if(to && (!o.at || o.at > to)) return false;
-    if(co && o.client !== co) return false;   // Sender Company is the client reference (falls back to Company)
+    if(co && coKey(o.client) !== coKey(co)) return false;   // Sender Company is the client reference (falls back to Company); spellings like ProFx / Profx count as one
     if(cr && o.courier !== cr) return false;
     if(FILTER === 'ready' && !(o.st === 'ready' || o.st === 'held')) return false;
     if(FILTER === 'transit' && !(o.st === 'transit' || o.st === 'partly')) return false;
@@ -512,7 +592,147 @@ function render(){
     : '<tr><td colspan="8" class="empty">No orders match.</td></tr>';
   if(VIEW.length > 500) $('rows').insertAdjacentHTML('beforeend', `<tr><td colspan="8" class="empty">Showing the newest 500. Narrow the search or dates to see more.</td></tr>`);
   showDetail(SEL && VIEW.includes(SEL) ? SEL : null);
+  renderView();
 }
+
+/* ---------- View: Company / Individual, Grid / List (remembered on this computer) ---------- */
+const VKEY = 'boxup.sales.view';
+let VM = (() => { try { const v = JSON.parse(localStorage.getItem(VKEY) || 'null'); if(v && /^(co|in)$/.test(v.by) && /^(grid|list)$/.test(v.lay)) return v; } catch(e){} return {by:'in', lay:'list'}; })();
+let OPENCO = '';
+const coKey = s => { const n = String(s || '').toLowerCase().replace(/&/g, 'and').replace(/\b(pvt|private|ltd|limited|llp|inc|llc|co|company|india|the)\b\.?/g, '').replace(/[^a-z0-9]/g, ''); return n || String(s || '').trim().toLowerCase(); };
+const ini = s => (String(s).replace(/[^A-Za-z0-9 ]/g, ' ').trim().split(/\s+/).map(w => w[0]).join('').slice(0, 2) || '?').toUpperCase();
+const bucket = o => o.st === 'delivered' ? 'del' : o.problem === 'RTO' || o.st === 'returned' ? 'rto' : o.step === 'Out for Delivery' ? 'ofd' : (o.st === 'transit' || o.st === 'partly') ? 'tr' : 'pen';
+const BK = { del:['delivered', '#2E7D32'], tr:['in transit', '#1a56b8'], ofd:['out for delivery', '#0b6aa8'], pen:['ready / pending', '#b08a3a'], rto:['RTO', '#9E2B25'] };
+function groupsOf(list){
+  const m = new Map();
+  list.forEach(o => {
+    const name = o.client || '', k = name ? coKey(name) : '~b2c';
+    let g = m.get(k); if(!g){ g = {k, names:{}, list:[]}; m.set(k, g); }
+    g.list.push(o); if(name) g.names[name] = (g.names[name] || 0) + 1;
+  });
+  return [...m.values()].map(g => {
+    const nm = Object.keys(g.names).sort((a, b) => g.names[b] - g.names[a])[0] || '';
+    const c = {del:0, tr:0, ofd:0, pen:0, rto:0}; g.list.forEach(o => c[bucket(o)]++);
+    const last = g.list.reduce((a, o) => o.at && (!a || o.at > a) ? o.at : a, null);
+    return Object.assign(g, {name: nm || 'B2C / no company', b2c: !nm, c, last, couriers: [...new Set(g.list.map(o => o.courier).filter(Boolean))]});
+  }).sort((a, b) => (a.b2c - b.b2c) || b.list.length - a.list.length);
+}
+function sbar(g, cls){ return `<div class="${cls}">${Object.keys(BK).map(k => g.c[k] ? `<i style="width:${g.c[k] / g.list.length * 100}%;background:${BK[k][1]}" title="${g.c[k]} ${BK[k][0]}"></i>` : '').join('')}</div>`; }
+function renderView(){
+  document.querySelectorAll('#vBy button').forEach(b => b.classList.toggle('on', b.dataset.v === VM.by));
+  document.querySelectorAll('#vLay button').forEach(b => b.classList.toggle('on', b.dataset.v === VM.lay));
+  const table = VM.by === 'in' && VM.lay === 'list';
+  $('tblWrap').hidden = !table; $('alt').hidden = table;
+  $('mainBox').classList.toggle('wide', VM.by === 'co');
+  if(table){ $('cardT').textContent = 'Orders'; return; }
+  const box = $('alt');
+  if(VM.by === 'in'){
+    $('cardT').textContent = 'Orders';
+    const shown = VIEW.slice(0, 300);
+    box.innerHTML = shown.length ? `<div class="og">${shown.map(o => `<div class="oc${SEL === o ? ' sel' : ''}" data-n="${o.n}">
+        <div class="r1"><span class="id">${esc(o.id)}</span>${stChip(o)}</div>
+        <div class="nm">${esc(o.name || '-')}</div><div class="co">${esc([o.client, o.city].filter(Boolean).join(' · ') || o.cat)}</div>
+        <div class="r3"><span>&#128666; ${esc(o.courier || 'Not set')}${o.trk ? ' · ' + esc(o.trk.split(/[,\s]+/)[0]) : ''}</span><span>${esc(o.at ? o.at.toLocaleDateString('en-IN', {day:'2-digit', month:'short'}) : '')}</span></div></div>`).join('')}</div>`
+      + (VIEW.length > 300 ? `<div class="alt-empty">Showing the newest 300. Narrow the search or dates to see more.</div>` : '')
+      : '<div class="alt-empty">No orders match.</div>';
+    return;
+  }
+  const G = groupsOf(VIEW);
+  $('cardT').textContent = 'Companies';
+  $('cnt').textContent = `(${G.filter(g => !g.b2c).length} companies · ${VIEW.length} orders)`;
+  if(!G.length){ box.innerHTML = '<div class="alt-empty">No orders match.</div>'; return; }
+  const dt = d => d ? d.toLocaleDateString('en-IN', {day:'2-digit', month:'short', year:'numeric'}) : '';
+  const lgd = g => Object.keys(BK).filter(k => g.c[k]).map(k => `<span style="--c:${BK[k][1]}">${g.c[k]} ${BK[k][0]}</span>`).join('');
+  if(VM.lay === 'grid'){
+    box.innerHTML = `<div class="cg">${G.map(g => `<div class="cc" data-k="${esc(g.k)}">
+        <div class="t" data-a="orders"><div class="av">${g.b2c ? '&#128100;' : esc(ini(g.name))}</div><div><h4>${esc(g.name)}</h4><small>${g.b2c ? 'B2C and orders without a company' : 'Last order ' + esc(dt(g.last))}</small></div></div>
+        <div class="big">${g.list.length} <small>order${g.list.length > 1 ? 's' : ''}</small></div>
+        ${sbar(g, 'sbar')}<div class="lgd">${lgd(g)}</div>
+        <div class="ft"><span>${esc(g.couriers.join(', '))}</span><button type="button" class="lnkb" data-a="orders">View orders &rarr;</button></div>
+        ${g.b2c ? '' : '<button type="button" class="sndb" data-a="send">&#128232; Send tracking link &amp; code</button>'}</div>`).join('')}</div>`;
+    return;
+  }
+  box.innerHTML = `<table class="ctb"><thead><tr><th>Sender company</th><th>Orders</th><th>Delivered</th><th>In transit</th><th>Out for delivery</th><th>Ready / pending</th><th>RTO</th><th>Progress</th><th>Last order</th><th></th></tr></thead><tbody>${G.map(g => {
+    const open = OPENCO === g.k;
+    const head = `<tr data-k="${esc(g.k)}"><td><div class="cn" data-a="toggle"><span class="car">${open ? '&#9662;' : '&#9656;'}</span><div class="av">${g.b2c ? '&#128100;' : esc(ini(g.name))}</div>${esc(g.name)}</div></td>
+      <td><b>${g.list.length}</b></td><td>${g.c.del}</td><td>${g.c.tr}</td><td>${g.c.ofd}</td><td>${g.c.pen}</td><td>${g.c.rto}</td><td>${sbar(g, 'mini')}</td><td class="nw">${esc(dt(g.last))}</td>
+      <td class="nw"><button type="button" class="lnkb" data-a="orders">View &rarr;</button>${g.b2c ? '' : ' &nbsp;<button type="button" class="sndb sm" data-a="send">&#128232; Send link</button>'}</td></tr>`;
+    if(!open) return head;
+    const sub = g.list.slice(0, 8).map(o => `<tr class="sub" data-n="${o.n}"><td>${esc(o.id)}</td><td colspan="3">${esc([o.name, o.city].filter(Boolean).join(' · '))}</td><td colspan="2">${esc(o.courier || '')} ${esc(o.trk.split(/[,\s]+/)[0] || '')}</td><td colspan="2">${stChip(o)}</td><td class="nw">${esc(dt(o.at))}</td><td></td></tr>`).join('');
+    const more = g.list.length > 8 ? `<tr class="sub" data-k="${esc(g.k)}"><td colspan="10" style="color:var(--forest);font-weight:700" data-a="orders">+ ${g.list.length - 8} more ${esc(g.name)} orders · Show all</td></tr>` : '';
+    return head + sub + more;
+  }).join('')}</tbody></table>`;
+}
+function setView(by, lay){
+  VM = {by: by || VM.by, lay: lay || VM.lay};
+  try { localStorage.setItem(VKEY, JSON.stringify(VM)); } catch(e){}
+  render();
+}
+function openCompany(g){
+  const sel = $('fCompany'), want = coKey(g.name);
+  const opt = [...sel.options].find(x => x.value && coKey(x.value) === want);
+  if(opt) sel.value = opt.value;
+  VM.by = 'in'; try { localStorage.setItem(VKEY, JSON.stringify(VM)); } catch(e){}
+  applyFilters();
+  window.scrollTo({top: $('mainBox').offsetTop - 20, behavior: 'smooth'});
+}
+
+/* ---------- Send the company its tracking page link and access code (Company view only) ---------- */
+let CT = null;
+function ctText(co, link, code){
+  return [`Hello ${co} team,`, '',
+    'You can now track all your BoxUp gift orders live, from our warehouse to your recipients\' doorstep.', '',
+    `\u{1F517} Tracking page: ${link}`, `\u{1F511} Access code: ${code}`, '',
+    `Open the link, enter the code, and you will see only ${co} orders: live status, shipment progress, proof of delivery and a downloadable report.`, '',
+    'Thanks,', 'Team BoxUp Luxury Gifting'].join('\n');
+}
+async function ctOpen(g){
+  CT = {g, code:'', link:'', edited:false};
+  $('ctTitle').textContent = 'Send tracking link to ' + g.name; $('ctAv').textContent = ini(g.name);
+  $('ctCode').textContent = 'Loading…'; $('ctLink').textContent = ''; $('ctLink').removeAttribute('href');
+  $('ctNum').value = ''; $('ctMail').value = ''; $('ctTxt').value = ''; $('ctMsg').textContent = 'Getting the access code from the Client Codes tab…'; $('ctMsg').className = 'msg';
+  ['ctWa', 'ctEm', 'ctCp'].forEach(id => $(id).disabled = true);
+  $('ctOv').hidden = false;
+  shLoadContacts().then(() => {
+    if(!CT || CT.g !== g) return;
+    const c = shFind(g.name) || (SH_CONTACTS || []).find(x => coKey(x.company) === g.k);
+    if(c && c.phone && !$('ctNum').value){ const d = String(c.phone).replace(/\D/g, ''); $('ctNum').value = d.length > 10 ? d.slice(-10) : d; }
+    if(c && c.email && !$('ctMail').value) $('ctMail').value = c.email;
+  });
+  try {
+    const d = await fetch(LOG_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action:'ct', op:'code', name:g.name})}).then(r => r.json());
+    if(!CT || CT.g !== g) return;
+    if(!d.ok) throw new Error(d.error || 'No code found');
+    CT.code = d.code; CT.link = d.link;
+    $('ctCode').textContent = d.code.replace(/(.{3})(?=.)/g, '$1 ');
+    $('ctLink').textContent = d.link.replace(/^https?:\/\//, ''); $('ctLink').href = d.link;
+    $('ctTxt').value = ctText(g.name, d.link, d.code);
+    $('ctMsg').textContent = d.active === false ? 'This company is set to Active: No in the Client Codes tab, so the code will not work until you set it back to Yes.' : 'Check the number or email, then send.';
+    $('ctMsg').className = d.active === false ? 'msg bad' : 'msg';
+    ['ctWa', 'ctEm', 'ctCp'].forEach(id => $(id).disabled = false);
+  } catch(e){
+    if(!CT || CT.g !== g) return;
+    $('ctCode').textContent = '-'; $('ctMsg').textContent = 'Could not get the code: ' + (e.message === 'Failed to fetch' ? 'check the internet.' : e.message); $('ctMsg').className = 'msg bad';
+  }
+}
+function ctClose(){ $('ctOv').hidden = true; CT = null; }
+$('ctX').onclick = ctClose;
+$('ctOv').addEventListener('click', e => { if(e.target === $('ctOv')) ctClose(); });
+document.addEventListener('keydown', e => { if(e.key === 'Escape' && !$('ctOv').hidden) ctClose(); });
+$('ctWa').onclick = () => {
+  let d = $('ctNum').value.replace(/\D/g, '');
+  if(d.length === 10) d = '91' + d;
+  if(d && d.length < 11){ $('ctMsg').textContent = 'Check the WhatsApp number (10 digits for India).'; $('ctMsg').className = 'msg bad'; return; }
+  window.open((d ? 'https://wa.me/' + d : 'https://api.whatsapp.com/send') + '?text=' + encodeURIComponent($('ctTxt').value), '_blank', 'noopener');
+};
+$('ctEm').onclick = () => {
+  const to = $('ctMail').value.trim();
+  location.href = 'mailto:' + encodeURIComponent(to).replace(/%40/g, '@') + '?subject=' + encodeURIComponent('Track your BoxUp orders - ' + (CT ? CT.g.name : '')) + '&body=' + encodeURIComponent($('ctTxt').value);
+};
+$('ctCp').onclick = () => {
+  const t = $('ctTxt').value, b = $('ctCp');
+  (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => { b.innerHTML = '&#10003; Copied'; setTimeout(() => { b.innerHTML = '&#10697; Copy message'; }, 1500); }, () => { prompt('Copy this:', t); });
+};
 
 function showDetail(o){
   SEL = o;
@@ -1232,6 +1452,21 @@ $('qDate').onchange = () => {
 $('chips').addEventListener('click', e => {
   const b = e.target.closest('.chip'); if(!b) return;
   FILTER = b.dataset.f; document.querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x === b)); applyFilters();
+});
+$('vBy').addEventListener('click', e => { const b = e.target.closest('button'); if(b) setView(b.dataset.v, null); });
+$('vLay').addEventListener('click', e => { const b = e.target.closest('button'); if(b) setView(null, b.dataset.v); });
+$('alt').addEventListener('click', e => {
+  if(e.target.closest('a')) return;
+  const oc = e.target.closest('[data-n]');
+  const act = e.target.closest('[data-a]'), holder = e.target.closest('[data-k]');
+  if(act && holder){
+    const g = groupsOf(VIEW).find(x => x.k === holder.dataset.k); if(!g) return;
+    const a = act.dataset.a;
+    if(a === 'send') return ctOpen(g);
+    if(a === 'orders') return openCompany(g);
+    if(a === 'toggle'){ OPENCO = OPENCO === g.k ? '' : g.k; renderView(); return; }
+  }
+  if(oc){ const o = ORDERS.find(x => x.n === +oc.dataset.n); if(!o) return; if(VM.by === 'co'){ VM.by = 'in'; VM.lay = 'list'; render(); } showDetail(o); renderView(); }
 });
 $('rows').addEventListener('click', e => {
   if(e.target.closest('a')) return;
