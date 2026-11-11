@@ -289,6 +289,9 @@
   .ctb .car{color:#999;width:12px;display:inline-block}
   .alt-empty{padding:40px;text-align:center;color:var(--muted)}
   .main.wide .det{display:none}
+  .chl{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .bkb{border:1.5px solid var(--forest);background:#fff;color:var(--forest);border-radius:9px;padding:7px 12px;font:700 13px 'Inter';cursor:pointer}
+  .bkb:hover{background:var(--forest);color:#fff}
   /* send tracking link pop-up */
   .ctov{position:fixed;inset:0;background:rgba(10,20,14,.55);display:grid;place-items:center;z-index:200;padding:16px}
   .ctov[hidden]{display:none}
@@ -357,7 +360,7 @@
 
   <div class="main" id="mainBox">
     <div class="card">
-      <div class="ch"><div><b id="cardT">Orders</b> <span id="cnt"></span></div><div class="ch-btns"><button type="button" class="upb" id="upBtn">&#11014; Upload status sheet</button><button type="button" class="dl" id="dlBtn">&#11015; Download Excel</button><button type="button" class="shf" id="shBtn">&#128228; Share file</button></div></div>
+      <div class="ch"><div class="chl"><button type="button" class="bkb" id="bkBtn" hidden>&#8592; Back to companies</button><b id="cardT">Orders</b> <span id="cnt"></span></div><div class="ch-btns"><button type="button" class="upb" id="upBtn">&#11014; Upload status sheet</button><button type="button" class="dl" id="dlBtn">&#11015; Download Excel</button><button type="button" class="shf" id="shBtn">&#128228; Share file</button></div></div>
       <div id="alt" hidden></div>
       <div class="tbl" id="tblWrap"><table>
         <thead><tr><th>Order ID</th><th>Sender Company / Recipient</th><th class="c">Code</th><th>Courier</th><th>AWB / Tracking</th><th>Label printed</th><th>Dispatched</th><th>Status</th></tr></thead>
@@ -601,7 +604,7 @@ function render(){
 /* ---------- View: Company / Individual, Grid / List (remembered on this computer) ---------- */
 const VKEY = 'boxup.sales.view';
 let VM = (() => { try { const v = JSON.parse(localStorage.getItem(VKEY) || 'null'); if(v && /^(co|in)$/.test(v.by) && /^(grid|list)$/.test(v.lay)) return v; } catch(e){} return {by:'in', lay:'list'}; })();
-let OPENCO = '';
+let OPENCO = '', FROMCO = null;   // FROMCO: the company view to go back to after "View orders"
 const coKey = s => { const n = String(s || '').toLowerCase().replace(/&/g, 'and').replace(/\b(pvt|private|ltd|limited|llp|inc|llc|co|company|india|the)\b\.?/g, '').replace(/[^a-z0-9]/g, ''); return n || String(s || '').trim().toLowerCase(); };
 const ini = s => (String(s).replace(/[^A-Za-z0-9 ]/g, ' ').trim().split(/\s+/).map(w => w[0]).join('').slice(0, 2) || '?').toUpperCase();
 const bucket = o => o.st === 'delivered' ? 'del' : o.problem === 'RTO' || o.st === 'returned' ? 'rto' : o.step === 'Out for Delivery' ? 'ofd' : (o.st === 'transit' || o.st === 'partly') ? 'tr' : 'pen';
@@ -624,13 +627,16 @@ function sbar(g, cls){ return `<div class="${cls}">${Object.keys(BK).map(k => g.
 function renderView(){
   document.querySelectorAll('#vBy button').forEach(b => b.classList.toggle('on', b.dataset.v === VM.by));
   document.querySelectorAll('#vLay button').forEach(b => b.classList.toggle('on', b.dataset.v === VM.lay));
+  if(FROMCO && (VM.by === 'co' || coKey($('fCompany').value) !== FROMCO.k)) FROMCO = null;
+  $('bkBtn').hidden = !FROMCO;
+  if(FROMCO){ $('cardT').textContent = FROMCO.name; $('cnt').textContent = `(${VIEW.length} order${VIEW.length === 1 ? '' : 's'})`; }
   const table = VM.by === 'in' && VM.lay === 'list';
   $('tblWrap').hidden = !table; $('alt').hidden = table;
   $('mainBox').classList.toggle('wide', VM.by === 'co');
-  if(table){ $('cardT').textContent = 'Orders'; return; }
+  if(table){ if(!FROMCO) $('cardT').textContent = 'Orders'; return; }
   const box = $('alt');
   if(VM.by === 'in'){
-    $('cardT').textContent = 'Orders';
+    if(!FROMCO) $('cardT').textContent = 'Orders';
     const shown = VIEW.slice(0, 300);
     box.innerHTML = shown.length ? `<div class="og">${shown.map(o => `<div class="oc${SEL === o ? ' sel' : ''}" data-n="${o.n}">
         <div class="r1"><span class="id">${esc(o.id)}</span>${stChip(o)}</div>
@@ -666,6 +672,13 @@ function renderView(){
     return head + sub + more;
   }).join('')}</tbody></table>`;
 }
+function backToCompanies(){
+  const f = FROMCO; if(!f) return;
+  FROMCO = null; $('fCompany').value = f.prevCo; VM = {by: f.by, lay: f.lay};
+  try { localStorage.setItem(VKEY, JSON.stringify(VM)); } catch(e){}
+  applyFilters();
+  requestAnimationFrame(() => window.scrollTo({top: f.y}));
+}
 function setView(by, lay){
   VM = {by: by || VM.by, lay: lay || VM.lay};
   try { localStorage.setItem(VKEY, JSON.stringify(VM)); } catch(e){}
@@ -675,6 +688,7 @@ function openCompany(g){
   const sel = $('fCompany'), want = coKey(g.name);
   const opt = [...sel.options].find(x => x.value && coKey(x.value) === want);
   if(opt) sel.value = opt.value;
+  FROMCO = {k: want, name: g.name, by: VM.by, lay: VM.lay, y: window.scrollY, prevCo: ''};
   VM.by = 'in'; try { localStorage.setItem(VKEY, JSON.stringify(VM)); } catch(e){}
   applyFilters();
   window.scrollTo({top: $('mainBox').offsetTop - 20, behavior: 'smooth'});
@@ -1456,6 +1470,7 @@ $('chips').addEventListener('click', e => {
   const b = e.target.closest('.chip'); if(!b) return;
   FILTER = b.dataset.f; document.querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x === b)); applyFilters();
 });
+$('bkBtn').addEventListener('click', backToCompanies);
 $('vBy').addEventListener('click', e => { const b = e.target.closest('button'); if(b) setView(b.dataset.v, null); });
 $('vLay').addEventListener('click', e => { const b = e.target.closest('button'); if(b) setView(null, b.dataset.v); });
 $('alt').addEventListener('click', e => {
