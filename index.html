@@ -292,6 +292,12 @@
   .chl{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
   .bkb{border:1.5px solid var(--forest);background:#fff;color:var(--forest);border-radius:9px;padding:7px 12px;font:700 13px 'Inter';cursor:pointer}
   .bkb:hover{background:var(--forest);color:#fff}
+  .rfb{background:var(--forest);color:#fff;border:1px solid var(--forest);border-radius:8px;padding:7px 12px;font:700 12.5px 'Inter';cursor:pointer;white-space:nowrap}
+  .rfb:disabled{opacity:.85;cursor:default}
+  .rfp{height:4px;background:#e4ded0;position:relative;overflow:hidden}.rfp[hidden]{display:none}
+  .rfp i{position:absolute;left:0;top:0;bottom:0;background:#25D366;transition:width .3s}
+  .rfm{padding:9px 16px;font-size:12.5px;background:#eef6ef;color:#1e5c30;border-bottom:1px solid #d7e9db}.rfm[hidden]{display:none}
+  .rfm.bad{background:#fbe7e5;color:var(--danger)}
   /* send tracking link pop-up */
   .ctov{position:fixed;inset:0;background:rgba(10,20,14,.55);display:grid;place-items:center;z-index:200;padding:16px}
   .ctov[hidden]{display:none}
@@ -360,7 +366,8 @@
 
   <div class="main" id="mainBox">
     <div class="card">
-      <div class="ch"><div class="chl"><button type="button" class="bkb" id="bkBtn" hidden>&#8592; Back to companies</button><b id="cardT">Orders</b> <span id="cnt"></span></div><div class="ch-btns"><button type="button" class="upb" id="upBtn">&#11014; Upload status sheet</button><button type="button" class="dl" id="dlBtn">&#11015; Download Excel</button><button type="button" class="shf" id="shBtn">&#128228; Share file</button></div></div>
+      <div class="ch"><div class="chl"><button type="button" class="bkb" id="bkBtn" hidden>&#8592; Back to companies</button><b id="cardT">Orders</b> <span id="cnt"></span></div><div class="ch-btns"><button type="button" class="rfb" id="rfBtn" hidden>&#8635; Refresh statuses</button><button type="button" class="upb" id="upBtn">&#11014; Upload status sheet</button><button type="button" class="dl" id="dlBtn">&#11015; Download Excel</button><button type="button" class="shf" id="shBtn">&#128228; Share file</button></div></div>
+      <div class="rfp" id="rfP" hidden><i></i></div><div class="rfm" id="rfM" hidden></div>
       <div id="alt" hidden></div>
       <div class="tbl" id="tblWrap"><table>
         <thead><tr><th>Order ID</th><th>Sender Company / Recipient</th><th class="c">Code</th><th>Courier</th><th>AWB / Tracking</th><th>Label printed</th><th>Dispatched</th><th>Status</th></tr></thead>
@@ -629,6 +636,8 @@ function renderView(){
   document.querySelectorAll('#vLay button').forEach(b => b.classList.toggle('on', b.dataset.v === VM.lay));
   if(FROMCO && (VM.by === 'co' || coKey($('fCompany').value) !== FROMCO.k)) FROMCO = null;
   $('bkBtn').hidden = !FROMCO;
+  $('rfBtn').hidden = !FROMCO; $('upBtn').hidden = !!FROMCO;
+  if(!FROMCO && !RF){ $('rfM').hidden = true; $('rfP').hidden = true; }
   if(FROMCO){ $('cardT').textContent = FROMCO.name; $('cnt').textContent = `(${VIEW.length} order${VIEW.length === 1 ? '' : 's'})`; }
   const table = VM.by === 'in' && VM.lay === 'list';
   $('tblWrap').hidden = !table; $('alt').hidden = table;
@@ -671,6 +680,48 @@ function renderView(){
     const more = g.list.length > 8 ? `<tr class="sub" data-k="${esc(g.k)}"><td colspan="10" style="color:var(--forest);font-weight:700" data-a="orders">+ ${g.list.length - 8} more ${esc(g.name)} orders · Show all</td></tr>` : '';
     return head + sub + more;
   }).join('')}</tbody></table>`;
+}
+/* ---------- Refresh statuses (inside one company): live check of every open Shree Anjani order,
+   saved to the Label Log by the same check as "Track on courier site", then the list reloads ---------- */
+let RF = null;
+async function refreshCompany(){
+  if(RF || !FROMCO) return;
+  const list = VIEW.slice(), co = FROMCO.name;
+  const todo = list.filter(o => /shree\s*anjani/i.test(o.courier) && o.trk && o.st !== 'delivered' && o.problem !== 'RTO');
+  const b = $('rfBtn'), bar = $('rfP'), msg = $('rfM');
+  RF = {done:0, changed:0, del:0, fail:0, total:todo.length};
+  b.disabled = true; bar.hidden = false; msg.hidden = false; msg.className = 'rfm';
+  const show = () => {
+    b.textContent = RF.total ? `Checking ${RF.done} of ${RF.total}…` : 'Refreshing…';
+    bar.firstElementChild.style.width = (RF.total ? RF.done / RF.total * 100 : 60) + '%';
+    msg.textContent = RF.total ? `Checking live status of ${RF.total} open Shree Anjani order${RF.total > 1 ? 's' : ''} for ${co} on the courier website… ${RF.changed ? RF.changed + ' updated so far.' : ''}` : `Getting the latest statuses for ${co}…`;
+  };
+  show();
+  let i = 0;
+  const one = async o => {
+    const awb = o.trk.split(/[,\s]+/)[0];
+    try {
+      const r = await fetch(LOG_URL + '?' + new URLSearchParams({action:'satrack', awb, id:o.id, t:Date.now()})).then(x => x.json());
+      const m = r && r.ok && r.mapped || {};
+      if(r && r.ok && r.saved && m.step){
+        const before = o.step + '|' + o.problem;
+        if(STEPS.indexOf(m.step) > STEPS.indexOf(o.step)) o.step = m.step;
+        if(m.problem || m.step === 'Delivered') o.problem = m.problem;
+        o.st = o.step === 'Delivered' ? 'delivered' : o.problem === 'RTO' ? 'returned' : o.step === 'Ready' ? 'ready' : 'transit';
+        if(before !== o.step + '|' + o.problem){ RF.changed++; if(o.step === 'Delivered') RF.del++; }
+      } else if(!r || !r.ok) RF.fail++;
+    } catch(e){ RF.fail++; }
+    RF.done++; show();
+  };
+  const worker = async () => { while(i < todo.length){ const o = todo[i++]; await one(o); } };
+  await Promise.all([worker(), worker(), worker()]);
+  try { await load(); } catch(e){}
+  const r = RF; RF = null;
+  b.disabled = false; b.innerHTML = '&#8635; Refresh statuses'; bar.hidden = true;
+  msg.className = r.fail && r.fail === r.total && r.total ? 'rfm bad' : 'rfm';
+  msg.textContent = (r.total ? `Done: ${r.total} open Shree Anjani order${r.total > 1 ? 's' : ''} checked, ${r.changed} updated${r.del ? ' (' + r.del + ' now delivered)' : ''}${r.fail ? ', ' + r.fail + ' could not be checked' : ''}. ` : 'No open Shree Anjani orders to check. ')
+    + `Other couriers and delivered orders show the latest from the Label Log. ${new Date().toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'})}`;
+  applyFilters();
 }
 function backToCompanies(){
   const f = FROMCO; if(!f) return;
@@ -1471,6 +1522,7 @@ $('chips').addEventListener('click', e => {
   FILTER = b.dataset.f; document.querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x === b)); applyFilters();
 });
 $('bkBtn').addEventListener('click', backToCompanies);
+$('rfBtn').addEventListener('click', refreshCompany);
 $('vBy').addEventListener('click', e => { const b = e.target.closest('button'); if(b) setView(b.dataset.v, null); });
 $('vLay').addEventListener('click', e => { const b = e.target.closest('button'); if(b) setView(null, b.dataset.v); });
 $('alt').addEventListener('click', e => {
