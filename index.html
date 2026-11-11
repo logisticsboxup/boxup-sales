@@ -225,6 +225,7 @@
   .sh-g{display:grid;grid-template-columns:1fr 1fr;gap:0 12px;}
   .sh-file{display:flex;gap:12px;align-items:center;background:#F1F8F3;border:1px solid #cfe5d2;border-radius:10px;padding:10px 12px;}
   .sh-file .xl{flex:none;width:34px;height:40px;border-radius:5px;background:#1d7a44;color:#fff;font:800 11px 'Inter';display:flex;align-items:center;justify-content:center;}
+  .sh-file.trk .xl{background:var(--forest);font-size:10px}
   .sh-file b{font-size:13px;word-break:break-word;} .sh-file small{display:block;color:var(--muted);font-size:12px;margin-top:2px;}
   .sh-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
   .sh-opt{display:flex;gap:9px;align-items:flex-start;border:1.5px solid #d8d2c0;border-radius:10px;padding:10px 12px;cursor:pointer;font-size:13.5px;background:#fff;}
@@ -447,7 +448,7 @@
   <div class="wa-m sh-m" role="dialog" aria-modal="true" aria-labelledby="shTitle">
     <div class="wa-h"><div class="ic">&#128228;</div><div><h3 id="shTitle">Share order file with customer</h3><small>Sends the orders on screen to the customer on WhatsApp. Filter by company first.</small></div><button type="button" class="x" id="shX" aria-label="Close">&#10005;</button></div>
     <div class="sh-b">
-      <div class="sh-file"><div class="xl">XLS</div><div><b id="shFile"></b><small id="shFileSub"></small></div></div>
+      <div class="sh-file" id="shCard"><div class="xl" id="shIco">XLS</div><div><b id="shFile"></b><small id="shFileSub"></small></div></div>
       <div class="sh-g">
         <div><div class="lb">Customer (company)</div><input type="text" id="shCo" autocomplete="off"></div>
         <div><div class="lb">Contact person</div><input type="text" id="shWho" placeholder="e.g. Ritika" autocomplete="off"></div>
@@ -455,9 +456,9 @@
       <div class="lb">Customer WhatsApp number</div>
       <div class="wa-row"><input type="text" class="cc" id="shCc" value="+91" aria-label="Country code" style="flex:0 0 70px;text-align:center;background:var(--cream);width:auto"><input type="tel" id="shNum" placeholder="10-digit mobile number"></div>
       <div class="sh-msg" id="shSaved">Saved for this company, so next time it fills in by itself.</div>
-      <div class="lb">How to send the Excel file</div>
+      <div class="lb">How to send</div>
       <div class="sh-opts" id="shMode">
-        <label class="sh-opt on"><input type="radio" name="shMode" value="link" checked><span class="ico">&#128279;</span><span><b>Share as link</b><small>File saved to Google Drive; the link goes in the message. Opens the customer's chat directly.</small></span></label>
+        <label class="sh-opt on"><input type="radio" name="shMode" value="link" checked><span class="ico">&#128279;</span><span><b>Share tracking page link</b><small>Sends the company's own live tracking page and access code. No Google Drive file. Opens the customer's chat directly.</small></span></label>
         <label class="sh-opt"><input type="radio" name="shMode" value="file"><span class="ico">&#128206;</span><span><b>Attach Excel file</b><small>The Excel file itself is attached in WhatsApp, with the message as its caption.</small></span></label>
       </div>
       <div class="sh-how" id="shHow"></div>
@@ -901,8 +902,27 @@ function shFill(){
 function shFileName(){
   return `${shSafe($('shCo').value) || 'BoxUp'} - BoxUp Shipment Details ${shToday().replace(/\s+/g,'-')} (${SH.list.length} order${SH.list.length>1?'s':''}).xlsx`;
 }
+/* tracking page link + access code of the company in the box (Client Codes tab) */
+function shGetCode(){
+  if(!SH) return;
+  const co = $('shCo').value.trim(), key = coKey(co);
+  if(!co || (SH.ct && SH.ct.key === key)) return;
+  const me = SH.ct = {key, busy:true};
+  fetch(LOG_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action:'ct', op:'code', name:co})}).then(r => r.json())
+    .then(d => { if(d && d.ok){ me.code = d.code; me.link = d.link; } else me.err = (d && d.error) || 'No tracking code for this company yet.'; })
+    .catch(() => { me.err = 'Could not get the tracking code. Check the internet.'; })
+    .finally(() => { me.busy = false; if(SH && SH.ct === me) shRefresh(); });
+}
 function shText(link){
   const L = SH.list, n = L.length, who = $('shWho').value.trim(), co = $('shCo').value.trim();
+  if(shMode() === 'link'){
+    const k = SH.ct && SH.ct.key === coKey(co) ? SH.ct : null;
+    return [who ? `Dear ${who},` : `Hello ${co || 'there'} team,`, '',
+      `You can now track all your BoxUp gift orders live${n ? ' (' + n + ' order' + (n > 1 ? 's' : '') + ' right now)' : ''}, from our warehouse to your recipients' doorstep.`, '',
+      `\u{1F517} Tracking page: ${k && k.link ? k.link : '[getting the link…]'}`, `\u{1F511} Access code: ${k && k.code ? k.code : '[getting the code…]'}`, '',
+      `Open the link, enter the code, and you will see only ${co || 'your'} orders: live status, shipment progress, proof of delivery and a downloadable report.`, '',
+      'Thanks,', 'Team BoxUp Luxury Gifting'].join('\n');
+  }
   const couriers = [...new Set(L.map(o => o.courier).filter(Boolean))].join(', ');
   const boxes = L.reduce((a,o) => a + (o.boxes || 1), 0);
   const t = [];
@@ -928,13 +948,22 @@ function shRefresh(){
   if(!SH) return;
   const boxes = SH.list.reduce((a,o) => a + (o.boxes || 1), 0);
   const couriers = [...new Set(SH.list.map(o => o.courier).filter(Boolean))].join(', ');
-  $('shFile').textContent = shFileName();
-  $('shFileSub').textContent = `${SH.list.length} order${SH.list.length>1?'s':''} · ${boxes} box${boxes>1?'es':''}${couriers ? ' · ' + couriers : ''}`;
+  const lk = shMode() === 'link';
+  $('shCard').classList.toggle('trk', lk); $('shIco').textContent = lk ? 'LINK' : 'XLS';
+  if(lk){
+    shGetCode();
+    const k = SH.ct && SH.ct.key === coKey($('shCo').value) ? SH.ct : null;
+    $('shFile').textContent = 'Live tracking page' + (k && k.code ? ' · code ' + k.code.replace(/(.{3})(?=.)/g, '$1 ') : '');
+    $('shFileSub').textContent = k ? (k.err || k.link || 'Getting the link and code…') : 'Getting the link and code…';
+  } else {
+    $('shFile').textContent = shFileName();
+    $('shFileSub').textContent = `${SH.list.length} order${SH.list.length>1?'s':''} · ${boxes} box${boxes>1?'es':''}${couriers ? ' · ' + couriers : ''}`;
+  }
   const m = shMode();
   document.querySelectorAll('.sh-opt').forEach(l => l.classList.toggle('on', l.querySelector('input').checked));
   $('shHow').innerHTML = m === 'file'
     ? '<b>Then:</b> the Windows share window opens with the Excel attached &rarr; pick <b>WhatsApp</b> &rarr; pick the customer\'s chat &rarr; <b>Send</b>. The message is also copied, so paste it (Ctrl+V) if WhatsApp does not show it.'
-    : '<b>Then:</b> WhatsApp opens on the customer\'s chat with the message and file link ready &rarr; press <b>Send</b>.';
+    : '<b>Then:</b> WhatsApp opens on the customer\'s chat with the tracking link and access code ready &rarr; press <b>Send</b>.';
   $('shGo').innerHTML = m === 'file' ? '&#128206; Share on WhatsApp' : 'Send on WhatsApp &#10140;';
   if(!SH.edited) $('shTxt').value = shText('');
   const num = shNumber();
@@ -944,6 +973,7 @@ function shRefresh(){
 }
 function shClose(){ if(SH && SH.busy) return; $('shOv').hidden = true; SH = null; }
 async function shSend(){
+  if(shMode() === 'link') return shSendTrack();
   await needXLSX();
   if(shMode() === 'file') return shSendFile();
   const num = shNumber(); if(num === null || !SH) return;
@@ -976,6 +1006,17 @@ async function shSend(){
   }finally{
     if(SH){ SH.busy = false; shRefresh(); }
   }
+}
+/* Share tracking page link: the company's live page + access code, no file */
+function shSendTrack(){
+  const num = shNumber(); if(num === null || !SH) return;
+  const k = SH.ct && SH.ct.key === coKey($('shCo').value) ? SH.ct : null, st = $('shStatus');
+  if(!k || !k.code){ st.textContent = k && k.err ? k.err : 'Getting the tracking code, try again in a moment.'; st.className = 'sh-msg bad'; return; }
+  const text = $('shTxt').value;
+  window.open((num ? 'https://wa.me/' + num : 'https://api.whatsapp.com/send') + '?text=' + encodeURIComponent(text), '_blank', 'noopener');
+  fetch(LOG_URL, { method:'POST', headers:{ 'Content-Type':'text/plain;charset=utf-8' },
+    body: JSON.stringify({ action:'salesshare', company: $('shCo').value.trim(), contact: $('shWho').value.trim(), phone: num ? '+' + num : '', fileName: '', file: '', orders: SH.list.length }) }).then(() => { SH_CONTACTS = null; }).catch(() => {});
+  st.textContent = '✓ WhatsApp opened with the tracking link and code. Press Send there.'; st.className = 'sh-msg ok';
 }
 /* Attach Excel file: the system share window gets the real .xlsx file + the message */
 async function shSendFile(){
