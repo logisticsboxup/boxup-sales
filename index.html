@@ -21,7 +21,7 @@
   .live i{width:9px;height:9px;border-radius:50%;background:#bbb;display:inline-block;}
   .live button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 12px;font:600 12.5px 'Inter';cursor:pointer;color:var(--forest);}
   .search{background:#fff;border-radius:14px;box-shadow:0 6px 20px rgba(0,0,0,.07);padding:14px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
-  .search input[type=search]{flex:1;min-width:280px;border:2px solid var(--forest);border-radius:10px;padding:11px 14px;font:15px 'Inter';outline:none;}
+  .search input[type=search]{flex:1;min-width:280px;height:44px;box-sizing:border-box;border:2px solid var(--forest);border-radius:10px;padding:11px 14px;font:15px 'Inter';outline:none;}
   .search select,.search input[type=date]{border:1px solid #d8d2c0;border-radius:8px;padding:10px 10px;font:13px 'Inter';background:#fff;color:var(--ink);max-width:220px;}
   .search .lbl{font-size:12px;color:var(--muted);font-weight:600;}
   .gob{background:#16311F;color:#fff;border:0;border-radius:9px;padding:0 18px;min-height:40px;font:700 13.5px 'Inter';cursor:pointer}
@@ -133,7 +133,9 @@
   .ug2{display:grid;grid-template-columns:1fr 1fr;gap:14px 16px}
   .uf2 label{display:block;font-size:11px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:#8a8577;margin-bottom:6px}
   .uin{width:100%;box-sizing:border-box;border:1px solid #ddd6c4;border-radius:10px;padding:11px 13px;font:14px 'Inter';background:#fff;color:#1d2a21}
-  .uin::placeholder{color:#b2ac9c}.uspan2{grid-column:span 2}
+  .uin::placeholder{color:#b2ac9c}
+  .unset{background:#fdecea;color:#b3261e;border-radius:10px;padding:1px 8px;font-size:10.5px;letter-spacing:.3px;margin-left:6px;text-transform:none}
+  .uhint{display:block;color:#8a8577;font-size:11.5px;margin-top:4px}.uspan2{grid-column:span 2}
   .ufoot{display:flex;align-items:center;gap:10px;padding:14px 24px;background:#f6f2e7;margin-top:18px;border-top:1px solid #ece6d8;flex-wrap:wrap}
   .ufoot .hint{font-size:12px;color:#7A776C;flex:1;min-width:160px}
   .ufoot .btn{padding:10px 16px;font-size:13.5px;border-radius:10px}.ufoot .g,.cff .g{background:#16311F;color:#fff;border-color:#16311F}
@@ -247,6 +249,8 @@
 
   /* ---------- View: Company / Individual, Grid / List ---------- */
   .vw{display:flex;gap:8px;align-items:center;margin-left:auto}
+  .row2{flex:1 0 100%;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .row2 select{min-width:240px}
   .vw .vl{font:700 11px 'Inter';color:var(--muted);letter-spacing:.6px;text-transform:uppercase}
   .seg{display:inline-flex;border:1.5px solid #d9d2c0;border-radius:10px;overflow:hidden;background:#fff;height:40px}
   .seg button{border:0;background:#fff;padding:0 13px;font:600 13px 'Inter';color:#555;display:flex;align-items:center;gap:6px;cursor:pointer;border-right:1px solid #e4ded0}
@@ -320,6 +324,48 @@
   .ctbx .pf button:disabled{opacity:.5;cursor:default}
   .ctbx .msg{font-size:12.5px;color:var(--muted)}.ctbx .msg.bad{color:var(--danger);font-weight:600}
   @media (max-width:700px){ .vw{margin-left:0} .ctbx .k2{grid-template-columns:1fr} }
+
+  /* ---------- date range picker (replaces From / To / Quick dates) ---------- */
+  .dold{display:none}
+  .rsb{height:44px;border:1.5px solid #cfc8b4;border-radius:10px;background:#fff;color:var(--ink);padding:0 16px;font:700 14.5px 'Inter';cursor:pointer;white-space:nowrap}
+  .rsb:hover{border-color:var(--forest)}
+  .dr{position:relative}
+  .drb{display:flex;align-items:center;gap:8px;border:1.5px solid #cfc8b4;border-radius:10px;background:#fff;padding:0 14px;height:44px;font:700 14.5px 'Inter';color:var(--ink);cursor:pointer;white-space:nowrap}
+  .drb .cv{font-size:14px;color:#555;margin-left:6px;position:relative;top:-3px}
+  .drb.on{border-color:var(--forest);box-shadow:0 0 0 2px rgba(22,49,31,.12)}
+  .drp{position:absolute;top:calc(100% + 8px);right:0;z-index:60;background:#fff;border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.18);border:1px solid #ece7da;display:flex;overflow:hidden;font-family:'Inter',Arial,sans-serif}
+  .drp[hidden]{display:none}
+  .drl{width:220px;padding:8px 0;display:flex;flex-direction:column}
+  .drp.wide .drl{border-right:1px solid #ece7da}
+  .drl button{border:0;background:none;text-align:left;padding:11px 20px;font:500 15px 'Inter';color:var(--ink);cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+  .drl button:hover{background:#f6f3eb}
+  .drl button.on{background:#e8efe9;font-weight:700}
+  .drl button.on:after{content:"\2713";font-weight:700}
+  .drl .nt{padding:10px 20px;color:#a08d5c;font-size:14px}
+  .drc{padding:16px 18px 14px;display:flex;flex-direction:column;gap:12px}
+  .drm{display:flex;gap:16px}
+  .cal{border:1px solid #ece7da;border-radius:12px;padding:12px 12px 10px;width:350px;flex:none;box-sizing:border-box}
+  .cal .ch2{display:flex;align-items:center;gap:6px;font:700 16px 'Inter';margin-bottom:10px}
+  .cal .ch2 button{border:0;background:none;font:700 18px 'Inter';cursor:pointer;padding:0 4px;color:var(--ink)}
+  .cal .ch2 button:disabled{opacity:.25;cursor:default}
+  .cal .gr{display:grid;grid-template-columns:repeat(7,1fr);row-gap:4px}
+  .cal .dw{text-align:center;font-size:12px;color:#8a8577;padding-bottom:6px}
+  .cal .d{height:36px;border:0;background:none;font:500 14.5px 'Inter';color:var(--ink);cursor:pointer;position:relative}
+  .cal .d.in{background:#e3ebe4}
+  .cal .d.s,.cal .d.e{background:#e3ebe4}
+  .cal .d.s span,.cal .d.e span{display:inline-grid;place-items:center;width:38px;height:32px;border-radius:16px;background:var(--forest);color:#fff;font-weight:700}
+  .cal .d.s{border-radius:18px 0 0 18px}.cal .d.e{border-radius:0 18px 18px 0}.cal .d.s.e{border-radius:18px}
+  .cal .d.x{color:#c9c4b6;cursor:default}
+  .cal .d:not(.x):not(.s):not(.e):hover span{background:#f0ece1;border-radius:14px}
+  .cal .d span{display:inline-grid;place-items:center;width:36px;height:30px}
+  .cal .d{min-width:0;padding:0}
+  .drf{display:flex;align-items:center;gap:10px;border-top:1px solid #ece7da;padding-top:12px}
+  .drf .sel{flex:1;font-size:14px}.drf .sel b{font-weight:700}
+  .drf .er{color:var(--danger);font-weight:600}
+  .drf button{border-radius:9px;padding:10px 26px;font:700 14.5px 'Inter';cursor:pointer;border:1.5px solid #cfc8b4;background:#fff;color:var(--ink)}
+  .drf .ap{background:var(--forest);border-color:var(--forest);color:#fff}
+  .drf .ap:disabled{opacity:.5;cursor:default}
+  @media (max-width:900px){ .drm{flex-direction:column} .drp.wide{flex-direction:column;position:fixed;left:8px;right:8px;top:70px;max-height:calc(100vh - 90px);overflow:auto} .drp.wide .drl{width:auto;flex-direction:row;flex-wrap:wrap;border-right:0;border-bottom:1px solid #ece7da} .cal{width:auto} }
 </style>
 </head>
 <body>
@@ -333,15 +379,19 @@
 
   <div class="search">
     <input type="search" id="q" placeholder="&#128269; Search Order ID, Estimate, sender company, recipient, phone or AWB" autocomplete="off">
-    <span class="lbl">From</span><input type="date" id="from">
+    <span class="dold"><span class="lbl">From</span><input type="date" id="from">
     <span class="lbl">To</span><input type="date" id="to">
-    <select id="qDate" title="Quick dates"><option value="">Quick dates</option><option value="today">Today</option><option value="yday">Yesterday</option><option value="7">Last 7 days</option><option value="30">Last 30 days</option><option value="month">This month</option><option value="all">All dates</option></select>
+    <select id="qDate" title="Quick dates"><option value="">Quick dates</option><option value="today">Today</option><option value="yday">Yesterday</option><option value="7">Last 7 days</option><option value="30">Last 30 days</option><option value="month">This month</option><option value="all">All dates</option></select></span>
+    <div class="dr"><button type="button" id="drBtn" class="drb">&#128197; <span id="drTxt">All dates</span> <span class="cv">&#8964;</span></button><div class="drp" id="drPop" hidden></div></div>
     <button type="button" id="goBtn" class="gob">Go</button>
+    <button type="button" id="rsBtn" class="rsb" title="Clear search and filters, back to the first page">&#8634; Reset</button>
+    <div class="row2">
     <select id="fCompany" title="Sender Company (your client)"><option value="">Sender Company: All</option></select>
     <select id="fCourier"><option value="">Courier: All</option></select>
     <div class="vw" id="vw"><span class="vl">View</span>
       <div class="seg" id="vBy"><button type="button" data-v="co">&#127970; Company</button><button type="button" data-v="in">&#128100; Individual</button></div>
       <div class="seg" id="vLay"><button type="button" data-v="grid">&#9638; Grid</button><button type="button" data-v="list">&#9776; List</button></div>
+    </div>
     </div>
   </div>
 
@@ -558,6 +608,7 @@ const stChip = o => `<span class="st ${STEP_CLS[o.problem || o.step] || 's-no'}"
 
 /* ---------- filters ---------- */
 function applyFilters(){
+  if(typeof drLabel === 'function') try { drLabel(); } catch(e){}
   const q = $('q').value.trim().toLowerCase();
   const okD = id => { const v = $(id).value, y = +String(v).slice(0, 4), good = !v || (/^\d{4}-\d{2}-\d{2}$/.test(v) && y >= 2020 && y <= 2100); $(id).classList.toggle('bad', !good); return good && v ? v : ''; };
   const fv = okD('from'), tv = okD('to');
@@ -1068,11 +1119,17 @@ function ov(html){ const v = $('uov'); v.innerHTML = html; v.hidden = !html; }
 $('uov').addEventListener('mousedown', e => { if(e.target.id === 'uov') ov(''); });
 document.addEventListener('keydown', e => { if(e.key === 'Escape' && !$('uov').hidden) ov(''); });
 const isoD = d => d ? d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0') : '';
+/* all client companies already in the Label Log, one spelling each (most used) */
+function scNames(){
+  const m = new Map();
+  ORDERS.forEach(x => { const n = (x.client || '').trim(); if(!n) return; const k = n.toLowerCase().replace(/[^a-z0-9]/g, ''); const e = m.get(k) || {}; e[n] = (e[n] || 0) + 1; m.set(k, e); });
+  return [...m.values()].map(e => Object.keys(e).sort((a, b) => e[b] - e[a])[0]).sort((a, b) => a.localeCompare(b));
+}
 function updOpen(o){ UP = {o, step:o.step, problem:o.problem, edit:false, open:false}; updDraw(true); }
 function updDraw(first){
   const o = UP.o, k = STEPS.indexOf(UP.step), pi = UP.problem && PROB_INFO[UP.problem];
   const ICON = {'Ready':'&#128230;', 'Dispatched':'&#128666;', 'In Transit':'&#10148;', 'At Destination':'&#128205;', 'Out for Delivery':'&#128757;', 'Delivered':'&#10003;'};
-  const keep = first ? null : {c:$('uCo').value, a:$('uAwb').value, d:$('uDisp').value, v:$('uDel').value, n:$('uNote').value, p:$('uPin') ? $('uPin').value : ''};
+  const keep = first ? null : {sc:$('uSc').value, c:$('uCo').value, a:$('uAwb').value, d:$('uDisp').value, v:$('uDel').value, n:$('uNote').value, p:$('uPin') ? $('uPin').value : ''};
   const couriers = [...new Set(['Shree Anjani', 'DTDC', 'Delhivery', 'Blue Dart', 'Shadowfax', 'Porter', 'Self delivery'].concat(ORDERS.map(x => x.courier).filter(Boolean)))];
   const savedPin = (() => { try { return localStorage.getItem(PIN_KEY) || ''; } catch(e){ return ''; } })();
   ov(`<div class="udlg">
@@ -1090,6 +1147,9 @@ function updDraw(first){
       ${UP.edit ? '<div class="ehint">Click a step to move the order there</div>' : ''}
       <div class="usep"></div>
       <div class="ug2">
+        <div class="uf2 uspan2"><label>Sender company (client)${o.sender ? '' : ' <span class="unset">not set</span>'}</label><input class="uin" id="uSc" list="uScList" value="${esc(keep ? keep.sc : (o.sender || (o.cat === 'B2C' ? '' : o.co)))}" placeholder="Choose or type the client company" autocomplete="off">
+          <datalist id="uScList">${scNames().map(n => `<option value="${esc(n)}">`).join('')}</datalist>
+          <small class="uhint">Orders show under this company in Company view, Share file and the company's tracking page.</small></div>
         <div class="uf2"><label>Courier</label><select class="uin" id="uCo"><option value="">Not set</option>${couriers.map(c => `<option${(keep ? keep.c : o.courier) === c ? ' selected' : ''}>${esc(c)}</option>`).join('')}</select></div>
         <div class="uf2"><label>AWB / Tracking ID</label><input class="uin" id="uAwb" value="${esc(keep ? keep.a : o.trk)}" placeholder="tracking number"></div>
         <div class="uf2"><label>Dispatch date</label><input class="uin" type="date" id="uDisp" value="${esc(keep ? keep.d : isoD(o.dispAt))}"></div>
@@ -1110,6 +1170,7 @@ function updDraw(first){
   $('uSave').onclick = updSave;
 }
 function updApply(o, U, q, d){
+  if(q.sender){ o.sender = q.sender; o.client = q.sender; }
   Object.assign(o, {step:U.step, problem:U.problem, courier:q.courier || o.courier, trk:q.awb || o.trk, note:q.note, upd:(d.at || '') + ' · Order Tracker',
     dispAt:q.disp ? new Date(q.disp + 'T00:00') : o.dispAt, delivOn:q.deliv ? new Date(q.deliv + 'T00:00') : null});
   if(/shree\s*anjani/i.test(o.courier) && o.trk) o.link = SA_LINK_PREFIX + o.trk.split(/[,\s]+/)[0];
@@ -1118,7 +1179,7 @@ function updApply(o, U, q, d){
 async function updSave(){
   const o = UP.o, btn = $('uSave');
   const pin = '';
-  const q = {action:'orderset', pin, id:o.id, status:UP.step, problem:UP.problem, courier:$('uCo').value, awb:$('uAwb').value.trim(), disp:$('uDisp').value, deliv:$('uDel').value, note:$('uNote').value.trim(), t:Date.now()};
+  const q = {action:'orderset', pin, id:o.id, status:UP.step, problem:UP.problem, courier:$('uCo').value, sender:$('uSc').value.trim().replace(/\s+/g, ' '), awb:$('uAwb').value.trim(), disp:$('uDisp').value, deliv:$('uDel').value, note:$('uNote').value.trim(), t:Date.now()};
   const back = (o.step === 'Delivered' && UP.step !== 'Delivered') || RANK(UP.step) < RANK(o.step);
   if(back && !UP.approved){
     const chip = (x, y) => `<span class="st ${STEP_CLS[y || x] || 's-no'}">${esc(y || x)}</span>`;
@@ -1584,10 +1645,108 @@ $('rows').addEventListener('click', e => {
   const tr = e.target.closest('tr.row'); if(!tr) return;
   showDetail(ORDERS.find(o => o.n === +tr.dataset.n));
 });
+
+/* ---------- date range picker: one button, quick options, two-month calendar for Custom ---------- */
+const DR = { open:false, wide:false, s:null, e:null, left:null };
+const drIso = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+const drDmy = d => String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear();
+const drDay = d => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+const drParse = v => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v || ''); return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null; };
+const DR_PRE = [['today', 'Today'], ['yday', 'Yesterday'], ['7', 'Last 7 days'], ['30', 'Last 30 days'], ['month', 'This Month'], ['lmonth', 'Last Month'], ['custom', 'Custom']];
+function drRange(k){
+  const t = drDay(new Date()), add = n => new Date(t.getFullYear(), t.getMonth(), t.getDate() + n);
+  if(k === 'today') return [t, t];
+  if(k === 'yday') return [add(-1), add(-1)];
+  if(k === '7') return [add(-6), t];
+  if(k === '30') return [add(-29), t];
+  if(k === 'month') return [new Date(t.getFullYear(), t.getMonth(), 1), t];
+  if(k === 'lmonth') return [new Date(t.getFullYear(), t.getMonth() - 1, 1), new Date(t.getFullYear(), t.getMonth(), 0)];
+  return null;
+}
+function drPreset(){
+  const f = $('from').value, to = $('to').value;
+  if(!f && !to) return '';
+  for(const [k] of DR_PRE){ const r = drRange(k); if(r && drIso(r[0]) === f && drIso(r[1]) === to) return k; }
+  return 'custom';
+}
+function drLabel(){
+  const f = drParse($('from').value), t = drParse($('to').value);
+  $('drTxt').textContent = f && t ? (drIso(f) === drIso(t) ? drDmy(f) : drDmy(f) + ' – ' + drDmy(t)) : f ? 'From ' + drDmy(f) : t ? 'Up to ' + drDmy(t) : 'All dates';
+}
+function drSet(f, t){ $('from').value = f ? drIso(f) : ''; $('to').value = t ? drIso(t) : ''; $('qDate').value = ''; drLabel(); applyFilters(); }
+function drList(cur){
+  return `<div class="drl">${DR_PRE.map(([k, n]) => `<button type="button" data-p="${k}" class="${cur === k ? 'on' : ''}">${n}</button>`).join('')}${DR.wide ? '<div class="nt">&#9432; Range can be up to 1 year</div>' : ''}</div>`;
+}
+function drCal(y, m, side){
+  const first = new Date(y, m, 1), days = new Date(y, m + 1, 0).getDate(), today = drDay(new Date());
+  const maxEnd = DR.s && !DR.e ? new Date(DR.s.getFullYear() + 1, DR.s.getMonth(), DR.s.getDate()) : null;
+  const name = first.toLocaleDateString('en-IN', {month:'long', year:'numeric'});
+  const nextOk = side === 'r' && new Date(y, m + 1, 1) <= today;
+  let h = `<div class="cal"><div class="ch2">${side === 'l' ? '<button type="button" data-nav="-1" aria-label="Previous month">&#8249;</button>' : ''}${name}${side === 'r' ? `<button type="button" data-nav="1" aria-label="Next month" ${nextOk ? '' : 'disabled'}>&#8250;</button>` : ''}</div><div class="gr">`;
+  h += ['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(x => `<div class="dw">${x}</div>`).join('');
+  for(let i = 0; i < first.getDay(); i++) h += '<div></div>';
+  const s = DR.s && DR.s.getTime(), e = (DR.e || DR.s) && (DR.e || DR.s).getTime();
+  for(let d = 1; d <= days; d++){
+    const dt = new Date(y, m, d), v = dt.getTime();
+    const off = dt > today || (maxEnd && dt > maxEnd);
+    const cls = ['d', off ? 'x' : '', s && v === s ? 's' : '', e && v === e ? 'e' : '', s && e && v > s && v < e ? 'in' : ''].filter(Boolean).join(' ');
+    h += `<button type="button" class="${cls}" ${off ? 'disabled' : `data-d="${drIso(dt)}"`}><span>${d}</span></button>`;
+  }
+  return h + '</div></div>';
+}
+function drRender(){
+  const p = $('drPop'), cur = DR.wide ? 'custom' : drPreset();
+  p.classList.toggle('wide', DR.wide);
+  if(!DR.wide){ p.innerHTML = drList(cur); return; }
+  const L = DR.left, R = new Date(L.getFullYear(), L.getMonth() + 1, 1);
+  const tooLong = DR.s && DR.e && (DR.e - DR.s) / 86400000 > 366;
+  p.innerHTML = drList('custom') + `<div class="drc"><div class="drm">${drCal(L.getFullYear(), L.getMonth(), 'l')}${drCal(R.getFullYear(), R.getMonth(), 'r')}</div>
+    <div class="drf"><span class="sel">${DR.s ? `<b>Selected:</b> ${drDmy(DR.s)}${DR.e ? ' to ' + drDmy(DR.e) : ' &rarr; pick the end date'}` : '<b>Pick the start date</b>'}${tooLong ? ' <span class="er">· more than 1 year</span>' : ''}</span>
+      <button type="button" data-a="cancel">Cancel</button><button type="button" class="ap" data-a="apply" ${DR.s && !tooLong ? '' : 'disabled'}>Apply</button></div></div>`;
+}
+function drOpen(wide){
+  DR.open = true; DR.wide = !!wide;
+  if(DR.wide){
+    DR.s = drParse($('from').value); DR.e = drParse($('to').value);
+    const t = drDay(new Date()), base = DR.e || t;
+    DR.left = new Date(base.getFullYear(), base.getMonth() - 1, 1);
+  }
+  $('drPop').hidden = false; $('drBtn').classList.add('on'); drRender();
+}
+function drClose(){ DR.open = false; DR.wide = false; $('drPop').hidden = true; $('drBtn').classList.remove('on'); }
+$('drBtn').addEventListener('click', e => { e.stopPropagation(); DR.open ? drClose() : drOpen(false); });
+$('drPop').addEventListener('click', e => {
+  e.stopPropagation();
+  const p = e.target.closest('[data-p]');
+  if(p){ const k = p.dataset.p; if(k === 'custom') return drOpen(true); const r = drRange(k); drClose(); return drSet(r[0], r[1]); }
+  const nav = e.target.closest('[data-nav]');
+  if(nav && !nav.disabled){ DR.left = new Date(DR.left.getFullYear(), DR.left.getMonth() + +nav.dataset.nav, 1); return drRender(); }
+  const d = e.target.closest('[data-d]');
+  if(d){ const v = drParse(d.dataset.d);
+    if(!DR.s || DR.e || v < DR.s){ DR.s = v; DR.e = null; } else DR.e = v;
+    return drRender(); }
+  const a = e.target.closest('[data-a]');
+  if(a && a.dataset.a === 'cancel') return drClose();
+  if(a && a.dataset.a === 'apply' && DR.s){ const f = DR.s, t = DR.e || DR.s; drClose(); drSet(f, t); }
+});
+document.addEventListener('click', e => { if(DR.open && !e.target.closest('.dr')) drClose(); });
+document.addEventListener('keydown', e => { if(e.key === 'Escape' && DR.open) drClose(); });
+/* Reset: everything back to how the page first opens */
+$('rsBtn').addEventListener('click', () => {
+  if(typeof drClose === 'function' && DR.open) drClose();
+  $('q').value = ''; $('fCompany').value = ''; $('fCourier').value = '';
+  const r = drRange('30'); $('from').value = drIso(r[0]); $('to').value = drIso(r[1]); $('qDate').value = '';
+  FILTER = 'all'; document.querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x.dataset.f === 'all'));
+  FROMCO = null; OPENCO = ''; SEL = null;
+  VM = {by:'in', lay:'list'}; try { localStorage.setItem(VKEY, JSON.stringify(VM)); } catch(e){}
+  if(!$('rfM').hidden && !RF){ $('rfM').hidden = true; }
+  applyFilters();
+  window.scrollTo({top:0, behavior:'smooth'});
+});
 $('dlBtn').addEventListener('click', downloadExcel);
 $('reload').addEventListener('click', load);
 // default: last 30 days
-(function(){ const t = new Date(), f = new Date(Date.now() - 30*86400000); const iso = d => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); $('from').value = iso(f); $('to').value = iso(t); })();
+(function(){ const t = new Date(), f = new Date(Date.now() - 29*86400000); const iso = d => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); $('from').value = iso(f); $('to').value = iso(t); })();
 /* open instantly with the last data this browser saw, then refresh in the background */
 (function(){
   try{
