@@ -615,7 +615,7 @@ function buildOrders(headers, rows){
       phone: g(r, ix.phone), alt: g(r, ix.alt), addr: g(r, ix.addr), city: g(r, ix.city), state: g(r, ix.state), pin: g(r, ix.pin),
       type: g(r, ix.type), mode: g(r, ix.mode), courier, trk, link: link.split(/,\s*/)[0], boxes: parseInt(g(r, ix.boxes), 10) || 1,
       batch: g(r, ix.batch), statusTxt, st, dispAt, delivTxt, delivOn: parseDate(g(r, ix.delivOn)), cat: /b2c/i.test(cat) ? 'B2C' : 'B2B',
-      intl: /international/i.test(courier) || /international/i.test(g(r, ix.src))
+      intl: /international/i.test(courier) || /international/i.test(g(r, ix.type)) || /international/i.test(g(r, ix.src).replace(/(bulk sheet|file)\s*:.*$/i, ''))   // a file name like "Pragathi International.xlsx" is not an international order
     };
   }).filter(Boolean).sort((a, b) => (b.at ? b.at.getTime() : 0) - (a.at ? a.at.getTime() : 0) || b.n - a.n);
 }
