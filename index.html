@@ -199,6 +199,7 @@
   .wa-chk label,.wa-all{display:flex;align-items:center;gap:8px;cursor:pointer;}
   .wa-chk input,.wa-all input{width:16px;height:16px;accent-color:var(--forest);margin:0;cursor:pointer;}
   .wa-chk label.na{color:#aaa;cursor:default;}
+  .rfstop{margin-left:8px;border:1.5px solid #b3261e;color:#b3261e;background:#fff;border-radius:8px;padding:3px 10px;font:700 12.5px 'Inter';cursor:pointer;}
   .wa-poc{margin-top:9px;border:1.5px solid #e6dfcc;border-radius:10px;padding:8px 10px;font-size:13px;}
   .wa-poc.on{border-color:#C8A64B;background:#FFF9E8;}
   .wa-poc > label{display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;}
@@ -703,7 +704,7 @@ function renderView(){
   document.querySelectorAll('#vLay button').forEach(b => b.classList.toggle('on', b.dataset.v === VM.lay));
   if(FROMCO && (VM.by === 'co' || coKey($('fCompany').value) !== FROMCO.k)) FROMCO = null;
   $('bkBtn').hidden = !FROMCO;
-  $('rfBtn').hidden = !FROMCO; $('upBtn').hidden = !!FROMCO;
+  $('rfBtn').hidden = false; if(!RF) $('rfBtn').innerHTML = FROMCO ? '&#8635; Refresh statuses' : '&#8635; Refresh Shree Anjani statuses'; $('upBtn').hidden = !!FROMCO;
   if(!FROMCO && !RF){ $('rfM').hidden = true; $('rfP').hidden = true; }
   if(FROMCO){ $('cardT').textContent = FROMCO.name; $('cnt').textContent = `(${VIEW.length} order${VIEW.length === 1 ? '' : 's'})`; }
   const table = VM.by === 'in' && VM.lay === 'list';
@@ -752,16 +753,22 @@ function renderView(){
    saved to the Label Log by the same check as "Track on courier site", then the list reloads ---------- */
 let RF = null;
 async function refreshCompany(){
-  if(RF || !FROMCO) return;
-  const list = VIEW.slice(), co = FROMCO.name;
+  if(RF) return;
+  const list = VIEW.slice(), co = FROMCO ? FROMCO.name : '', where = co ? 'for ' + co : 'in this view';
   const todo = list.filter(o => /shree\s*anjani/i.test(o.courier) && o.trk && o.st !== 'delivered' && o.problem !== 'RTO');
   const b = $('rfBtn'), bar = $('rfP'), msg = $('rfM');
-  RF = {done:0, changed:0, del:0, fail:0, total:todo.length};
+  if(todo.length > 300){
+    const mins = Math.max(1, Math.round(todo.length / 3 / 60));
+    if(!confirm(`Check ${todo.length} open Shree Anjani orders ${where}?\n\nIt takes about ${mins} minute${mins > 1 ? 's' : ''}. Keep this page open; you can press Stop any time.\n\nTip: pick a shorter date range or one company to make it quicker.`)) return;
+  }
+  RF = {done:0, changed:0, del:0, fail:0, total:todo.length, stop:false};
+  msg.onclick = e => { if(e.target.closest('#rfStop') && RF){ RF.stop = true; e.target.closest('#rfStop').disabled = true; e.target.closest('#rfStop').textContent = 'Stopping…'; } };
   b.disabled = true; bar.hidden = false; msg.hidden = false; msg.className = 'rfm';
   const show = () => {
     b.textContent = RF.total ? `Checking ${RF.done} of ${RF.total}…` : 'Refreshing…';
     bar.firstElementChild.style.width = (RF.total ? RF.done / RF.total * 100 : 60) + '%';
-    msg.textContent = RF.total ? `Checking live status of ${RF.total} open Shree Anjani order${RF.total > 1 ? 's' : ''} for ${co} on the courier website… ${RF.changed ? RF.changed + ' updated so far.' : ''}` : `Getting the latest statuses for ${co}…`;
+    if(RF.stop) return;
+    msg.innerHTML = esc(RF.total ? `Checking live status of ${RF.total} open Shree Anjani order${RF.total > 1 ? 's' : ''} ${where} on the courier website… ${RF.changed ? RF.changed + ' updated so far' + (RF.del ? ' (' + RF.del + ' delivered).' : '.') : ''}` : `Getting the latest statuses ${where}…`) + (RF.total ? ' <button type="button" id="rfStop" class="rfstop">Stop</button>' : '');
   };
   show();
   let i = 0;
@@ -780,14 +787,14 @@ async function refreshCompany(){
     } catch(e){ RF.fail++; }
     RF.done++; show();
   };
-  const worker = async () => { while(i < todo.length){ const o = todo[i++]; await one(o); } };
+  const worker = async () => { while(i < todo.length && !RF.stop){ const o = todo[i++]; await one(o); } };
   await Promise.all([worker(), worker(), worker()]);
   try { await load(); } catch(e){}
   const r = RF; RF = null;
-  b.disabled = false; b.innerHTML = '&#8635; Refresh statuses'; bar.hidden = true;
+  b.disabled = false; b.innerHTML = FROMCO ? '&#8635; Refresh statuses' : '&#8635; Refresh Shree Anjani statuses'; bar.hidden = true;
   msg.className = r.fail && r.fail === r.total && r.total ? 'rfm bad' : 'rfm';
-  msg.textContent = (r.total ? `Done: ${r.total} open Shree Anjani order${r.total > 1 ? 's' : ''} checked, ${r.changed} updated${r.del ? ' (' + r.del + ' now delivered)' : ''}${r.fail ? ', ' + r.fail + ' could not be checked' : ''}. ` : 'No open Shree Anjani orders to check. ')
-    + `Other couriers and delivered orders show the latest from the Label Log. ${new Date().toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'})}`;
+  msg.textContent = (r.stop ? `Stopped after ${r.done} of ${r.total}: ${r.changed} updated${r.del ? ' (' + r.del + ' now delivered)' : ''}. ` : '') + (r.stop ? '' : r.total ? `Done: ${r.total} open Shree Anjani order${r.total > 1 ? 's' : ''} checked, ${r.changed} updated${r.del ? ' (' + r.del + ' now delivered)' : ''}${r.fail ? ', ' + r.fail + ' could not be checked' : ''}. ` : 'No open Shree Anjani orders to check. ')
+    + (r.stop ? '' : `Other couriers and delivered orders show the latest from the Label Log. `) + new Date().toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'});
   applyFilters();
 }
 function backToCompanies(){
