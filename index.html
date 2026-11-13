@@ -199,6 +199,16 @@
   .wa-chk label,.wa-all{display:flex;align-items:center;gap:8px;cursor:pointer;}
   .wa-chk input,.wa-all input{width:16px;height:16px;accent-color:var(--forest);margin:0;cursor:pointer;}
   .wa-chk label.na{color:#aaa;cursor:default;}
+  .wa-poc{margin-top:9px;border:1.5px solid #e6dfcc;border-radius:10px;padding:8px 10px;font-size:13px;}
+  .wa-poc.on{border-color:#C8A64B;background:#FFF9E8;}
+  .wa-poc > label{display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;}
+  .wa-poc > label input{width:16px;height:16px;accent-color:var(--forest);margin:0;cursor:pointer;}
+  .wa-poc.na > label{color:#aaa;cursor:default;}
+  .wa-poc .pr{display:none;gap:8px;margin-top:8px;}
+  .wa-poc.on .pr{display:flex;}
+  .wa-poc .pr input{flex:1;min-width:0;border:1px solid #d8d2c0;border-radius:9px;padding:8px 10px;font:13.5px 'Inter';background:#fff;}
+  .wa-poc .ph{display:none;font-size:11.5px;color:#7a6a3c;margin-top:6px;}
+  .wa-poc.on .ph{display:block;}
   .wa-all{font:700 12.5px 'Inter';color:var(--forest);text-transform:none;letter-spacing:0;border:1px solid #d8d2c0;border-radius:20px;padding:4px 11px 4px 8px;background:#fff;}
   .wa-p{background:#EFE7DC;padding:14px 16px;display:flex;flex-direction:column;min-width:0;}
   .wa-p .lb{display:flex;justify-content:space-between;align-items:center;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:8px;}
@@ -479,6 +489,11 @@
           <label><input type="checkbox" data-k="co" checked>Company name</label>
           <label><input type="checkbox" data-k="name" checked>Customer name</label>
           <label><input type="checkbox" data-k="addr">Delivery address</label>
+        </div>
+        <div class="wa-poc" id="waPoc">
+          <label><input type="checkbox" id="waPocOn">Courier person (POC)</label>
+          <div class="pr"><input type="text" id="waPocName" placeholder="Name" aria-label="Courier person name"><input type="tel" id="waPocPh" placeholder="Phone number" aria-label="Courier person phone"></div>
+          <div class="ph" id="waPocHint"></div>
         </div>
 
         <div class="lb">Note (optional)</div>
@@ -1482,6 +1497,18 @@ const WA_ST = {
   delayed:    ['Delayed', 'is slightly *delayed*. We are sorry for the wait and are following up with the courier.']
 };
 const WA_OTHER_KEY = 'boxup.sales.waOther';
+/* courier person (POC): known ones, plus what was typed (remembered per courier on this computer) */
+const POC_KEY = 'boxup.sales.poc', POC_ON_KEY = 'boxup.sales.pocOn';
+const POC_DEFAULT = { 'shree anjani': { name: 'Ramji Anjani', phone: '+91 79849 70695' } };
+const pocKey = c => String(c || '').trim().toLowerCase().replace(/\s+/g, ' ');
+function pocGet(c){ let m = {}; try{ m = JSON.parse(localStorage.getItem(POC_KEY) || '{}'); }catch(e){} const k = pocKey(c); return m[k] || POC_DEFAULT[k] || { name: '', phone: '' }; }
+function pocSave(c, v){ let m = {}; try{ m = JSON.parse(localStorage.getItem(POC_KEY) || '{}'); }catch(e){} m[pocKey(c)] = v; try{ localStorage.setItem(POC_KEY, JSON.stringify(m)); }catch(e){} }
+function pocUi(){
+  const on = $('waPocOn').checked && !$('waPocOn').disabled;
+  $('waPoc').classList.toggle('on', on);
+  const c = WA && WA.o.courier, v = { name: $('waPocName').value.trim(), phone: $('waPocPh').value.trim() };
+  $('waPocHint').textContent = (v.name || v.phone) ? 'Filled in for ' + c + '. Change it once and it is remembered for this courier.' : 'Type the ' + c + ' person\'s name and number. It is remembered for this courier.';
+}
 let WA = null;   // {o, who, st, edited}
 
 function waDigits(t){
@@ -1517,9 +1544,10 @@ function waText(){
   if(inc('awb') && o.courier) d.push(`\u{1F69A} Courier: ${o.courier}`);
   if(inc('awb') && o.trk) d.push(`\u{1F4E6} AWB: ${o.trk}`);
   if(inc('boxes')) d.push(`\u{1F4E6} Boxes: ${o.boxes}`);
+  if($('waPocOn').checked && !$('waPocOn').disabled){ const pn = $('waPocName').value.trim(), pp = $('waPocPh').value.trim(); if(pn || pp) d.push(`\u{1F4DE} Courier contact: ${[pn, pp].filter(Boolean).join(', ')}`); }
   const addr = [o.addr, o.city, o.state, o.pin].filter(Boolean).join(', ');
   if(inc('addr') && addr) d.push(`\u{1F4CD} Address: ${addr}`);
-  if(inc('ddate') && o.dispAt) d.push(`\u{1F4C5} Dispatched: ${fmtD(o.dispAt)}`);
+  if(inc('ddate') && (o.at || o.dispAt)) d.push(`\u{1F4C5} Dispatched: ${fmtD(o.at || o.dispAt)}`);   // the date the label was printed
   const eta = $('waEta').value;
   if(eta && WA.st !== 'delivered') d.push(`\u{23F3} Expected delivery: ${fmtD(new Date(eta + 'T00:00'))}`);
   if(d.length) L.push('', ...d);
@@ -1559,11 +1587,16 @@ function waOpen(o){
   const custom = hubCustomTemplates();
   $('waSavedWrap').hidden = !custom.length;
   $('waSaved').innerHTML = '<option value="">Status message (above)</option>' + custom.map((t, i) => `<option value="${i}">${esc(t.name)}</option>`).join('');
-  const avail = { awb: !!(o.courier || o.trk), link: !!o.link, boxes: true, ddate: !!o.dispAt, co: !!o.co, name: !!o.name, addr: !!(o.addr || o.city) };
+  const avail = { awb: !!(o.courier || o.trk), link: !!o.link, boxes: true, ddate: !!(o.at || o.dispAt), co: !!o.co, name: !!o.name, addr: !!(o.addr || o.city) };
   document.querySelectorAll('#waChk input').forEach(c => {
     const ok = avail[c.dataset.k]; c.disabled = !ok; c.parentElement.classList.toggle('na', !ok);
     c.checked = ok && c.dataset.k !== 'addr';
   });
+  const hasC = !!o.courier, pv = pocGet(o.courier);
+  let pOn = false; try{ pOn = localStorage.getItem(POC_ON_KEY) === '1'; }catch(e){}
+  $('waPocOn').disabled = !hasC; $('waPocOn').checked = hasC && pOn; $('waPoc').classList.toggle('na', !hasC);
+  $('waPocName').value = pv.name || ''; $('waPocPh').value = pv.phone || '';
+  pocUi();
   $('waTxt').hidden = true; $('waBub').hidden = false; $('waEdit').innerHTML = '&#9998; Edit text';
   $('waOv').hidden = false;
   waRefresh();
@@ -1581,6 +1614,8 @@ $('waWho').addEventListener('click', e => {
 $('waSaved').addEventListener('change', () => WA && waRefresh());
 $('waSeg').addEventListener('click', e => { const b = e.target.closest('button'); if(!b || !WA) return; WA.st = b.dataset.s; waRefresh(); });
 $('waChk').addEventListener('change', waRefresh);
+$('waPocOn').addEventListener('change', () => { try{ localStorage.setItem(POC_ON_KEY, $('waPocOn').checked ? '1' : '0'); }catch(e){} pocUi(); if(WA) waRefresh(); });
+['waPocName','waPocPh'].forEach(id => $(id).addEventListener('input', () => { if(!WA) return; pocSave(WA.o.courier, { name: $('waPocName').value.trim(), phone: $('waPocPh').value.trim() }); pocUi(); waRefresh(); }));
 $('waAll').addEventListener('change', () => { document.querySelectorAll('#waChk input').forEach(c => { if(!c.disabled) c.checked = $('waAll').checked; }); waRefresh(); });
 ['waEta','waNote','waNum','waCc'].forEach(id => $(id).addEventListener('input', () => WA && waRefresh()));
 $('waEdit').addEventListener('click', () => {
