@@ -27,6 +27,21 @@
   .gob{background:#16311F;color:#fff;border:0;border-radius:9px;padding:0 18px;min-height:40px;font:700 13.5px 'Inter';cursor:pointer}
   .search input.bad{border-color:#c0392b!important;background:#fdeeee}
   .chips{display:flex;gap:8px;margin:14px 0;flex-wrap:wrap;}
+  .row2 #fStatus{min-width:290px}.row2 #fType{min-width:190px}
+  .row2 #fStatus.on,.row2 #fType.on{border-color:var(--forest);background:#eef5f0;font-weight:600}
+  .ftags{display:flex;gap:6px;flex-wrap:wrap}
+  .ftag{display:inline-flex;align-items:center;gap:6px;background:var(--forest);color:#fff;border:0;border-radius:20px;padding:6px 12px;font:600 12px 'Inter';cursor:pointer}
+  .ftag b{font-weight:800;opacity:.85}
+  .adh{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:2px 0 12px;font-size:13px;color:var(--muted)}
+  .adh .gob{min-height:34px;font-size:12.5px}
+  .adg{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+  .adc{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px;cursor:pointer;transition:box-shadow .15s,border-color .15s}
+  .adc:hover{border-color:#1a7f45;box-shadow:0 4px 14px rgba(22,49,31,.12)}
+  .adc .t{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+  .adc h4{margin:0;font-size:14px;color:var(--ink);line-height:1.3}
+  .adc .bd{flex:none;background:#E3F3E8;color:#1a7f45;border-radius:20px;padding:3px 9px;font-size:11px;font-weight:700}
+  .adc small{display:block;color:var(--muted);font-size:12px;margin-top:6px}
+  .adc .bar{height:6px;border-radius:4px;background:#1a7f45;margin-top:10px}
   .chip{background:#fff;border:1px solid #d8d2c0;border-radius:20px;padding:6px 14px;font:600 12.5px 'Inter';cursor:pointer;color:var(--ink);}
   .chip.on{background:var(--forest);color:#fff;border-color:var(--forest);}
   .tiles{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:14px;}
@@ -399,6 +414,11 @@
     <div class="row2">
     <select id="fCompany" title="Sender Company (your client)"><option value="">Sender Company: All</option></select>
     <select id="fCourier"><option value="">Courier: All</option></select>
+    <select id="fStatus" title="Status"><option value="">Status: All</option>
+      <optgroup label="Order status"><option value="ready">Ready for dispatch</option><option value="transit">Dispatched / In transit</option><option value="ofd">Out for delivery</option><option value="delivered">Delivered</option><option value="prob">Problems</option></optgroup>
+      <optgroup label="Companies"><option value="alldel">&#9989; All delivered (100%)</option></optgroup></select>
+    <select id="fType" title="Type"><option value="">Type: All</option><option value="b2b">B2B</option><option value="b2c">B2C</option><option value="intl">International</option></select>
+    <span id="fTags" class="ftags"></span>
     <div class="vw" id="vw"><span class="vl">View</span>
       <div class="seg" id="vBy"><button type="button" data-v="co">&#127970; Company</button><button type="button" data-v="in">&#128100; Individual</button></div>
       <div class="seg" id="vLay"><button type="button" data-v="grid">&#9638; Grid</button><button type="button" data-v="list">&#9776; List</button></div>
@@ -406,17 +426,6 @@
     </div>
   </div>
 
-  <div class="chips" id="chips">
-    <button type="button" class="chip on" data-f="all">All</button>
-    <button type="button" class="chip" data-f="ready">Ready for dispatch</button>
-    <button type="button" class="chip" data-f="transit">Dispatched / In transit</button>
-    <button type="button" class="chip" data-f="ofd">Out for delivery</button>
-    <button type="button" class="chip" data-f="delivered">Delivered</button>
-    <button type="button" class="chip" data-f="prob">Problems</button>
-    <button type="button" class="chip" data-f="b2b">B2B</button>
-    <button type="button" class="chip" data-f="b2c">B2C</button>
-    <button type="button" class="chip" data-f="intl">International</button>
-  </div>
 
   <div class="tiles">
     <div class="tile"><b>Orders</b><span id="tOrders">0</span></div>
@@ -543,7 +552,7 @@ const SA_LINK_PREFIX = 'https://shreeanjani.co.in/tracking/?awb=';
 const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-let ORDERS = [], VIEW = [], FILTER = 'all', SEL = null;
+let ORDERS = [], VIEW = [], FILTER = 'all', SEL = null, ADG = [];
 
 /* ---------- read the Label Log rows (by header name, so column order does not matter) ---------- */
 const MON = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
@@ -631,25 +640,35 @@ function applyFilters(){
   const from = fv ? new Date(fv + 'T00:00') : null;
   const to = tv ? new Date(tv + 'T23:59:59') : null;
   const co = $('fCompany').value, cr = $('fCourier').value;
-  VIEW = ORDERS.filter(o => {
+  const BASE = ORDERS.filter(o => {
     if(from && (!o.at || o.at < from)) return false;
     if(to && (!o.at || o.at > to)) return false;
     if(co && coKey(o.client) !== coKey(co)) return false;   // Sender Company is the client reference (falls back to Company); spellings like ProFx / Profx count as one
     if(cr && o.courier !== cr) return false;
-    if(FILTER === 'ready' && !(o.st === 'ready' || o.st === 'held')) return false;
-    if(FILTER === 'transit' && !(o.st === 'transit' || o.st === 'partly')) return false;
-    if(FILTER === 'delivered' && o.st !== 'delivered') return false;
-    if(FILTER === 'ofd' && o.step !== 'Out for Delivery') return false;
-    if(FILTER === 'prob' && !o.problem) return false;
-    if(FILTER === 'b2b' && o.cat !== 'B2B') return false;
-    if(FILTER === 'b2c' && o.cat !== 'B2C') return false;
-    if(FILTER === 'intl' && !o.intl) return false;
     if(q){
       const hay = [o.id, o.name, o.sender, o.co, o.phone, o.trk, o.city, o.batch, o.src].join(' ').toLowerCase();
       if(!q.split(/\s+/).every(w => hay.includes(w))) return false;
     }
     return true;
   });
+  const ST = $('fStatus').value, TY = $('fType').value;
+  const tyOk = (o, t) => !t || (t === 'b2b' ? o.cat === 'B2B' : t === 'b2c' ? o.cat === 'B2C' : !!o.intl);
+  const stOk = (o, t) => !t || t === 'alldel' || (t === 'ready' ? (o.st === 'ready' || o.st === 'held') : t === 'transit' ? (o.st === 'transit' || o.st === 'partly') : t === 'delivered' ? o.st === 'delivered' : t === 'ofd' ? o.step === 'Out for Delivery' : !!o.problem);
+  const byType = BASE.filter(o => tyOk(o, TY));
+  ADG = groupsOf(byType).filter(g => !g.b2c && g.list.length && g.list.every(o => o.st === 'delivered'));
+  ADG.sort((a, b) => (b.last || 0) - (a.last || 0));
+  if(ST === 'alldel'){ const ks = new Set(ADG.map(g => g.k)); VIEW = byType.filter(o => ks.has(coKey(o.client || '')) && o.client); }
+  else VIEW = byType.filter(o => stOk(o, ST));
+  // counts in the dropdowns follow the other filters
+  [...$('fStatus').options].forEach(op => { const v = op.value, base = v ? (op.dataset.t || (op.dataset.t = op.textContent)) : 'Status: All';
+    const n = v === 'alldel' ? ADG.length : byType.filter(o => stOk(o, v)).length; op.textContent = v === 'alldel' ? `${base} · ${n} compan${n === 1 ? 'y' : 'ies'}` : `${base} (${n})`; });
+  const forType = ST === 'alldel' ? BASE : BASE.filter(o => stOk(o, ST));
+  [...$('fType').options].forEach(op => { const v = op.value, base = v ? (op.dataset.t || (op.dataset.t = op.textContent)) : 'Type: All';
+    op.textContent = `${base} (${forType.filter(o => tyOk(o, v)).length})`; });
+  $('fStatus').classList.toggle('on', !!ST); $('fType').classList.toggle('on', !!TY);
+  const lab = sel => (sel.options[sel.selectedIndex].dataset.t || '').replace(/^\u2705\s*/, '');
+  $('fTags').innerHTML = (ST ? `<button type="button" class="ftag" data-x="fStatus">Status: ${esc(lab($('fStatus')))} <b>&#10005;</b></button>` : '')
+    + (TY ? `<button type="button" class="ftag" data-x="fType">Type: ${esc(lab($('fType')))} <b>&#10005;</b></button>` : '');
   render();
 }
 
@@ -707,11 +726,22 @@ function renderView(){
   $('rfBtn').hidden = false; if(!RF) $('rfBtn').innerHTML = FROMCO ? '&#8635; Refresh statuses' : '&#8635; Refresh Shree Anjani statuses'; $('upBtn').hidden = !!FROMCO;
   if(!FROMCO && !RF){ $('rfM').hidden = true; $('rfP').hidden = true; }
   if(FROMCO){ $('cardT').textContent = FROMCO.name; $('cnt').textContent = `(${VIEW.length} order${VIEW.length === 1 ? '' : 's'})`; }
-  const table = VM.by === 'in' && VM.lay === 'list';
+  const AD = $('fStatus').value === 'alldel' && !FROMCO;
+  const table = VM.by === 'in' && VM.lay === 'list' && !AD;
   $('tblWrap').hidden = !table; $('alt').hidden = table;
-  $('mainBox').classList.toggle('wide', VM.by === 'co');
+  $('mainBox').classList.toggle('wide', VM.by === 'co' || AD);
   if(table){ if(!FROMCO) $('cardT').textContent = 'Orders'; return; }
   const box = $('alt');
+  if(AD){
+    const dt = d => d ? d.toLocaleDateString('en-IN', {day:'2-digit', month:'short', year:'numeric'}) : '';
+    $('cardT').textContent = 'All delivered (100%)';
+    $('cnt').textContent = `(${ADG.length} compan${ADG.length === 1 ? 'y' : 'ies'} · ${VIEW.length} orders)`;
+    box.innerHTML = ADG.length ? `<div class="adh"><span>Companies where every order is delivered. Click a company to see its orders.</span><button type="button" class="gob" data-ad="xl">&#11015; Download list (Excel)</button></div>
+      <div class="adg">${ADG.map(g => `<div class="adc" data-k="${esc(g.k)}" data-a="orders"><div class="t"><h4>${esc(g.name)}</h4><span class="bd">100% delivered</span></div>
+        <small>${g.list.length} of ${g.list.length} delivered · last ${esc(dt(g.last))}</small><div class="bar"></div></div>`).join('')}</div>`
+      : '<div class="alt-empty">No company has all its orders delivered for these filters.</div>';
+    return;
+  }
   if(VM.by === 'in'){
     if(!FROMCO) $('cardT').textContent = 'Orders';
     const shown = VIEW.slice(0, 300);
@@ -931,6 +961,16 @@ function needXLSX(){
   if(window.XLSX) return Promise.resolve(true);
   if(!XLSX_P) XLSX_P = new Promise(res => { const sc = document.createElement('script'); sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'; sc.onload = () => res(true); sc.onerror = () => { XLSX_P = null; res(false); }; document.head.appendChild(sc); });
   return XLSX_P;
+}
+async function adExcel(){
+  await needXLSX();
+  if(typeof XLSX === 'undefined'){ alert('Excel tool did not load. Check the internet and try again.'); return; }
+  const dt = d => d ? d.toLocaleDateString('en-IN', {day:'2-digit', month:'short', year:'numeric'}) : '';
+  const data = [['Company','Orders','Delivered','Last order','Couriers']];
+  ADG.forEach(g => data.push([g.name, g.list.length, g.list.length, dt(g.last), g.couriers.join(', ')]));
+  const ws = XLSX.utils.aoa_to_sheet(data); ws['!cols'] = [{wch:40},{wch:9},{wch:10},{wch:14},{wch:26}];
+  const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'All delivered');
+  XLSX.writeFile(wb, `BoxUp All delivered companies ${dt(new Date()).replace(/\s+/g,'-')} (${ADG.length}).xlsx`);
 }
 async function downloadExcel(){
   await needXLSX();
@@ -1661,16 +1701,15 @@ $('qDate').onchange = () => {
   else if(f){ $('from').value = iso(f); $('to').value = iso(to); }
   applyFilters();
 };
-$('chips').addEventListener('click', e => {
-  const b = e.target.closest('.chip'); if(!b) return;
-  FILTER = b.dataset.f; document.querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x === b)); applyFilters();
-});
+['fStatus','fType'].forEach(id => $(id).addEventListener('change', () => { FROMCO = null; applyFilters(); }));
+$('fTags').addEventListener('click', e => { const b = e.target.closest('[data-x]'); if(!b) return; $(b.dataset.x).value = ''; FROMCO = null; applyFilters(); });
 $('bkBtn').addEventListener('click', backToCompanies);
 $('rfBtn').addEventListener('click', refreshCompany);
 $('vBy').addEventListener('click', e => { const b = e.target.closest('button'); if(b) setView(b.dataset.v, null); });
 $('vLay').addEventListener('click', e => { const b = e.target.closest('button'); if(b) setView(null, b.dataset.v); });
 $('alt').addEventListener('click', e => {
   if(e.target.closest('a')) return;
+  if(e.target.closest('[data-ad=xl]')) return adExcel();
   const oc = e.target.closest('[data-n]');
   const act = e.target.closest('[data-a]'), holder = e.target.closest('[data-k]');
   if(act && holder){
@@ -1778,7 +1817,7 @@ $('rsBtn').addEventListener('click', () => {
   if(typeof drClose === 'function' && DR.open) drClose();
   $('q').value = ''; $('fCompany').value = ''; $('fCourier').value = '';
   const r = drRange('30'); $('from').value = drIso(r[0]); $('to').value = drIso(r[1]); $('qDate').value = '';
-  FILTER = 'all'; document.querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x.dataset.f === 'all'));
+  FILTER = 'all'; $('fStatus').value = ''; $('fType').value = '';
   FROMCO = null; OPENCO = ''; SEL = null;
   VM = {by:'in', lay:'list'}; try { localStorage.setItem(VKEY, JSON.stringify(VM)); } catch(e){}
   if(!$('rfM').hidden && !RF){ $('rfM').hidden = true; }
