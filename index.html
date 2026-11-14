@@ -74,6 +74,27 @@
   .tl div{position:relative;margin-bottom:12px;}
   .tl div:before{content:"";position:absolute;left:-21px;top:3px;width:12px;height:12px;border-radius:50%;background:#ccc;}
   .tl div.ok:before{background:#2E7D32;}
+  .tl div.rsx:before{background:#d9822b;} .tl div.rsx b{color:#a8550c;} .tl div.rsx b a{color:#a8550c;}
+  .rsbtn{position:absolute;top:18px;right:118px;background:#fff;color:#a8550c;border:1.5px solid #d9822b;border-radius:9px;padding:7px 12px;font:700 13px 'Inter';cursor:pointer;display:flex;gap:6px;align-items:center}
+  .rsbtn:hover{background:#fff6ea}
+  .rstag{display:inline-block;background:#fde8d4;color:#a8550c;border-radius:9px;padding:1px 7px;font-size:10px;font-weight:800;letter-spacing:.04em;margin-left:6px;vertical-align:middle}
+  .rsof{display:inline-block;margin-top:6px;background:#fff6ea;border:1px solid #f0c27a;color:#7a4e12;border-radius:8px;padding:5px 9px;font-size:12px;cursor:pointer}
+  .uh.rs{background:linear-gradient(135deg,#7a3e08,#a8550c)}
+  .rsl{background:#fff6ea;border:1px solid #f0c27a;border-radius:10px;padding:9px 12px;font-size:12.5px;color:#7a4e12;margin-bottom:6px}
+  .rschips{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 4px}
+  .rschip{border:1px solid #d8d2c0;background:#fff;border-radius:16px;padding:6px 12px;font:600 12.5px 'Inter';cursor:pointer;color:#1d2a21}
+  .rschip.on{background:#16311F;color:#fff;border-color:#16311F}
+  .rschip.nw{border-color:#2e7d3c;color:#1a7f45;background:#eef7f0}.rschip.nw.on{background:#1a7f45;color:#fff}
+  .rsband{margin-top:8px;border:1.5px solid #111;border-radius:6px;overflow:hidden}
+  .rsband div{background:#000;color:#fff;font:900 22px 'Arial Black',Arial,sans-serif;text-align:center;padding:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rsband small{display:block;font-size:8.5px;text-align:center;padding:3px;color:#222}
+  .rsband.off div{background:#f1efe8;color:#9a9483;font:600 12px 'Inter'}
+  .rsrd{display:flex;gap:9px;align-items:flex-start;border:1px solid #e4dfd0;border-radius:10px;padding:9px 12px;font-size:13px;margin-top:6px;cursor:pointer;background:#fff}
+  .rsrd.on{border-color:#16311F;background:#f5f9f6}.rsrd.dis{opacity:.4;cursor:not-allowed}
+  .rsrd input{margin-top:3px}.rsrd small{display:block;color:#8a8577;font-size:11.5px}
+  .rsck{display:flex;gap:8px;align-items:center;font-size:13px;margin-top:10px}
+  .rssum{background:#eef6f0;border-radius:10px;padding:9px 12px;font-size:12.5px;color:#1c6b33;margin-top:10px}
+  .ufoot .rsgo{background:#a8550c;color:#fff;border-color:#a8550c}
   .tl small{display:block;color:var(--muted);}
   .btns{margin-top:6px;display:flex;flex-wrap:wrap;gap:6px;}
   .btn{border:1px solid #d8d2c0;background:#fff;border-radius:8px;padding:7px 12px;font:600 12.5px 'Inter';cursor:pointer;color:var(--ink);text-decoration:none;}
@@ -103,7 +124,7 @@
   /* ---------- Update pop-up + live tracking ---------- */
   .det{position:relative}
   .updbtn{position:absolute;top:18px;right:18px;background:#16311F;color:#fff;border:0;border-radius:9px;padding:8px 14px;font:700 13px 'Inter';display:flex;gap:6px;align-items:center;box-shadow:0 4px 12px rgba(22,49,31,.25);cursor:pointer}
-  .det h3{padding-right:110px}
+  .det h3{padding-right:220px;min-height:42px}
   .probx{display:flex;gap:8px;align-items:center;border-radius:10px;padding:8px 12px;font-size:13px;font-weight:600;margin:10px 0 2px}
   .csl{font-size:12px;color:#7A776C;margin-top:6px}
   .uov{position:fixed;inset:0;background:rgba(16,28,21,.55);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;z-index:80;padding:16px}
@@ -611,6 +632,7 @@ function buildOrders(headers, rows){
     else if(step !== 'Ready' && st !== 'partly') st = 'transit';
     return {
       step, problem, note: g(r, ix.note), upd: g(r, ix.upd), cs: g(r, ix.cs),
+      reOf: ((/^reship of\s+([^\s·]+)/i.exec(g(r, ix.src)) || [])[1] || ''), reWhy: ((/^reship of\s+[^\s·]+\s*·\s*(.+)$/i.exec(g(r, ix.src)) || [])[1] || ''),
       n, id, at: parseDate(g(r, ix.at)), atText: g(r, ix.at), src: g(r, ix.src), hub: g(r, ix.hub), name: g(r, ix.name), co: g(r, ix.co), sender: g(r, ix.sender), client: g(r, ix.sender) || g(r, ix.co),
       phone: g(r, ix.phone), alt: g(r, ix.alt), addr: g(r, ix.addr), city: g(r, ix.city), state: g(r, ix.state), pin: g(r, ix.pin),
       type: g(r, ix.type), mode: g(r, ix.mode), courier, trk, link: link.split(/,\s*/)[0], boxes: parseInt(g(r, ix.boxes), 10) || 1,
@@ -681,7 +703,7 @@ function render(){
   $('cnt').textContent = `(${VIEW.length}${VIEW.length !== ORDERS.length ? ' of ' + ORDERS.length : ''})`;
   const shown = VIEW.slice(0, 500);
   $('rows').innerHTML = shown.length ? shown.map(o => `<tr class="row${SEL === o ? ' sel' : ''}" data-n="${o.n}">
-      <td class="nw"><b>${esc(o.id)}</b><small>${o.cat}${o.intl ? ' · Intl' : ''}</small></td>
+      <td class="nw"><b>${esc(o.id)}</b>${o.reOf ? '<span class="rstag">RESHIP</span>' : ''}<small>${o.cat}${o.intl ? ' · Intl' : ''}</small></td>
       <td>${esc(o.client || (o.cat === 'B2C' ? '(B2C)' : ''))}<small>${esc([o.sender && o.co ? o.co : '', o.name].filter(Boolean).join(' · '))}</small></td>
       <td class="c">${o.hub ? `<span class="hub">${esc(o.hub)}</span>` : ''}</td>
       <td>${esc(o.courier) || '<span class="mu">Not set</span>'}</td>
@@ -746,7 +768,7 @@ function renderView(){
     if(!FROMCO) $('cardT').textContent = 'Orders';
     const shown = VIEW.slice(0, 300);
     box.innerHTML = shown.length ? `<div class="og">${shown.map(o => `<div class="oc${SEL === o ? ' sel' : ''}" data-n="${o.n}">
-        <div class="r1"><span class="id">${esc(o.id)}</span>${stChip(o)}</div>
+        <div class="r1"><span class="id">${esc(o.id)}${o.reOf ? '<span class="rstag">RESHIP</span>' : ''}</span>${stChip(o)}</div>
         <div class="nm">${esc(o.name || '-')}</div><div class="co">${esc([o.client, o.city].filter(Boolean).join(' · ') || o.cat)}</div>
         <div class="r3"><span>&#128666; ${esc(o.courier || 'Not set')}${o.trk ? ' · ' + esc(o.trk.split(/[,\s]+/)[0]) : ''}</span><span>${esc(o.at ? o.at.toLocaleDateString('en-IN', {day:'2-digit', month:'short'}) : '')}</span></div></div>`).join('')}</div>`
       + (VIEW.length > 300 ? `<div class="alt-empty">Showing the newest 300. Narrow the search or dates to see more.</div>` : '')
@@ -921,7 +943,8 @@ function showDetail(o){
   };
   const pi = o.problem && PROB_INFO[o.problem];
   const saTrack = /shree\s*anjani/i.test(o.courier) && o.trk;
-  $('det').innerHTML = `<button class="updbtn" id="updBtn">&#9998; Update</button><h3>${esc(o.id)}</h3>
+  const rsNew = ORDERS.filter(x => x.reOf && x.reOf === o.id && x !== o);
+  $('det').innerHTML = `<button class="rsbtn" id="rsBtn" title="Send this order again, or make a new order from it">&#8635; Reship</button><button class="updbtn" id="updBtn">&#9998; Update</button><h3>${esc(o.id)}</h3>
     <div class="sub">${esc([o.sender ? 'Sender: ' + o.sender : '', o.co, o.name, o.phone].filter(Boolean).join(' · '))}</div>
     <div class="kv">${esc(addr)}${addr ? ' · ' : ''}<b>${o.boxes} box${o.boxes > 1 ? 'es' : ''}</b><br>
       Courier <b>${esc(o.courier || 'Not set')}</b>${o.trk ? ` · AWB ${o.link ? `<a href="${esc(o.link)}" target="_blank" rel="noopener">${esc(o.trk)}</a>` : esc(o.trk)}` : ''}
@@ -930,13 +953,17 @@ function showDetail(o){
     ${o.note ? `<div class="csl">&#128221; ${esc(o.note)}</div>` : ''}
     ${o.cs ? `<div class="csl">&#128666; Courier says: ${esc(o.cs)}</div>` : ''}
     ${o.upd ? `<div class="csl">&#9998; Updated ${esc(o.upd)}</div>` : ''}
-    <div class="tl">${STEPS.map((s, i) => `<div class="${i <= k ? 'ok' : ''}"><b>${s === 'Ready' ? 'Label printed' : s === 'Dispatched' ? (o.st === 'partly' ? 'Partly dispatched' : 'Dispatched from gate') : s}</b><small>${sub[s]}</small></div>`).join('')}</div>
+    ${o.reOf ? `<div class="rsof" id="rsOf">&#8635; Reship of <b>${esc(o.reOf)}</b>${o.reWhy ? ' · ' + esc(o.reWhy) : ''}</div>` : ''}
+    <div class="tl">${STEPS.map((s, i) => `<div class="${i <= k ? 'ok' : ''}"><b>${s === 'Ready' ? 'Label printed' : s === 'Dispatched' ? (o.st === 'partly' ? 'Partly dispatched' : 'Dispatched from gate') : s}</b><small>${sub[s]}</small></div>`).join('')}${rsNew.map(x => `<div class="ok rsx"><b>&#8635; Reshipped as <a href="#" data-rsn="${x.n}">${esc(x.id)}</a></b><small>${esc([fmtD(x.at), x.reWhy, x.boxes + ' box' + (x.boxes > 1 ? 'es' : ''), x.trk ? 'AWB ' + x.trk.split(/[,\s]+/)[0] : ''].filter(Boolean).join(' · '))}</small></div>`).join('')}</div>
     <div class="btns">
       ${saTrack ? `<button class="btn" id="trkBtn">&#128279; Track on courier site</button>` : o.link ? `<a class="btn" href="${esc(o.link)}" target="_blank" rel="noopener">&#128279; Track on courier site</a>` : `<button class="btn" disabled>&#128279; Track on courier site</button>`}
       <button class="btn" id="cpBtn" ${o.link || o.trk ? '' : 'disabled'}>&#128203; Copy tracking link</button>
       <button class="btn" id="waBtn">&#128172; Share on WhatsApp</button>
     </div>`;
   $('updBtn').onclick = () => updOpen(o);
+  $('rsBtn').onclick = () => rsOpen(o);
+  if($('rsOf')) $('rsOf').onclick = () => { const x = ORDERS.find(y => y.id === o.reOf); if(x){ showDetail(x); if(typeof renderView === 'function') renderView(); } };
+  $('det').querySelectorAll('[data-rsn]').forEach(a => a.onclick = e => { e.preventDefault(); const x = ORDERS.find(y => y.n === +a.dataset.rsn); if(x){ showDetail(x); if(typeof renderView === 'function') renderView(); } });
   if($('trkBtn')) $('trkBtn').onclick = () => trkConfirm(o);
   $('waBtn').onclick = () => waOpen(o);
   const cp = $('cpBtn');
@@ -1187,6 +1214,126 @@ function scNames(){
   ORDERS.forEach(x => { const n = (x.client || '').trim(); if(!n) return; const k = n.toLowerCase().replace(/[^a-z0-9]/g, ''); const e = m.get(k) || {}; e[n] = (e[n] || 0) + 1; m.set(k, e); });
   return [...m.values()].map(e => Object.keys(e).sort((a, b) => e[b] - e[a])[0]).sort((a, b) => a.localeCompare(b));
 }
+/* ---------- Reship: a new order made from this one; BoxUp Labels prints it ---------- */
+const RS_WHY = ['Damaged in transit', 'Lost / not delivered', 'Returned (RTO)', 'Wrong / missing item', 'Customer request', 'New order', 'Other'];
+const RS_NOTES = ['REPLACEMENT', 'RESHIPMENT', 'FRAGILE', 'HANDLE WITH CARE', 'DIWALI GIFT', 'FESTIVE GIFT'];
+const RS_COURIERS = ['Shree Anjani', 'Porter', 'In-house', 'DTDC', 'Blue Dart', 'Delhivery', 'Professional Couriers', 'Trackon', 'DHL', 'India Post'];
+const LABELS_URL = 'https://logisticsboxup.github.io/boxup-labels/';
+var RS = null;
+const rsIsSA = c => /shree\s*anjani/i.test(c || ''), rsIsPor = c => /porter|in-?house|self/i.test(c || '');
+function rsNextId(id){ let k = 1; while(ORDERS.some(x => x.id.toLowerCase() === (id + '-R' + k).toLowerCase())) k++; return id + '-R' + k; }
+function rsOpen(o){
+  const auto = rsNextId(o.id);
+  RS = { o, auto, why: 'Damaged in transit', notes: ['REPLACEMENT'], noteTyped: null, awb: rsIsSA(o.courier) ? 'sa' : rsIsPor(o.courier) ? 'none' : 'type', oldNote: true,
+    f: { id: auto, boxes: o.boxes, courier: RS_COURIERS.find(c => c.toLowerCase() === String(o.courier || '').toLowerCase()) || (rsIsSA(o.courier) ? 'Shree Anjani' : o.courier || ''),
+         name: o.name, phone: String(o.phone || '').replace(/\D/g, '').slice(-10), alt: o.alt, addr: o.addr, pin: o.pin, city: o.city, state: o.state,
+         mode: o.mode || 'Surface Shipping', sender: o.sender || (o.cat === 'B2C' ? '' : o.co), note: '', trk: '' } };
+  rsDraw();
+}
+function rsNoteText(){ return RS.noteTyped !== null ? RS.noteTyped : RS.notes.join(' · '); }
+function rsKeep(){ if(!RS || !$('rsId')) return; const F = RS.f;
+  [['rsId','id'],['rsBoxes','boxes'],['rsCo','courier'],['rsName','name'],['rsPhone','phone'],['rsAlt','alt'],['rsAddr','addr'],['rsPin','pin'],['rsCity','city'],['rsState','state'],['rsMode','mode'],['rsSender','sender'],['rsNote','note'],['rsTrk','trk']]
+    .forEach(([id, k]) => { if($(id)) F[k] = $(id).value; });
+  if($('rsOld')) RS.oldNote = $('rsOld').checked;
+}
+function rsDraw(){
+  if(!RS || RS.drawing) return;
+  RS.drawing = true;
+  try { const ae = document.activeElement; if(ae && ae.blur && $('rsDlg') && $('rsDlg').contains(ae)) ae.blur(); rsDraw2(); } finally { if(RS) RS.drawing = false; }
+}
+function rsDraw2(){
+  const o = RS.o, F = RS.f, isNew = RS.why === 'New order', note = rsNoteText().trim().toUpperCase();
+  const sa = rsIsSA(F.courier), por = rsIsPor(F.courier);
+  if(RS.awb === 'sa' && !sa) RS.awb = por ? 'none' : 'type';
+  if(RS.awb === 'none' && !por) RS.awb = sa ? 'sa' : 'type';
+  const boxes = Math.max(1, parseInt(F.boxes, 10) || 1);
+  const inp = (id, k, ph, extra) => `<input class="uin" id="${id}" value="${esc(F[k] == null ? '' : String(F[k]))}" placeholder="${esc(ph || '')}" autocomplete="off" ${extra || ''}>`;
+  const couriers = [...new Set(RS_COURIERS.concat(F.courier ? [F.courier] : []))];
+  ov(`<div class="udlg" id="rsDlg">
+    <div class="uh rs"><span class="ic">&#8635;</span><div><h3>${isNew ? 'New order from' : 'Reship order ·'} ${esc(o.id)}</h3><div class="s">${isNew ? 'A fresh order for the same customer. Change anything, then print the label.' : 'A new order is made from this one. Change anything, then print the new label. The old order stays as it is.'}</div></div>
+      <button class="x" id="rsX" title="Close">&#10005;</button></div>
+    <div class="ub">
+      <div class="rsl">&#128279; ${isNew ? 'From' : 'Reship of'} <b>${esc(o.id)}</b> · ${esc(stLabel(o))}${o.delivOn ? ' ' + esc(fmtD(o.delivOn)) : ''} · ${esc(o.courier || 'No courier')} · ${o.boxes} box${o.boxes > 1 ? 'es' : ''}</div>
+      <div class="ulb" style="margin-top:12px">Why reship?</div>
+      <div class="rschips" id="rsWhy">${RS_WHY.map(w => `<button type="button" class="rschip${w === 'New order' ? ' nw' : ''}${RS.why === w ? ' on' : ''}" data-w="${esc(w)}">${w === 'New order' ? '&#43; New order' : esc(w)}</button>`).join('')}</div>
+      <div class="ulb" style="margin:14px 0 8px">${isNew ? 'New order' : 'Reship order'}</div>
+      <div class="ug2">
+        <div class="uf2"><label>New Order ID</label>${inp('rsId', 'id', isNew ? 'Type the new Order ID' : '')}</div>
+        <div class="uf2" style="display:grid;grid-template-columns:90px 1fr;gap:10px"><div><label>Boxes</label>${inp('rsBoxes', 'boxes', '', 'type="number" min="1" max="500"')}</div>
+          <div><label>Courier</label><select class="uin" id="rsCo"><option value="">Not set</option>${couriers.map(c => `<option${F.courier === c ? ' selected' : ''}>${esc(c)}</option>`).join('')}</select></div></div>
+        <div class="uf2"><label>Recipient</label>${inp('rsName', 'name')}</div>
+        <div class="uf2" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div><label>Phone</label>${inp('rsPhone', 'phone', '10 digits', 'inputmode="numeric"')}</div><div><label>Alt number</label>${inp('rsAlt', 'alt')}</div></div>
+        <div class="uf2 uspan2"><label>Address</label>${inp('rsAddr', 'addr')}</div>
+        <div class="uf2" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div><label>Pincode</label>${inp('rsPin', 'pin', '6 digits', 'inputmode="numeric" maxlength="6"')}</div><div><label>City</label>${inp('rsCity', 'city')}</div></div>
+        <div class="uf2" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div><label>State</label>${inp('rsState', 'state')}</div>
+          <div><label>Mode</label><select class="uin" id="rsMode">${['Air Shipping', 'Surface Shipping', 'Express Ground'].map(m => `<option${F.mode === m ? ' selected' : ''}>${m}</option>`).join('')}</select></div></div>
+        <div class="uf2"><label>Sender company</label><input class="uin" id="rsSender" list="uScList2" value="${esc(F.sender || '')}" autocomplete="off"><datalist id="uScList2">${scNames().map(n => `<option value="${esc(n)}">`).join('')}</datalist></div>
+        <div class="uf2"><label>Note (optional)</label>${inp('rsNote', 'note', isNew ? 'e.g. repeat gift' : 'e.g. 2 of 5 hampers broken, resend', 'maxlength="200"')}</div>
+      </div>
+      <div class="ulb" style="margin:16px 0 6px">Note on the label <span style="text-transform:none;letter-spacing:0;font-weight:600">(this label only, printed as a black band; empty = no band)</span></div>
+      <input class="uin" id="rsLn" value="${esc(rsNoteText())}" placeholder="No note" autocomplete="off" style="text-transform:uppercase;font-weight:700;letter-spacing:.04em">
+      <div class="rschips" id="rsNotes">${RS_NOTES.map(n => `<button type="button" class="rschip${RS.noteTyped === null && RS.notes.includes(n) ? ' on' : ''}" data-n="${n}">${n}</button>`).join('')}<button type="button" class="rschip" data-n="">No note</button></div>
+      <div class="rsband${note ? '' : ' off'}"><div>${note ? esc(note) : 'No note band on this label'}</div><small>THIS IS AN AUTO-GENERATED LABEL AND DOES NOT NEED SIGNATURE.</small></div>
+      <div class="ulb" style="margin:16px 0 2px">Tracking ID / AWB</div>
+      <label class="rsrd${RS.awb === 'sa' ? ' on' : ''}${sa ? '' : ' dis'}"><input type="radio" name="rsAwb" value="sa" ${RS.awb === 'sa' ? 'checked' : ''} ${sa ? '' : 'disabled'}><span><b>New Shree Anjani AWB${boxes > 1 ? 's' : ''} (automatic)</b><small>Next free AWB${boxes > 1 ? 's' : ''} from your allotment${boxes > 1 ? ' · one per box' : ''}</small></span></label>
+      <label class="rsrd${RS.awb === 'type' ? ' on' : ''}"><input type="radio" name="rsAwb" value="type" ${RS.awb === 'type' ? 'checked' : ''}><span><b>Type a tracking ID</b><small>Other couriers (comma between IDs for one per box)</small>${RS.awb === 'type' ? `<input class="uin" id="rsTrk" value="${esc(F.trk || '')}" placeholder="Tracking ID" style="margin-top:6px" autocomplete="off">` : ''}</span></label>
+      <label class="rsrd${RS.awb === 'none' ? ' on' : ''}${por ? '' : ' dis'}"><input type="radio" name="rsAwb" value="none" ${RS.awb === 'none' ? 'checked' : ''} ${por ? '' : 'disabled'}><span><b>No tracking ID</b><small>Porter / In-house</small></span></label>
+      ${isNew ? '' : `<label class="rsck"><input type="checkbox" id="rsOld" ${RS.oldNote ? 'checked' : ''}> Add a "Reshipped as ${esc(F.id || '…')}" note on ${esc(o.id)} in the Label Log</label>`}
+      <div class="rssum"><b>${isNew ? 'New order' : 'Reship'} ${esc(F.id || '(no Order ID yet)')} · ${boxes} label${boxes > 1 ? 's' : ''}</b> · BoxUp Labels opens in a new tab to print it. It then shows in the Order Tracker and Manage Orders.</div>
+    </div>
+    <div class="uerr" id="rsErr"></div>
+    <div class="ufoot"><span class="hint">&#128424; Printed and saved by BoxUp Labels</span>
+      <button class="btn" id="rsCancel">Cancel</button><button class="btn rsgo" id="rsGo">&#8635; Create &amp; print ${isNew ? 'label' : 'reship label'}</button></div>
+  </div>`);
+  const dlg = $('rsDlg');
+  $('rsX').onclick = $('rsCancel').onclick = () => { RS = null; ov(''); };
+  $('rsWhy').onclick = e => { const b = e.target.closest('[data-w]'); if(!b) return; rsKeep();
+    const was = RS.why; RS.why = b.dataset.w;
+    if(RS.why === 'New order' && was !== 'New order'){ if(RS.f.id === RS.auto) RS.f.id = ''; if(RS.noteTyped === null && RS.notes.join() === 'REPLACEMENT') RS.notes = []; }
+    if(RS.why !== 'New order' && was === 'New order'){ if(!RS.f.id) RS.f.id = RS.auto; if(RS.noteTyped === null && !RS.notes.length) RS.notes = ['REPLACEMENT']; }
+    rsDraw(); };
+  $('rsNotes').onclick = e => { const b = e.target.closest('[data-n]'); if(!b) return; rsKeep(); const n = b.dataset.n;
+    if(!n){ RS.notes = []; RS.noteTyped = null; }
+    else { if(RS.noteTyped !== null){ RS.notes = []; RS.noteTyped = null; } RS.notes = RS.notes.includes(n) ? RS.notes.filter(x => x !== n) : RS.notes.concat(n); }
+    rsDraw(); };
+  $('rsLn').oninput = () => { RS.noteTyped = $('rsLn').value; const t = RS.noteTyped.trim().toUpperCase(), bd = dlg.querySelector('.rsband');
+    bd.classList.toggle('off', !t); bd.firstElementChild.textContent = t || 'No note band on this label';
+    dlg.querySelectorAll('#rsNotes .rschip').forEach(c => c.classList.remove('on')); };
+  dlg.querySelectorAll('input[name=rsAwb]').forEach(r => r.onchange = () => { rsKeep(); RS.awb = r.value; rsDraw(); });
+  $('rsCo').onchange = () => { rsKeep(); const c = RS.f.courier; RS.awb = rsIsSA(c) ? 'sa' : rsIsPor(c) ? 'none' : 'type'; rsDraw(); };
+  $('rsBoxes').onchange = () => { rsKeep(); rsDraw(); };
+  $('rsId').onchange = () => { rsKeep(); rsDraw(); };
+  $('rsGo').onclick = rsGo;
+}
+function rsGo(){
+  rsKeep();
+  const F = RS.f, o = RS.o, isNew = RS.why === 'New order', err = [];
+  const id = String(F.id || '').trim(), phone = String(F.phone || '').replace(/\D/g, '');
+  if(!id) err.push('type the new Order ID');
+  else if(id.toLowerCase() === o.id.toLowerCase()) err.push('the new Order ID must be different from ' + o.id);
+  if(!String(F.name || '').trim()) err.push('recipient is empty');
+  if(phone.length < 10) err.push('phone needs 10 digits');
+  if(!String(F.addr || '').trim()) err.push('address is empty');
+  if(!/^\d{6}$/.test(String(F.pin || '').trim()) && !o.intl) err.push('pincode must be 6 digits');
+  if(RS.awb === 'type' && rsIsSA(F.courier) && !String(F.trk || '').trim()) err.push('type the tracking ID or pick automatic AWB');
+  if(err.length){ $('rsErr').textContent = 'To fix: ' + err.join(' · '); return; }
+  const P = { v: 1, ts: Date.now(), reship: !isNew, why: RS.why, from: { id: o.id, name: o.name, sender: o.sender || '', co: o.co || '' },
+    orderid: id, name: String(F.name).trim(), phone: phone.slice(-10), alt: String(F.alt || '').trim(), address: String(F.addr).trim(), pincode: String(F.pin).trim(),
+    city: String(F.city || '').trim(), state: String(F.state || '').trim(), courier: F.courier || '', mode: F.mode || 'Surface Shipping',
+    totalpkg: Math.min(500, Math.max(1, parseInt(F.boxes, 10) || 1)), sender: String(F.sender || '').trim(), company: o.co || '',
+    awb: RS.awb, trackid: RS.awb === 'type' ? String(F.trk || '').trim() : '', labelNote: rsNoteText().trim().toUpperCase(), note: String(F.note || '').trim(),
+    oldNote: !isNew && RS.oldNote };
+  let b64 = '';
+  try { localStorage.setItem('boxup.reship', JSON.stringify(P)); } catch(e){}
+  try { b64 = btoa(unescape(encodeURIComponent(JSON.stringify(P)))); } catch(e){}
+  const w = window.open(LABELS_URL + '#reship=' + b64, '_blank');
+  ov(`<div class="udlg sm"><div class="uh rs"><span class="ic">&#8635;</span><div><h3>${w ? 'Opened BoxUp Labels' : 'Open BoxUp Labels'}</h3><div class="s">${esc(id)} · ${P.totalpkg} label${P.totalpkg > 1 ? 's' : ''}</div></div></div>
+    <div class="cfb" style="padding:18px 24px;font-size:14px;line-height:1.5">${w ? 'BoxUp Labels is open in a new tab with this order filled in. Press <b>Print</b> there. The new order shows here after the next refresh.'
+      : `Your browser blocked the new tab. <a href="${esc(LABELS_URL + '#reship=' + b64)}" target="_blank" rel="noopener"><b>Open BoxUp Labels</b></a> and press Print there.`}</div>
+    <div class="cff"><button class="btn g" id="rsOk">OK</button></div></div>`);
+  $('rsOk').onclick = () => { RS = null; ov(''); setTimeout(load, 500); };
+}
+
 function updOpen(o){ UP = {o, step:o.step, problem:o.problem, edit:false, open:false}; updDraw(true); }
 function updDraw(first){
   const o = UP.o, k = STEPS.indexOf(UP.step), pi = UP.problem && PROB_INFO[UP.problem];
