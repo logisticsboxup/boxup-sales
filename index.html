@@ -276,14 +276,22 @@
   .sh-file .xl{flex:none;width:34px;height:40px;border-radius:5px;background:#1d7a44;color:#fff;font:800 11px 'Inter';display:flex;align-items:center;justify-content:center;}
   .sh-file.trk .xl{background:var(--forest);font-size:10px}
   .sh-file b{font-size:13px;word-break:break-word;} .sh-file small{display:block;color:var(--muted);font-size:12px;margin-top:2px;}
-  .sh-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .sh-opts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+  .sh-opt.xo.on{border-color:#1d6f42;background:#EEF7F1;box-shadow:0 0 0 1px #1d6f42 inset;}
+  .xl-ic{display:inline-flex;width:22px;height:26px;border-radius:4px;background:#1d6f42;color:#fff;font:800 8px 'Inter';align-items:flex-end;justify-content:center;padding-bottom:3px;box-sizing:border-box;flex:none;}
+  .sh-x{margin-top:4px;}
+  .sh-chips{display:flex;flex-wrap:wrap;gap:7px;}
+  .sh-ch{border:1.5px solid #d0cabb;border-radius:16px;padding:5px 11px;font:600 12.5px 'Inter';color:#444;background:#fff;cursor:pointer;}
+  .sh-ch.on{border-color:var(--forest);background:var(--forest);color:#fff;}
+  .sh-ch.on::before{content:'\2713  ';}
+  .wa-ft .go.xg{background:#1d6f42;border-color:#17593a;}
   .sh-opt{display:flex;gap:9px;align-items:flex-start;border:1.5px solid #d8d2c0;border-radius:10px;padding:10px 12px;cursor:pointer;font-size:13.5px;background:#fff;}
   .sh-opt input{margin:2px 0 0;accent-color:var(--forest);flex:none;}
   .sh-opt .ico{font-size:17px;line-height:1;flex:none;}
   .sh-opt small{display:block;color:var(--muted);font-size:11.8px;margin-top:3px;line-height:1.35;}
   .sh-opt.on{border-color:#e3a050;background:#FFF3E3;box-shadow:0 0 0 1px #e3a050 inset;}
   .sh-how{font-size:12px;color:#5b4a2a;background:#FAF6EC;border-radius:8px;padding:7px 10px;margin-top:8px;line-height:1.45;}
-  @media (max-width:600px){ .sh-opts{grid-template-columns:1fr;} }
+  @media (max-width:700px){ .sh-opts{grid-template-columns:1fr;} }
   .sh-tick{display:flex;gap:10px;align-items:flex-start;background:#FFF3E3;border:1.5px solid #e3a050;border-radius:10px;padding:10px 12px;margin-top:14px;cursor:pointer;font-size:13.5px;}
   .sh-tick input{width:17px;height:17px;accent-color:var(--forest);margin:1px 0 0;flex:none;cursor:pointer;}
   .sh-tick small{display:block;color:var(--muted);font-size:12px;margin-top:2px;}
@@ -599,13 +607,20 @@
       <div class="sh-opts" id="shMode">
         <label class="sh-opt on"><input type="radio" name="shMode" value="link" checked><span class="ico">&#128279;</span><span><b>Share tracking page link</b><small>Sends the company's own live tracking page and access code. No Google Drive file. Opens the customer's chat directly.</small></span></label>
         <label class="sh-opt"><input type="radio" name="shMode" value="file"><span class="ico">&#128206;</span><span><b>Attach Excel file</b><small>The Excel file itself is attached in WhatsApp, with the message as its caption.</small></span></label>
+        <label class="sh-opt xo"><input type="radio" name="shMode" value="xls"><span class="xl-ic">XLS</span><span><b>Download Excel</b><small>Download an Excel file of these orders, only the statuses you pick.</small></span></label>
+      </div>
+      <div class="sh-x" id="shX2" hidden>
+        <div class="lb">Include orders with status</div>
+        <div class="sh-chips" id="shStChips"></div>
+        <div class="lb">Excel columns</div>
+        <div class="sh-chips" id="shColChips"></div>
       </div>
       <div class="sh-how" id="shHow"></div>
-      <div class="lb">Message (you can edit)</div>
+      <div class="lb" id="shTxtL">Message (you can edit)</div>
       <textarea id="shTxt" spellcheck="false"></textarea>
       <div class="sh-msg" id="shStatus"></div>
     </div>
-    <div class="wa-ft"><span class="nt">Then press Send in WhatsApp.</span><button type="button" id="shCancel">Cancel</button><button type="button" id="shCopy">&#128203; Copy message</button><button type="button" class="go" id="shGo">Send on WhatsApp &#10140;</button></div>
+    <div class="wa-ft"><span class="nt" id="shNt">Then press Send in WhatsApp.</span><button type="button" id="shCancel">Cancel</button><button type="button" id="shCopy">&#128203; Copy message</button><button type="button" class="go" id="shGo">Send on WhatsApp &#10140;</button></div>
   </div>
 </div>
 
@@ -642,7 +657,7 @@ function buildOrders(headers, rows){
     boxes: col('Total Boxes'), batch: col('Batch ID'), status: col('Dispatch Status'), cat: find(/^(category|order category|b2b ?\/ ?b2c)$/),
     dd: find(/^dispatch(ed)? date$/), dt: find(/^dispatch(ed)? time$/), dat: find(/^dispatched (at|on)$/),
     deliv: find(/^deliver(y|ed)( status)?$/), delivOn: find(/^delivered (on|date|at)$/),
-    os: col('Order Status'), pr: col('Problem'), note: col('Status Note'), upd: col('Status Updated'), cs: col('Courier Status')
+    os: col('Order Status'), pr: col('Problem'), note: col('Status Note'), upd: col('Status Updated'), cs: col('Courier Status'), pod: col('POD')
   };
   const g = (r, i) => i >= 0 ? String(r[i] == null ? '' : r[i]).trim() : '';
   return rows.map((r, n) => {
@@ -674,7 +689,7 @@ function buildOrders(headers, rows){
     else if(problem === 'RTO') st = 'returned';
     else if(step !== 'Ready' && st !== 'partly') st = 'transit';
     return {
-      step, problem, note: g(r, ix.note), upd: g(r, ix.upd), cs: g(r, ix.cs),
+      step, problem, pod: g(r, ix.pod), note: g(r, ix.note), upd: g(r, ix.upd), cs: g(r, ix.cs),
       reOf: ((/^reship of\s+([^\s·]+)/i.exec(g(r, ix.src)) || [])[1] || ''), reWhy: ((/^reship of\s+[^\s·]+\s*·\s*(.+)$/i.exec(g(r, ix.src)) || [])[1] || ''),
       n, id, at: parseDate(g(r, ix.at)), atText: g(r, ix.at), src: g(r, ix.src), hub: g(r, ix.hub), name: g(r, ix.name), co: g(r, ix.co), sender: g(r, ix.sender), client: g(r, ix.sender) || g(r, ix.co),
       phone: g(r, ix.phone), alt: g(r, ix.alt), addr: g(r, ix.addr), city: g(r, ix.city), state: g(r, ix.state), pin: g(r, ix.pin),
@@ -790,7 +805,7 @@ function renderView(){
   document.querySelectorAll('#vLay button').forEach(b => b.classList.toggle('on', b.dataset.v === VM.lay));
   if(FROMCO && (VM.by === 'co' || coKey($('fCompany').value) !== FROMCO.k)) FROMCO = null;
   $('bkBtn').hidden = !FROMCO;
-  $('rfBtn').hidden = false; if(!RF) $('rfBtn').innerHTML = FROMCO ? '&#8635; Refresh statuses' : '&#8635; Refresh Shree Anjani statuses'; $('upBtn').hidden = !!FROMCO;
+  $('rfBtn').hidden = false; if(!RF) $('rfBtn').innerHTML = FROMCO ? '&#8635; Refresh statuses' : '&#8635; Refresh all courier statuses'; $('upBtn').hidden = !!FROMCO;
   if(!FROMCO && !RF){ $('rfM').hidden = true; $('rfP').hidden = true; }
   if(FROMCO){ $('cardT').textContent = FROMCO.name; $('cnt').textContent = `(${VIEW.length} order${VIEW.length === 1 ? '' : 's'})`; }
   const AD = $('fStatus').value === 'alldel' && !FROMCO;
@@ -852,46 +867,52 @@ let RF = null;
 async function refreshCompany(){
   if(RF) return;
   const list = VIEW.slice(), co = FROMCO ? FROMCO.name : '', where = co ? 'for ' + co : 'in this view';
-  const todo = list.filter(o => /shree\s*anjani/i.test(o.courier) && o.trk && o.st !== 'delivered' && o.problem !== 'RTO');
+  const kind = o => /anjani/i.test(o.courier) ? 'sa' : /maru/i.test(o.courier) ? 'sm' : /delhivery/i.test(o.courier) ? 'dl' : /dtdc/i.test(o.courier) ? 'dt' : '';
+  const open = list.filter(o => o.trk && o.st !== 'delivered' && o.problem !== 'RTO');
+  const todo = open.filter(o => ['sa','sm','dl'].includes(kind(o)));
+  const dtdc = open.filter(o => kind(o) === 'dt').length;
+  const CN = {sa:'Shree Anjani', sm:'Shree Maruthi', dl:'Delhivery'};
   const b = $('rfBtn'), bar = $('rfP'), msg = $('rfM');
   if(todo.length > 300){
     const mins = Math.max(1, Math.round(todo.length / 3 / 60));
-    if(!confirm(`Check ${todo.length} open Shree Anjani orders ${where}?\n\nIt takes about ${mins} minute${mins > 1 ? 's' : ''}. Keep this page open; you can press Stop any time.\n\nTip: pick a shorter date range or one company to make it quicker.`)) return;
+    if(!confirm(`Check ${todo.length} open orders ${where} (Shree Anjani, Shree Maruthi, Delhivery)?\n\nIt takes about ${mins} minute${mins > 1 ? 's' : ''}. Keep this page open; you can press Stop any time.\n\nTip: pick a shorter date range or one company to make it quicker.`)) return;
   }
-  RF = {done:0, changed:0, del:0, fail:0, total:todo.length, stop:false};
+  RF = {done:0, changed:0, del:0, fail:0, total:todo.length, stop:false, by:{}};
+  todo.forEach(o => { const k = kind(o); RF.by[k] = RF.by[k] || {n:0, d:0, c:0}; RF.by[k].n++; });
+  const perC = () => Object.keys(RF.by).map(k => `${CN[k]} ${RF.by[k].d}/${RF.by[k].n}${RF.by[k].c ? ' · ' + RF.by[k].c + ' updated' : ''}`).join(' &nbsp;|&nbsp; ');
   msg.onclick = e => { if(e.target.closest('#rfStop') && RF){ RF.stop = true; e.target.closest('#rfStop').disabled = true; e.target.closest('#rfStop').textContent = 'Stopping…'; } };
   b.disabled = true; bar.hidden = false; msg.hidden = false; msg.className = 'rfm';
   const show = () => {
     b.textContent = RF.total ? `Checking ${RF.done} of ${RF.total}…` : 'Refreshing…';
     bar.firstElementChild.style.width = (RF.total ? RF.done / RF.total * 100 : 60) + '%';
     if(RF.stop) return;
-    msg.innerHTML = esc(RF.total ? `Checking live status of ${RF.total} open Shree Anjani order${RF.total > 1 ? 's' : ''} ${where} on the courier website… ${RF.changed ? RF.changed + ' updated so far' + (RF.del ? ' (' + RF.del + ' delivered).' : '.') : ''}` : `Getting the latest statuses ${where}…`) + (RF.total ? ' <button type="button" id="rfStop" class="rfstop">Stop</button>' : '');
+    msg.innerHTML = esc(RF.total ? `Checking live status of ${RF.total} open order${RF.total > 1 ? 's' : ''} ${where} on the courier websites… ${RF.changed ? RF.changed + ' updated so far' + (RF.del ? ' (' + RF.del + ' delivered).' : '.') : ''}` : `Getting the latest statuses ${where}…`) + (RF.total ? '<br><small>' + perC() + (dtdc ? ` &nbsp;|&nbsp; DTDC ${dtdc}: check on the DTDC site` : '') + '</small> <button type="button" id="rfStop" class="rfstop">Stop</button>' : '');
   };
   show();
   let i = 0;
   const one = async o => {
-    const awb = o.trk.split(/[,\s]+/)[0];
+    const awb = o.trk.split(/[,\s]+/)[0], k = kind(o);
     try {
-      const r = await fetch(LOG_URL + '?' + new URLSearchParams({action:'satrack', awb, id:o.id, t:Date.now()})).then(x => x.json());
+      const r = await fetch(LOG_URL + '?' + new URLSearchParams(k === 'sa' ? {action:'satrack', awb, id:o.id, t:Date.now()} : {action:'ctrack', courier:o.courier, awb, id:o.id, t:Date.now()})).then(x => x.json());
       const m = r && r.ok && r.mapped || {};
-      if(r && r.ok && r.saved && m.step){
+      if(r && r.ok && r.saved && (m.step || m.problem)){
         const before = o.step + '|' + o.problem;
-        if(STEPS.indexOf(m.step) > STEPS.indexOf(o.step)) o.step = m.step;
+        if(m.step && STEPS.indexOf(m.step) > STEPS.indexOf(o.step)) o.step = m.step;
         if(m.problem || m.step === 'Delivered') o.problem = m.problem;
         o.st = o.step === 'Delivered' ? 'delivered' : o.problem === 'RTO' ? 'returned' : o.step === 'Ready' ? 'ready' : 'transit';
-        if(before !== o.step + '|' + o.problem){ RF.changed++; if(o.step === 'Delivered') RF.del++; }
+        if(before !== o.step + '|' + o.problem){ RF.changed++; RF.by[k].c++; if(o.step === 'Delivered') RF.del++; }
       } else if(!r || !r.ok) RF.fail++;
     } catch(e){ RF.fail++; }
-    RF.done++; show();
+    RF.done++; RF.by[k].d++; show();
   };
   const worker = async () => { while(i < todo.length && !RF.stop){ const o = todo[i++]; await one(o); } };
   await Promise.all([worker(), worker(), worker()]);
   try { await load(); } catch(e){}
-  const r = RF; RF = null;
-  b.disabled = false; b.innerHTML = FROMCO ? '&#8635; Refresh statuses' : '&#8635; Refresh Shree Anjani statuses'; bar.hidden = true;
+  const r = RF; RF = null; const pc = Object.keys(r.by).map(k => `${CN[k]} ${r.by[k].n}${r.by[k].c ? ' (' + r.by[k].c + ' updated)' : ''}`).join(', ');
+  b.disabled = false; b.innerHTML = FROMCO ? '&#8635; Refresh statuses' : '&#8635; Refresh all courier statuses'; bar.hidden = true;
   msg.className = r.fail && r.fail === r.total && r.total ? 'rfm bad' : 'rfm';
-  msg.textContent = (r.stop ? `Stopped after ${r.done} of ${r.total}: ${r.changed} updated${r.del ? ' (' + r.del + ' now delivered)' : ''}. ` : '') + (r.stop ? '' : r.total ? `Done: ${r.total} open Shree Anjani order${r.total > 1 ? 's' : ''} checked, ${r.changed} updated${r.del ? ' (' + r.del + ' now delivered)' : ''}${r.fail ? ', ' + r.fail + ' could not be checked' : ''}. ` : 'No open Shree Anjani orders to check. ')
-    + (r.stop ? '' : `Other couriers and delivered orders show the latest from the Label Log. `) + new Date().toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'});
+  msg.textContent = (r.stop ? `Stopped after ${r.done} of ${r.total}: ${r.changed} updated${r.del ? ' (' + r.del + ' now delivered)' : ''}. ` : '') + (r.stop ? '' : r.total ? `Done: ${r.total} open order${r.total > 1 ? 's' : ''} checked (${pc}), ${r.changed} updated${r.del ? ' (' + r.del + ' now delivered)' : ''}${r.fail ? ', ' + r.fail + ' could not be checked' : ''}. ` : 'No open orders to check. ')
+    + (r.stop ? '' : dtdc ? `DTDC (${dtdc}): open the order and press Track on courier site, DTDC needs a captcha. ` : '') + new Date().toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'});
   applyFilters();
 }
 function backToCompanies(){
@@ -1066,7 +1087,7 @@ function shOpen(){
   const cos = {}; VIEW.forEach(o => { if(o.client) cos[o.client] = (cos[o.client] || 0) + 1; });
   const top = $('fCompany').value || Object.keys(cos).sort((a,b) => cos[b] - cos[a])[0] || '';
   const many = Object.keys(cos).length > 1 && !$('fCompany').value;
-  SH = { list: VIEW.slice(), edited: false };
+  SH = { list: VIEW.slice(), edited: false, xs: null, xc: null };
   $('shCo').value = top; $('shWho').value = ''; $('shNum').value = ''; $('shCc').value = '+91';
   document.querySelector('input[name=shMode][value=link]').checked = true; $('shStatus').textContent = ''; $('shStatus').className = 'sh-msg';
   if(many) { $('shStatus').textContent = 'The orders on screen are for ' + Object.keys(cos).length + ' companies. Pick one in the Company filter to send only that customer\'s orders.'; $('shStatus').className = 'sh-msg bad'; }
@@ -1133,9 +1154,16 @@ function shRefresh(){
   if(!SH) return;
   const boxes = SH.list.reduce((a,o) => a + (o.boxes || 1), 0);
   const couriers = [...new Set(SH.list.map(o => o.courier).filter(Boolean))].join(', ');
-  const lk = shMode() === 'link';
+  const lk = shMode() === 'link', xo = shMode() === 'xls';
   $('shCard').classList.toggle('trk', lk); $('shIco').textContent = lk ? 'LINK' : 'XLS';
-  if(lk){
+  $('shX2').hidden = !xo; $('shTxt').hidden = xo; $('shTxtL').hidden = xo;
+  $('shCopy').hidden = xo; $('shNt').textContent = xo ? 'Saves the file to this computer.' : 'Then press Send in WhatsApp.';
+  if(xo){
+    shxChips();
+    const L = shxList();
+    $('shFile').textContent = shxName();
+    $('shFileSub').textContent = `${L.length} of ${SH.list.length} order${SH.list.length>1?'s':''} · ${SH.xs.size} status${SH.xs.size === 1 ? '' : 'es'} picked`;
+  } else if(lk){
     shGetCode();
     const k = SH.ct && SH.ct.key === coKey($('shCo').value) ? SH.ct : null;
     $('shFile').textContent = 'Live tracking page' + (k && k.code ? ' · code ' + k.code.replace(/(.{3})(?=.)/g, '$1 ') : '');
@@ -1146,12 +1174,16 @@ function shRefresh(){
   }
   const m = shMode();
   document.querySelectorAll('.sh-opt').forEach(l => l.classList.toggle('on', l.querySelector('input').checked));
-  $('shHow').innerHTML = m === 'file'
+  $('shHow').innerHTML = m === 'xls'
+    ? '<b>Then:</b> the Excel file downloads to this computer, with an <b>All</b> sheet plus one sheet per status you picked.'
+    : m === 'file'
     ? '<b>Then:</b> the Windows share window opens with the Excel attached &rarr; pick <b>WhatsApp</b> &rarr; pick the customer\'s chat &rarr; <b>Send</b>. The message is also copied, so paste it (Ctrl+V) if WhatsApp does not show it.'
     : '<b>Then:</b> WhatsApp opens on the customer\'s chat with the tracking link and access code ready &rarr; press <b>Send</b>.';
-  $('shGo').innerHTML = m === 'file' ? '&#128206; Share on WhatsApp' : 'Send on WhatsApp &#10140;';
+  $('shGo').innerHTML = m === 'xls' ? '&#11015; Download Excel' : m === 'file' ? '&#128206; Share on WhatsApp' : 'Send on WhatsApp &#10140;';
+  $('shGo').classList.toggle('xg', m === 'xls');
   if(!SH.edited) $('shTxt').value = shText('');
   const num = shNumber();
+  if(m === 'xls'){ $('shGo').disabled = !!SH.busy || !shxList().length; return; }
   $('shGo').disabled = num === null || SH.busy;
   if(num === null && !SH.busy){ $('shStatus').textContent = 'Check the WhatsApp number (10 digits for India).'; $('shStatus').className = 'sh-msg bad'; }
   else if($('shStatus').textContent.startsWith('Check the WhatsApp')){ $('shStatus').textContent = ''; }
@@ -1159,6 +1191,7 @@ function shRefresh(){
 function shClose(){ if(SH && SH.busy) return; $('shOv').hidden = true; SH = null; }
 async function shSend(){
   if(shMode() === 'link') return shSendTrack();
+  if(shMode() === 'xls') return shDownloadXls();
   await needXLSX();
   if(shMode() === 'file') return shSendFile();
   const num = shNumber(); if(num === null || !SH) return;
@@ -1191,6 +1224,84 @@ async function shSend(){
   }finally{
     if(SH){ SH.busy = false; shRefresh(); }
   }
+}
+/* ---------- Download Excel: only the statuses picked, one sheet per status ---------- */
+const SHX_ORDER = ['Delivered','Out for Delivery','At Destination','In Transit','Dispatched','Partly dispatched','Ready for dispatch','Rescheduled','Escalated','RTO'];
+const SHX_COLS = [['id','Order ID',1],['rcp','Recipient & city',1],['awb','Courier & AWB',1],['st','Status',1],['dd','Delivered date',1],['pod','POD link',0]];
+const shxStatus = o => stLabel(o) || 'Other';
+function shxCounts(){ const c = {}; SH.list.forEach(o => { const s = shxStatus(o); c[s] = (c[s] || 0) + 1; }); return c; }
+function shxChips(){
+  const c = shxCounts(), keys = Object.keys(c).sort((a,b) => (SHX_ORDER.indexOf(a) + 1 || 99) - (SHX_ORDER.indexOf(b) + 1 || 99));
+  if(!SH.xs) SH.xs = new Set(keys);
+  if(!SH.xc) SH.xc = new Set(SHX_COLS.filter(x => x[2]).map(x => x[0]));
+  const all = keys.every(k => SH.xs.has(k));
+  $('shStChips').innerHTML = `<button type="button" class="sh-ch${all ? ' on' : ''}" data-xs="*">All · ${SH.list.length}</button>` + keys.map(k => `<button type="button" class="sh-ch${SH.xs.has(k) ? ' on' : ''}" data-xs="${esc(k)}">${esc(k)} · ${c[k]}</button>`).join('');
+  $('shColChips').innerHTML = SHX_COLS.map(x => `<button type="button" class="sh-ch${SH.xc.has(x[0]) ? ' on' : ''}" data-xc="${x[0]}">${x[1]}</button>`).join('');
+  $('shStChips').querySelectorAll('[data-xs]').forEach(b => b.onclick = () => { const k = b.dataset.xs; if(k === '*') SH.xs = all ? new Set() : new Set(keys); else SH.xs.has(k) ? SH.xs.delete(k) : SH.xs.add(k); shRefresh(); });
+  $('shColChips').querySelectorAll('[data-xc]').forEach(b => b.onclick = () => { const k = b.dataset.xc; if(k === 'id') return; SH.xc.has(k) ? SH.xc.delete(k) : SH.xc.add(k); shRefresh(); });
+}
+const shxList = () => SH.list.filter(o => SH.xs && SH.xs.has(shxStatus(o)));
+const shxName = () => `${shSafe($('shCo').value) || 'BoxUp'} orders ${shToday().replace(/\s+/g,'-')} (${shxList().length}).xlsx`;
+function shxRows(list){
+  const C = SH.xc, h = [], fmt = d => d ? d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}) : '';
+  if(C.has('id')) h.push('Order ID');
+  if(C.has('rcp')) h.push('Name','Company','City','State','Pincode');
+  if(C.has('awb')) h.push('Courier','AWB / Tracking ID','Tracking Link');
+  if(C.has('st')) h.push('Status');
+  if(C.has('dd')) h.push('Delivered Date');
+  if(C.has('pod')) h.push('POD Link');
+  const rows = list.map(o => { const r = [];
+    if(C.has('id')) r.push(o.id);
+    if(C.has('rcp')) r.push(o.name, o.co, o.city, o.state, o.pin);
+    if(C.has('awb')) r.push(o.courier, o.trk, o.link);
+    if(C.has('st')) r.push(shxStatus(o));
+    if(C.has('dd')) r.push(o.step === 'Delivered' ? fmt(o.delivOn) : '');
+    if(C.has('pod')) r.push(o.pod || '');
+    return r; });
+  return [h, rows];
+}
+const SHX_FILL = {'Delivered':'FFE3F5E8','Out for Delivery':'FFFFF1CC','At Destination':'FFE3ECFB','In Transit':'FFE3ECFB','Dispatched':'FFE3ECFB','RTO':'FFFDE2E1','Escalated':'FFFDE2E1','Rescheduled':'FFFFF1CC'};
+let EXJ_P = null;
+function needExcelJS(){
+  if(window.ExcelJS) return Promise.resolve(true);
+  if(!EXJ_P) EXJ_P = new Promise(res => { const sc = document.createElement('script'); sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js'; sc.onload = () => res(true); sc.onerror = () => { EXJ_P = null; res(false); }; document.head.appendChild(sc); });
+  return EXJ_P;
+}
+async function shDownloadXls(){
+  const st = $('shStatus'), list = shxList();
+  if(!list.length){ st.textContent = 'Pick at least one status.'; st.className = 'sh-msg bad'; return; }
+  const name = shxName(), groups = [...SH.xs].filter(k => list.some(o => shxStatus(o) === k)).sort((a,b) => (SHX_ORDER.indexOf(a) + 1 || 99) - (SHX_ORDER.indexOf(b) + 1 || 99));
+  const sheets = [['All', list]].concat(groups.length > 1 ? groups.map(k => [k, list.filter(o => shxStatus(o) === k)]) : []);
+  st.textContent = 'Making the Excel file…'; st.className = 'sh-msg';
+  let blob = null;
+  if(await needExcelJS() && window.ExcelJS){
+    const wb = new ExcelJS.Workbook();
+    sheets.forEach(([k, L]) => {
+      const [h, rows] = shxRows(L), ws = wb.addWorksheet(`${k} (${L.length})`.replace(/[\\/?*\[\]:]/g,' ').slice(0, 31));
+      ws.addRow([`BoxUp Luxury Gifting · ${$('shCo').value.trim() || 'Orders'} · ${k} · ${shToday()}`]).font = { bold:true, size:13 };
+      ws.addRow([]);
+      const hr = ws.addRow(h); hr.eachCell(c => { c.font = { bold:true, color:{argb:'FFFFFFFF'} }; c.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FF1D6F42'} }; });
+      const sc = h.indexOf('Status') + 1, lc = h.indexOf('Tracking Link') + 1, pc = h.indexOf('POD Link') + 1;
+      rows.forEach(r => { const x = ws.addRow(r);
+        x.eachCell({ includeEmpty:true }, c => { c.border = { bottom:{style:'thin', color:{argb:'FFE0E0E0'}} }; });
+        if(sc){ const f = SHX_FILL[r[sc - 1]]; if(f) x.getCell(sc).fill = { type:'pattern', pattern:'solid', fgColor:{argb:f} }; x.getCell(sc).font = { bold:true }; }
+        [lc, pc].forEach(i => { if(i && /^https?:/.test(r[i - 1])) { x.getCell(i).value = { text: r[i - 1], hyperlink: r[i - 1] }; x.getCell(i).font = { color:{argb:'FF1155CC'}, underline:true }; } });
+      });
+      ws.columns.forEach((c, i) => { c.width = ({'Order ID':16,'Name':24,'Company':22,'City':16,'State':14,'Pincode':9,'Courier':14,'AWB / Tracking ID':18,'Tracking Link':42,'Status':17,'Delivered Date':14,'POD Link':40})[h[i]] || 14; });
+      ws.views = [{ state:'frozen', ySplit:3 }];
+      ws.autoFilter = { from:{row:3, column:1}, to:{row:3, column:h.length} };
+    });
+    blob = new Blob([await wb.xlsx.writeBuffer()], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  } else {
+    await needXLSX();
+    if(typeof XLSX === 'undefined'){ st.textContent = 'Excel tool did not load. Check the internet and try again.'; st.className = 'sh-msg bad'; return; }
+    const wb = XLSX.utils.book_new();
+    sheets.forEach(([k, L]) => { const [h, rows] = shxRows(L); XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([h].concat(rows)), `${k} (${L.length})`.slice(0, 31)); });
+    blob = new Blob([XLSX.write(wb, { bookType:'xlsx', type:'array' })], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+  st.textContent = `✓ Downloaded ${name}`; st.className = 'sh-msg ok';
 }
 /* Share tracking page link: the company's live page + access code, no file */
 function shSendTrack(){
