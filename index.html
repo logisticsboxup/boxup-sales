@@ -722,6 +722,7 @@ function buildOrders(headers, rows){
     const trk = g(r, ix.trk);
     let link = g(r, ix.link);
     if(!link && trk && /shree\s*anjani/i.test(courier)) link = SA_LINK_PREFIX + trk.split(/[,\s]+/)[0];
+    if(trk && /dtdc/i.test(courier) && (!link || /track-your-shipment\/?$/i.test(link))) link = 'https://www.dtdc.com/track-your-shipment/?awb=' + encodeURIComponent(trk.split(/[,\s]+/)[0]);
     const cat = g(r, ix.cat) || (/^boxup\s*\d/i.test(id) ? 'B2C' : 'B2B');
     // order journey: the saved Order Status, never behind what the gate or courier already show
     const osT = g(r, ix.os), prT = g(r, ix.pr);
@@ -1274,17 +1275,18 @@ const SHX_ORDER = ['Delivered','Out for Delivery','At Destination','In Transit',
 const shxStatus = o => stLabel(o) || 'Other';
 const dlD = d => d ? d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}) : '';
 const DLC = {   // key: [heading, value, Excel width, PDF weight]
-  id:['Order ID', o => o.id, 16, 1.1], sender:['Sender Company', o => o.client, 22, 1.3], name:['Recipient', o => o.name, 22, 1.3], co:['Company', o => o.co, 20, 1.2],
+  id:['Order ID', o => o.id, 16, 1.1], lp:['Label Printed', o => o.at ? dlD(o.at) : String(o.atText || '').split(' ')[0], 13, 0.8], sender:['Sender Company', o => o.client, 22, 1.3], name:['Recipient', o => o.name, 22, 1.3], co:['Company', o => o.co, 20, 1.2],
   phone:['Phone', o => o.phone, 14, 0.9], addr:['Address', o => o.addr, 40, 2.2], city:['City', o => o.city, 15, 0.9], state:['State', o => o.state, 14, 0.8], pin:['Pincode', o => o.pin, 9, 0.6],
   boxes:['Boxes', o => o.boxes, 7, 0.4], courier:['Courier', o => o.courier, 14, 0.9], trk:['AWB / Tracking ID', o => o.trk, 18, 1.1], link:['Tracking Link', o => o.link, 40, 1.8],
-  disp:['Dispatch Date', o => dlD(o.dispAt), 13, 0.8], status:['Status', o => shxStatus(o), 16, 0.9], dd:['Delivered Date', o => o.step === 'Delivered' ? dlD(o.delivOn) : '', 13, 0.8],
+  disp:['Dispatch Date', o => dlD(o.dispAt || o.at), 13, 0.8], status:['Status', o => shxStatus(o), 16, 0.9], dd:['Delivered Date', o => o.step === 'Delivered' ? dlD(o.delivOn) : '', 13, 0.8],
   cs:['Courier Update', o => String(o.cs || '').replace(/\s*·\s*\d{2}-[A-Za-z]{3}-\d{4}.*$/, ''), 36, 1.8], pod:['POD Link', o => o.pod, 36, 1.5], note:['Status Note', o => o.note, 30, 1.5]
 };
-const DL_DEF = ['id','sender','name','city','courier','trk','status','dd'];
+const DL_DEF = ['id','lp','sender','name','city','courier','trk','status','dd'];
 const DL_KEY = 'boxup.dlcols';
 function dlCfgLoad(){
   let c = null; try { c = JSON.parse(localStorage.getItem(DL_KEY) || 'null'); } catch(e){}
   if(!c || !Array.isArray(c.order)) c = { order: Object.keys(DLC), on: DL_DEF.slice(), names: {}, custom: [] };
+  if(!c.order.includes('lp')){ const p = c.order.indexOf('id'); c.order.splice(p + 1, 0, 'lp'); if(!c.on.includes('lp')) c.on.push('lp'); }   // new column: on for everyone once
   Object.keys(DLC).forEach(k => { if(!c.order.includes(k)) c.order.push(k); });
   c.custom = c.custom || []; c.names = c.names || {};
   c.order = c.order.filter(k => DLC[k] || c.custom.includes(k));
@@ -1384,7 +1386,7 @@ async function dlRun(list, opt){   // opt: {xls, pdf, by, cols, name, title}
 const dlSafe = t => String(t||'').replace(/[\\/:*?"<>|]+/g,' ').replace(/\s+/g,' ').trim();
 
 /* ---------- Share box: "Download file" (Excel / PDF / both) ---------- */
-const SHX_COLS = [['id','Order ID',1,['id']],['rcp','Recipient & city',1,['name','co','city','state','pin']],['awb','Courier & AWB',1,['courier','trk','link']],['st','Status',1,['status']],['dd','Delivered date',1,['dd']],['pod','POD link',0,['pod']]];
+const SHX_COLS = [['id','Order ID',1,['id']],['lp','Label printed',1,['lp']],['rcp','Recipient & city',1,['name','co','city','state','pin']],['awb','Courier & AWB',1,['courier','trk','link']],['st','Status',1,['status']],['dd','Delivered date',1,['dd']],['pod','POD link',0,['pod']]];
 function shxCounts(){ const c = {}; SH.list.forEach(o => { const s = shxStatus(o); c[s] = (c[s] || 0) + 1; }); return c; }
 function shxChips(){
   const c = shxCounts(), keys = Object.keys(c).sort(dlSortSt);
