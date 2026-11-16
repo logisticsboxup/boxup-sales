@@ -285,6 +285,28 @@
   .sh-ch.on{border-color:var(--forest);background:var(--forest);color:#fff;}
   .sh-ch.on::before{content:'\2713  ';}
   .wa-ft .go.xg{background:#1d6f42;border-color:#17593a;}
+  .dl-m{width:720px;}
+  .dl-fm{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .dl-f{display:flex;gap:10px;align-items:center;border:1.5px solid #d8d2c0;border-radius:10px;padding:9px 12px;cursor:pointer;background:#fff;font-size:12px;color:var(--muted);text-align:left;font-family:inherit;}
+  .dl-f b{display:block;color:var(--ink);font-size:14px;}
+  .dl-f .tk{width:18px;height:18px;border-radius:4px;border:2px solid #aaa;flex:none;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:800;}
+  .dl-f .fi{border-radius:4px;color:#fff;font:800 9px 'Inter';padding:7px 5px;flex:none;}
+  .dl-f.on.x{border-color:#1d6f42;background:#EEF7F1;box-shadow:0 0 0 1px #1d6f42 inset;} .dl-f.on.x .tk{background:#1d6f42;border-color:#1d6f42;}
+  .dl-f.on.p{border-color:#c0392b;background:#FDF1EF;box-shadow:0 0 0 1px #c0392b inset;} .dl-f.on.p .tk{background:#c0392b;border-color:#c0392b;}
+  .dl-mini{display:flex;gap:6px;margin-top:8px;} .dl-mini .dl-f{padding:5px 8px;font-size:12px;gap:6px;flex:1;} .dl-mini .dl-f b{font-size:12.5px;} .dl-mini .dl-f .fi{padding:4px 3px;font-size:8px;}
+  .sh-ch.add{border-style:dashed;color:var(--forest);} .sh-ch.add::before{content:'';}
+  .dl-ed{border:1px solid #e7e1d3;border-radius:10px;padding:8px;margin-top:8px;background:#FBFAF6;}
+  .dl-r{display:flex;gap:8px;align-items:center;border:1px solid #e5e0d5;border-radius:8px;padding:5px 9px;font-size:13px;background:#fff;margin-bottom:5px;}
+  .dl-r .hd{cursor:grab;color:#aaa;letter-spacing:-2px;user-select:none;} .dl-r input[type=checkbox]{accent-color:var(--forest);}
+  .dl-r input.nm{flex:1;border:1px solid transparent;border-radius:6px;padding:3px 6px;font:500 13px 'Inter';background:transparent;}
+  .dl-r input.nm:hover,.dl-r input.nm:focus{border-color:#d8d2c0;background:#fff;}
+  .dl-r .cu{font-size:11px;color:#8a6100;} .dl-r .rm{border:0;background:none;color:#a12a22;cursor:pointer;font-size:12px;}
+  .dl-r input{height:auto;min-height:0;margin:0;width:auto;box-shadow:none;}
+  .dl-r input.nm{width:auto;}
+  .dl-ed{max-height:260px;overflow:auto;}
+  .dl-r.drag{opacity:.4;} .dl-r.over{border-color:var(--forest);}
+  .dl-in{width:100%;border:1px solid #ddd;border-radius:9px;padding:8px 11px;font:500 14px 'Inter';box-sizing:border-box;}
+  .dl-lnk{border:0;background:none;color:var(--forest);font:600 12px 'Inter';cursor:pointer;padding:0;}
   .sh-opt{display:flex;gap:9px;align-items:flex-start;border:1.5px solid #d8d2c0;border-radius:10px;padding:10px 12px;cursor:pointer;font-size:13.5px;background:#fff;}
   .sh-opt input{margin:2px 0 0;accent-color:var(--forest);flex:none;}
   .sh-opt .ico{font-size:17px;line-height:1;flex:none;}
@@ -509,7 +531,7 @@
 
   <div class="main" id="mainBox">
     <div class="card">
-      <div class="ch"><div class="chl"><button type="button" class="bkb" id="bkBtn" hidden>&#8592; Back to companies</button><b id="cardT">Orders</b> <span id="cnt"></span></div><div class="ch-btns"><button type="button" class="rfb" id="rfBtn" hidden>&#8635; Refresh statuses</button><button type="button" class="upb" id="upBtn">&#11014; Upload status sheet</button><button type="button" class="dl" id="dlBtn">&#11015; Download Excel</button><button type="button" class="shf" id="shBtn">&#128228; Share file</button></div></div>
+      <div class="ch"><div class="chl"><button type="button" class="bkb" id="bkBtn" hidden>&#8592; Back to companies</button><b id="cardT">Orders</b> <span id="cnt"></span></div><div class="ch-btns"><button type="button" class="rfb" id="rfBtn" hidden>&#8635; Refresh statuses</button><button type="button" class="upb" id="upBtn">&#11014; Upload status sheet</button><button type="button" class="dl" id="dlBtn">&#11015; Download</button><button type="button" class="shf" id="shBtn">&#128228; Share file</button></div></div>
       <div class="rfp" id="rfP" hidden><i></i></div><div class="rfm" id="rfM" hidden></div>
       <div id="alt" hidden></div>
       <div class="tbl" id="tblWrap"><table>
@@ -607,12 +629,12 @@
       <div class="sh-opts" id="shMode">
         <label class="sh-opt on"><input type="radio" name="shMode" value="link" checked><span class="ico">&#128279;</span><span><b>Share tracking page link</b><small>Sends the company's own live tracking page and access code. No Google Drive file. Opens the customer's chat directly.</small></span></label>
         <label class="sh-opt"><input type="radio" name="shMode" value="file"><span class="ico">&#128206;</span><span><b>Attach Excel file</b><small>The Excel file itself is attached in WhatsApp, with the message as its caption.</small></span></label>
-        <label class="sh-opt xo"><input type="radio" name="shMode" value="xls"><span class="xl-ic">XLS</span><span><b>Download Excel</b><small>Download an Excel file of these orders, only the statuses you pick.</small></span></label>
+        <label class="sh-opt xo"><input type="radio" name="shMode" value="xls"><span class="ico">&#11015;</span><span><b>Download file</b><small>Excel, PDF or both, only the statuses you pick.</small><span class="dl-mini" id="shFmt"><button type="button" class="dl-f x on" data-f="xls"><span class="fi" style="background:#1d6f42">XLS</span><b>Excel</b></button><button type="button" class="dl-f p" data-f="pdf"><span class="fi" style="background:#c0392b">PDF</span><b>PDF</b></button></span></span></label>
       </div>
       <div class="sh-x" id="shX2" hidden>
         <div class="lb">Include orders with status</div>
         <div class="sh-chips" id="shStChips"></div>
-        <div class="lb">Excel columns</div>
+        <div class="lb">Columns</div>
         <div class="sh-chips" id="shColChips"></div>
       </div>
       <div class="sh-how" id="shHow"></div>
@@ -621,6 +643,28 @@
       <div class="sh-msg" id="shStatus"></div>
     </div>
     <div class="wa-ft"><span class="nt" id="shNt">Then press Send in WhatsApp.</span><button type="button" id="shCancel">Cancel</button><button type="button" id="shCopy">&#128203; Copy message</button><button type="button" class="go" id="shGo">Send on WhatsApp &#10140;</button></div>
+  </div>
+</div>
+
+<div class="wa-ov" id="dlOv" hidden>
+  <div class="wa-m dl-m" role="dialog" aria-modal="true" aria-labelledby="dlTitle">
+    <div class="wa-h"><div class="ic" style="background:var(--forest)">&#11015;</div><div><h3 id="dlTitle">Download orders</h3><small id="dlSub"></small></div><button type="button" class="x" id="dlX" aria-label="Close">&#10005;</button></div>
+    <div class="sh-b">
+      <div class="lb" style="margin-top:0">File type (pick one or both)</div>
+      <div class="dl-fm" id="dlFmt"><button type="button" class="dl-f x" data-f="xls"><span class="tk">&#10003;</span><span class="fi" style="background:#1d6f42">XLS</span><span><b>Excel</b>All sheet + one sheet per group</span></button><button type="button" class="dl-f p" data-f="pdf"><span class="tk">&#10003;</span><span class="fi" style="background:#c0392b">PDF</span><span><b>PDF</b>BoxUp report, a section per group</span></button></div>
+      <div class="lb">Include orders with status</div>
+      <div class="sh-chips" id="dlSt"></div>
+      <div class="lb">Group sheets / sections by</div>
+      <div class="sh-chips" id="dlGrp"></div>
+      <div class="lb">Columns <button type="button" class="dl-lnk" id="dlEdT">&#9998; Edit, reorder, rename</button></div>
+      <div class="sh-chips" id="dlCols"></div>
+      <div class="dl-ed" id="dlEd" hidden></div>
+      <div class="lb">File name</div>
+      <input type="text" class="dl-in" id="dlName" autocomplete="off">
+      <div class="sh-how" id="dlHow"></div>
+      <div class="sh-msg" id="dlMsg"></div>
+    </div>
+    <div class="wa-ft"><button type="button" class="dl-lnk" id="dlReset" style="margin-right:auto">&#8635; Reset to default columns</button><button type="button" id="dlCancel">Cancel</button><button type="button" class="go xg" id="dlGo">&#11015; Download</button></div>
   </div>
 </div>
 
@@ -1087,7 +1131,7 @@ function shOpen(){
   const cos = {}; VIEW.forEach(o => { if(o.client) cos[o.client] = (cos[o.client] || 0) + 1; });
   const top = $('fCompany').value || Object.keys(cos).sort((a,b) => cos[b] - cos[a])[0] || '';
   const many = Object.keys(cos).length > 1 && !$('fCompany').value;
-  SH = { list: VIEW.slice(), edited: false, xs: null, xc: null };
+  SH = { list: VIEW.slice(), edited: false, xs: null, xc: null, xf: null };
   $('shCo').value = top; $('shWho').value = ''; $('shNum').value = ''; $('shCc').value = '+91';
   document.querySelector('input[name=shMode][value=link]').checked = true; $('shStatus').textContent = ''; $('shStatus').className = 'sh-msg';
   if(many) { $('shStatus').textContent = 'The orders on screen are for ' + Object.keys(cos).length + ' companies. Pick one in the Company filter to send only that customer\'s orders.'; $('shStatus').className = 'sh-msg bad'; }
@@ -1175,11 +1219,11 @@ function shRefresh(){
   const m = shMode();
   document.querySelectorAll('.sh-opt').forEach(l => l.classList.toggle('on', l.querySelector('input').checked));
   $('shHow').innerHTML = m === 'xls'
-    ? '<b>Then:</b> the Excel file downloads to this computer, with an <b>All</b> sheet plus one sheet per status you picked.'
+    ? '<b>Then:</b> the file downloads to this computer. Excel: an <b>All</b> sheet plus one sheet per status. PDF: a BoxUp report with a section per status.'
     : m === 'file'
     ? '<b>Then:</b> the Windows share window opens with the Excel attached &rarr; pick <b>WhatsApp</b> &rarr; pick the customer\'s chat &rarr; <b>Send</b>. The message is also copied, so paste it (Ctrl+V) if WhatsApp does not show it.'
     : '<b>Then:</b> WhatsApp opens on the customer\'s chat with the tracking link and access code ready &rarr; press <b>Send</b>.';
-  $('shGo').innerHTML = m === 'xls' ? '&#11015; Download Excel' : m === 'file' ? '&#128206; Share on WhatsApp' : 'Send on WhatsApp &#10140;';
+  $('shGo').innerHTML = m === 'xls' ? '&#11015; Download ' + (SH.xf && SH.xf.size === 2 ? 'Excel + PDF' : SH.xf && SH.xf.has('pdf') ? 'PDF' : 'Excel') : m === 'file' ? '&#128206; Share on WhatsApp' : 'Send on WhatsApp &#10140;';
   $('shGo').classList.toggle('xg', m === 'xls');
   if(!SH.edited) $('shTxt').value = shText('');
   const num = shNumber();
@@ -1225,84 +1269,222 @@ async function shSend(){
     if(SH){ SH.busy = false; shRefresh(); }
   }
 }
-/* ---------- Download Excel: only the statuses picked, one sheet per status ---------- */
+/* ---------- Download engine: Excel and/or PDF of a list of orders (toolbar Download + Share "Download file") ---------- */
 const SHX_ORDER = ['Delivered','Out for Delivery','At Destination','In Transit','Dispatched','Partly dispatched','Ready for dispatch','Rescheduled','Escalated','RTO'];
-const SHX_COLS = [['id','Order ID',1],['rcp','Recipient & city',1],['awb','Courier & AWB',1],['st','Status',1],['dd','Delivered date',1],['pod','POD link',0]];
 const shxStatus = o => stLabel(o) || 'Other';
+const dlD = d => d ? d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}) : '';
+const DLC = {   // key: [heading, value, Excel width, PDF weight]
+  id:['Order ID', o => o.id, 16, 1.1], sender:['Sender Company', o => o.client, 22, 1.3], name:['Recipient', o => o.name, 22, 1.3], co:['Company', o => o.co, 20, 1.2],
+  phone:['Phone', o => o.phone, 14, 0.9], addr:['Address', o => o.addr, 40, 2.2], city:['City', o => o.city, 15, 0.9], state:['State', o => o.state, 14, 0.8], pin:['Pincode', o => o.pin, 9, 0.6],
+  boxes:['Boxes', o => o.boxes, 7, 0.4], courier:['Courier', o => o.courier, 14, 0.9], trk:['AWB / Tracking ID', o => o.trk, 18, 1.1], link:['Tracking Link', o => o.link, 40, 1.8],
+  disp:['Dispatch Date', o => dlD(o.dispAt), 13, 0.8], status:['Status', o => shxStatus(o), 16, 0.9], dd:['Delivered Date', o => o.step === 'Delivered' ? dlD(o.delivOn) : '', 13, 0.8],
+  cs:['Courier Update', o => String(o.cs || '').replace(/\s*·\s*\d{2}-[A-Za-z]{3}-\d{4}.*$/, ''), 36, 1.8], pod:['POD Link', o => o.pod, 36, 1.5], note:['Status Note', o => o.note, 30, 1.5]
+};
+const DL_DEF = ['id','sender','name','city','courier','trk','status','dd'];
+const DL_KEY = 'boxup.dlcols';
+function dlCfgLoad(){
+  let c = null; try { c = JSON.parse(localStorage.getItem(DL_KEY) || 'null'); } catch(e){}
+  if(!c || !Array.isArray(c.order)) c = { order: Object.keys(DLC), on: DL_DEF.slice(), names: {}, custom: [] };
+  Object.keys(DLC).forEach(k => { if(!c.order.includes(k)) c.order.push(k); });
+  c.custom = c.custom || []; c.names = c.names || {};
+  c.order = c.order.filter(k => DLC[k] || c.custom.includes(k));
+  return c;
+}
+function dlCfgSave(c){ try { localStorage.setItem(DL_KEY, JSON.stringify(c)); } catch(e){} }
+const dlLabel = (c, k) => c.names[k] || (DLC[k] ? DLC[k][0] : k.replace(/^cu:/, ''));
+const dlCols = c => c.order.filter(k => c.on.includes(k)).map(k => ({ k, label: dlLabel(c, k) }));
+const dlVal = (o, k) => { const d = DLC[k]; const v = d ? d[1](o) : ''; return v == null ? '' : v; };
+const DL_FILL = {'Delivered':'E3F5E8','Out for Delivery':'FFF1CC','At Destination':'E3ECFB','In Transit':'E3ECFB','Dispatched':'E3ECFB','Partly dispatched':'FFF1CC','RTO':'FDE2E1','Escalated':'FDE2E1','Rescheduled':'FFF1CC'};
+const dlSortSt = (a, b) => (SHX_ORDER.indexOf(a) + 1 || 99) - (SHX_ORDER.indexOf(b) + 1 || 99);
+function dlGroups(list, by){
+  if(by === 'none') return [];
+  const f = by === 'company' ? (o => o.client || o.co || 'No company') : by === 'courier' ? (o => o.courier || 'No courier') : shxStatus;
+  const m = new Map(); list.forEach(o => { const k = f(o); if(!m.has(k)) m.set(k, []); m.get(k).push(o); });
+  const keys = [...m.keys()].sort(by === 'status' ? dlSortSt : (a, b) => m.get(b).length - m.get(a).length || a.localeCompare(b));
+  return keys.map(k => [k, m.get(k)]);
+}
+function dlLoad(src, test){
+  if(test()) return Promise.resolve(true);
+  return new Promise(res => { const s = document.createElement('script'); s.src = src; s.onload = () => res(true); s.onerror = () => res(false); document.head.appendChild(s); });
+}
+const needExcelJS = () => dlLoad('https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js', () => !!window.ExcelJS);
+async function needPDF(){
+  await dlLoad('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js', () => !!(window.jspdf && window.jspdf.jsPDF));
+  if(!(window.jspdf && window.jspdf.jsPDF)) return false;
+  await dlLoad('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js', () => !!(window.jspdf.jsPDF.API && window.jspdf.jsPDF.API.autoTable));
+  return !!window.jspdf.jsPDF.API.autoTable;
+}
+function dlSave(blob, name){
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 3000);
+}
+async function dlExcel(list, groups, cols, name, title){
+  const sheets = [['All', list]].concat(groups.length > 1 ? groups : []);
+  const tab = (k, n) => `${k} (${n})`.replace(/[\\/?*\[\]:]/g, ' ').slice(0, 31);
+  if(await needExcelJS() && window.ExcelJS){
+    const wb = new ExcelJS.Workbook(), used = new Set();
+    sheets.forEach(([k, L]) => {
+      let nm = tab(k, L.length); while(used.has(nm)) nm = nm.slice(0, 29) + '~' + used.size; used.add(nm);
+      const ws = wb.addWorksheet(nm), h = cols.map(c => c.label);
+      ws.addRow([`BoxUp Luxury Gifting · ${title} · ${k} · ${dlD(new Date())}`]).font = { bold:true, size:13 };
+      ws.addRow([]);
+      const hr = ws.addRow(h); hr.eachCell(c => { c.font = { bold:true, color:{argb:'FFFFFFFF'} }; c.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FF1D6F42'} }; c.alignment = { vertical:'middle', wrapText:true }; });
+      L.forEach(o => {
+        const x = ws.addRow(cols.map(c => dlVal(o, c.k)));
+        x.eachCell({ includeEmpty:true }, c => { c.border = { bottom:{style:'thin', color:{argb:'FFE0E0E0'}} }; });
+        cols.forEach((c, i) => { const cell = x.getCell(i + 1), v = cell.value;
+          if(c.k === 'status' && DL_FILL[v]){ cell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FF' + DL_FILL[v]} }; cell.font = { bold:true }; }
+          if((c.k === 'link' || c.k === 'pod') && /^https?:/.test(v)){ const u = String(v).split(/\s*,\s*/)[0]; cell.value = { text: String(v), hyperlink: u }; cell.font = { color:{argb:'FF1155CC'}, underline:true }; }
+          if(c.k === 'trk' || c.k === 'phone' || c.k === 'pin') cell.numFmt = '@';
+        });
+      });
+      ws.columns.forEach((col, i) => { col.width = (DLC[cols[i].k] || [0,0,18])[2]; });
+      ws.views = [{ state:'frozen', ySplit:3 }];
+      if(h.length) ws.autoFilter = { from:{row:3, column:1}, to:{row:3, column:h.length} };
+    });
+    return dlSave(new Blob([await wb.xlsx.writeBuffer()], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), name + '.xlsx');
+  }
+  await needXLSX();
+  if(typeof XLSX === 'undefined') throw new Error('Excel tool did not load. Check the internet.');
+  const wb = XLSX.utils.book_new();
+  sheets.forEach(([k, L]) => XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([cols.map(c => c.label)].concat(L.map(o => cols.map(c => dlVal(o, c.k))))), tab(k, L.length)));
+  dlSave(new Blob([XLSX.write(wb, { bookType:'xlsx', type:'array' })], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), name + '.xlsx');
+}
+async function dlPdf(list, groups, cols, name, title, by){
+  if(!(await needPDF())) throw new Error('PDF tool did not load. Check the internet.');
+  const doc = new window.jspdf.jsPDF({ orientation: cols.length > 6 ? 'landscape' : 'portrait', unit:'pt', format:'a4' });
+  const W = doc.internal.pageSize.getWidth(), M = 32, rgb = h => [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)];
+  doc.setFont('times', 'bold'); doc.setFontSize(17); doc.text('BoxUp Luxury Gifting', M, 42);
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(100); doc.text(`Order status report · ${title}`, M, 58);
+  doc.text(`${dlD(new Date())} · ${list.length} order${list.length === 1 ? '' : 's'}`, W - M, 42, { align:'right' });
+  const cnt = {}; list.forEach(o => { const s = shxStatus(o); cnt[s] = (cnt[s] || 0) + 1; });
+  let x = M; doc.setFontSize(8.5); doc.setFont('helvetica', 'bold');
+  Object.keys(cnt).sort(dlSortSt).forEach(s => { const t = `${s} ${cnt[s]}`, w = doc.getTextWidth(t) + 12; doc.setFillColor(...rgb(DL_FILL[s] || 'EEEEEE')); doc.roundedRect(x, 66, w, 15, 7, 7, 'F'); doc.setTextColor(60); doc.text(t, x + 6, 76.5); x += w + 6; });
+  doc.setTextColor(0);
+  const sects = groups.length ? groups : [['', list]], tw = cols.reduce((a, c) => a + ((DLC[c.k] || [0,0,0,1.2])[3]), 0), avail = W - 2 * M;
+  const colStyles = {}; cols.forEach((c, i) => { colStyles[i] = { cellWidth: avail * ((DLC[c.k] || [0,0,0,1.2])[3]) / tw }; });
+  let y = 92;
+  sects.forEach(([k, L]) => {
+    if(k){ if(y > doc.internal.pageSize.getHeight() - 80){ doc.addPage(); y = 40; } doc.setFont('helvetica', 'bold'); doc.setFontSize(11.5); doc.setTextColor(22, 58, 38); doc.text(`${k} (${L.length})`, M, y + 6); doc.setTextColor(0); y += 12; }
+    doc.autoTable({ startY: y, margin:{ left:M, right:M, top:36, bottom:36 }, head:[cols.map(c => c.label)], body: L.map(o => cols.map(c => String(dlVal(o, c.k)))),
+      styles:{ fontSize: cols.length > 9 ? 6.8 : 8, cellPadding:3, overflow:'linebreak', lineColor:[230,230,230], lineWidth:0.4 }, headStyles:{ fillColor:[22,58,38], textColor:255, fontStyle:'bold' },
+      columnStyles: colStyles, alternateRowStyles:{ fillColor:[250,248,243] },
+      didParseCell: d => { if(d.section === 'body' && cols[d.column.index] && cols[d.column.index].k === 'status' && DL_FILL[d.cell.raw]){ d.cell.styles.fillColor = rgb(DL_FILL[d.cell.raw]); d.cell.styles.fontStyle = 'bold'; } } });
+    y = doc.lastAutoTable.finalY + 22;
+  });
+  const n = doc.internal.getNumberOfPages();
+  for(let i = 1; i <= n; i++){ doc.setPage(i); doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(140); doc.text(`Page ${i} of ${n} · BoxUp Luxury Gifting · generated ${new Date().toLocaleString('en-IN', {day:'2-digit', month:'short', year:'numeric', hour:'numeric', minute:'2-digit'})}`, M, doc.internal.pageSize.getHeight() - 16); }
+  dlSave(doc.output('blob'), name + '.pdf');
+}
+async function dlRun(list, opt){   // opt: {xls, pdf, by, cols, name, title}
+  const groups = dlGroups(list, opt.by);
+  if(opt.xls) await dlExcel(list, groups, opt.cols, opt.name, opt.title);
+  if(opt.pdf) await dlPdf(list, groups, opt.cols, opt.name, opt.title, opt.by);
+}
+const dlSafe = t => String(t||'').replace(/[\\/:*?"<>|]+/g,' ').replace(/\s+/g,' ').trim();
+
+/* ---------- Share box: "Download file" (Excel / PDF / both) ---------- */
+const SHX_COLS = [['id','Order ID',1,['id']],['rcp','Recipient & city',1,['name','co','city','state','pin']],['awb','Courier & AWB',1,['courier','trk','link']],['st','Status',1,['status']],['dd','Delivered date',1,['dd']],['pod','POD link',0,['pod']]];
 function shxCounts(){ const c = {}; SH.list.forEach(o => { const s = shxStatus(o); c[s] = (c[s] || 0) + 1; }); return c; }
 function shxChips(){
-  const c = shxCounts(), keys = Object.keys(c).sort((a,b) => (SHX_ORDER.indexOf(a) + 1 || 99) - (SHX_ORDER.indexOf(b) + 1 || 99));
+  const c = shxCounts(), keys = Object.keys(c).sort(dlSortSt);
   if(!SH.xs) SH.xs = new Set(keys);
   if(!SH.xc) SH.xc = new Set(SHX_COLS.filter(x => x[2]).map(x => x[0]));
+  if(!SH.xf) SH.xf = new Set(['xls']);
   const all = keys.every(k => SH.xs.has(k));
   $('shStChips').innerHTML = `<button type="button" class="sh-ch${all ? ' on' : ''}" data-xs="*">All · ${SH.list.length}</button>` + keys.map(k => `<button type="button" class="sh-ch${SH.xs.has(k) ? ' on' : ''}" data-xs="${esc(k)}">${esc(k)} · ${c[k]}</button>`).join('');
   $('shColChips').innerHTML = SHX_COLS.map(x => `<button type="button" class="sh-ch${SH.xc.has(x[0]) ? ' on' : ''}" data-xc="${x[0]}">${x[1]}</button>`).join('');
   $('shStChips').querySelectorAll('[data-xs]').forEach(b => b.onclick = () => { const k = b.dataset.xs; if(k === '*') SH.xs = all ? new Set() : new Set(keys); else SH.xs.has(k) ? SH.xs.delete(k) : SH.xs.add(k); shRefresh(); });
   $('shColChips').querySelectorAll('[data-xc]').forEach(b => b.onclick = () => { const k = b.dataset.xc; if(k === 'id') return; SH.xc.has(k) ? SH.xc.delete(k) : SH.xc.add(k); shRefresh(); });
+  $('shFmt').querySelectorAll('.dl-f').forEach(b => b.classList.toggle('on', SH.xf.has(b.dataset.f)));
 }
 const shxList = () => SH.list.filter(o => SH.xs && SH.xs.has(shxStatus(o)));
-const shxName = () => `${shSafe($('shCo').value) || 'BoxUp'} orders ${shToday().replace(/\s+/g,'-')} (${shxList().length}).xlsx`;
-function shxRows(list){
-  const C = SH.xc, h = [], fmt = d => d ? d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}) : '';
-  if(C.has('id')) h.push('Order ID');
-  if(C.has('rcp')) h.push('Name','Company','City','State','Pincode');
-  if(C.has('awb')) h.push('Courier','AWB / Tracking ID','Tracking Link');
-  if(C.has('st')) h.push('Status');
-  if(C.has('dd')) h.push('Delivered Date');
-  if(C.has('pod')) h.push('POD Link');
-  const rows = list.map(o => { const r = [];
-    if(C.has('id')) r.push(o.id);
-    if(C.has('rcp')) r.push(o.name, o.co, o.city, o.state, o.pin);
-    if(C.has('awb')) r.push(o.courier, o.trk, o.link);
-    if(C.has('st')) r.push(shxStatus(o));
-    if(C.has('dd')) r.push(o.step === 'Delivered' ? fmt(o.delivOn) : '');
-    if(C.has('pod')) r.push(o.pod || '');
-    return r; });
-  return [h, rows];
-}
-const SHX_FILL = {'Delivered':'FFE3F5E8','Out for Delivery':'FFFFF1CC','At Destination':'FFE3ECFB','In Transit':'FFE3ECFB','Dispatched':'FFE3ECFB','RTO':'FFFDE2E1','Escalated':'FFFDE2E1','Rescheduled':'FFFFF1CC'};
-let EXJ_P = null;
-function needExcelJS(){
-  if(window.ExcelJS) return Promise.resolve(true);
-  if(!EXJ_P) EXJ_P = new Promise(res => { const sc = document.createElement('script'); sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js'; sc.onload = () => res(true); sc.onerror = () => { EXJ_P = null; res(false); }; document.head.appendChild(sc); });
-  return EXJ_P;
-}
+const shxBase = () => `${dlSafe($('shCo').value) || 'BoxUp'} orders ${shToday().replace(/\s+/g,'-')} (${shxList().length})`;
+const shxName = () => shxBase() + (SH.xf && SH.xf.size === 2 ? '.xlsx + .pdf' : SH.xf && SH.xf.has('pdf') ? '.pdf' : '.xlsx');
+$('shFmt').addEventListener('click', e => {
+  const b = e.target.closest('.dl-f'); if(!b || !SH) return; e.preventDefault(); e.stopPropagation();
+  document.querySelector('input[name=shMode][value=xls]').checked = true;
+  if(!SH.xf) SH.xf = new Set(['xls']);
+  const f = b.dataset.f; if(SH.xf.has(f) && SH.xf.size > 1) SH.xf.delete(f); else SH.xf.add(f);
+  SH.edited = false; shRefresh();
+});
 async function shDownloadXls(){
   const st = $('shStatus'), list = shxList();
   if(!list.length){ st.textContent = 'Pick at least one status.'; st.className = 'sh-msg bad'; return; }
-  const name = shxName(), groups = [...SH.xs].filter(k => list.some(o => shxStatus(o) === k)).sort((a,b) => (SHX_ORDER.indexOf(a) + 1 || 99) - (SHX_ORDER.indexOf(b) + 1 || 99));
-  const sheets = [['All', list]].concat(groups.length > 1 ? groups.map(k => [k, list.filter(o => shxStatus(o) === k)]) : []);
-  st.textContent = 'Making the Excel file…'; st.className = 'sh-msg';
-  let blob = null;
-  if(await needExcelJS() && window.ExcelJS){
-    const wb = new ExcelJS.Workbook();
-    sheets.forEach(([k, L]) => {
-      const [h, rows] = shxRows(L), ws = wb.addWorksheet(`${k} (${L.length})`.replace(/[\\/?*\[\]:]/g,' ').slice(0, 31));
-      ws.addRow([`BoxUp Luxury Gifting · ${$('shCo').value.trim() || 'Orders'} · ${k} · ${shToday()}`]).font = { bold:true, size:13 };
-      ws.addRow([]);
-      const hr = ws.addRow(h); hr.eachCell(c => { c.font = { bold:true, color:{argb:'FFFFFFFF'} }; c.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FF1D6F42'} }; });
-      const sc = h.indexOf('Status') + 1, lc = h.indexOf('Tracking Link') + 1, pc = h.indexOf('POD Link') + 1;
-      rows.forEach(r => { const x = ws.addRow(r);
-        x.eachCell({ includeEmpty:true }, c => { c.border = { bottom:{style:'thin', color:{argb:'FFE0E0E0'}} }; });
-        if(sc){ const f = SHX_FILL[r[sc - 1]]; if(f) x.getCell(sc).fill = { type:'pattern', pattern:'solid', fgColor:{argb:f} }; x.getCell(sc).font = { bold:true }; }
-        [lc, pc].forEach(i => { if(i && /^https?:/.test(r[i - 1])) { x.getCell(i).value = { text: r[i - 1], hyperlink: r[i - 1] }; x.getCell(i).font = { color:{argb:'FF1155CC'}, underline:true }; } });
-      });
-      ws.columns.forEach((c, i) => { c.width = ({'Order ID':16,'Name':24,'Company':22,'City':16,'State':14,'Pincode':9,'Courier':14,'AWB / Tracking ID':18,'Tracking Link':42,'Status':17,'Delivered Date':14,'POD Link':40})[h[i]] || 14; });
-      ws.views = [{ state:'frozen', ySplit:3 }];
-      ws.autoFilter = { from:{row:3, column:1}, to:{row:3, column:h.length} };
-    });
-    blob = new Blob([await wb.xlsx.writeBuffer()], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-  } else {
-    await needXLSX();
-    if(typeof XLSX === 'undefined'){ st.textContent = 'Excel tool did not load. Check the internet and try again.'; st.className = 'sh-msg bad'; return; }
-    const wb = XLSX.utils.book_new();
-    sheets.forEach(([k, L]) => { const [h, rows] = shxRows(L); XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([h].concat(rows)), `${k} (${L.length})`.slice(0, 31)); });
-    blob = new Blob([XLSX.write(wb, { bookType:'xlsx', type:'array' })], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-  }
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
-  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
-  st.textContent = `✓ Downloaded ${name}`; st.className = 'sh-msg ok';
+  const cols = SHX_COLS.filter(x => SH.xc.has(x[0])).flatMap(x => x[3]).map(k => ({ k, label: DLC[k][0] }));
+  st.textContent = 'Making the file…'; st.className = 'sh-msg'; SH.busy = true; shRefresh();
+  try {
+    await dlRun(list, { xls: SH.xf.has('xls'), pdf: SH.xf.has('pdf'), by:'status', cols, name: shxBase(), title: $('shCo').value.trim() || 'Orders' });
+    st.textContent = `✓ Downloaded ${shxName()}`; st.className = 'sh-msg ok';
+  } catch(err){ st.textContent = 'Could not make the file: ' + (err.message || err); st.className = 'sh-msg bad'; }
+  finally { if(SH){ SH.busy = false; shRefresh(); } }
 }
+
+/* ---------- Toolbar "Download": pop-up with file type, statuses, grouping and editable columns ---------- */
+let DL = null;
+function dlOpen(){
+  if(!VIEW.length){ alert('No orders on screen to download.'); return; }
+  const cos = new Set(VIEW.map(o => o.client).filter(Boolean));
+  const c = {}; VIEW.forEach(o => { const s = shxStatus(o); c[s] = (c[s] || 0) + 1; });
+  DL = { list: VIEW.slice(), cfg: dlCfgLoad(), xs: new Set(Object.keys(c)), f: new Set((() => { try { return JSON.parse(localStorage.getItem('boxup.dlfmt') || '["xls"]'); } catch(e){ return ['xls']; } })()), by: 'status', ed: false, cnt: c, cos: cos.size };
+  const co = $('fCompany') ? $('fCompany').value : '';
+  DL.title = co || (cos.size === 1 ? [...cos][0] : 'All companies');
+  $('dlName').value = `${dlSafe(co || 'BoxUp Orders')} ${dlD(new Date()).replace(/\s+/g,'-')}`;
+  $('dlMsg').textContent = ''; $('dlMsg').className = 'sh-msg';
+  $('dlOv').hidden = false; dlRender();
+}
+const dlList = () => DL.list.filter(o => DL.xs.has(shxStatus(o)));
+function dlRender(){
+  if(!DL) return;
+  const keys = Object.keys(DL.cnt).sort(dlSortSt), all = keys.every(k => DL.xs.has(k)), L = dlList(), cfg = DL.cfg;
+  $('dlSub').textContent = `${DL.list.length} order${DL.list.length === 1 ? '' : 's'} on screen · ${DL.cos} compan${DL.cos === 1 ? 'y' : 'ies'} · the filters you set are kept`;
+  $('dlFmt').querySelectorAll('.dl-f').forEach(b => b.classList.toggle('on', DL.f.has(b.dataset.f)));
+  $('dlSt').innerHTML = `<button type="button" class="sh-ch${all ? ' on' : ''}" data-s="*">All · ${DL.list.length}</button>` + keys.map(k => `<button type="button" class="sh-ch${DL.xs.has(k) ? ' on' : ''}" data-s="${esc(k)}">${esc(k)} · ${DL.cnt[k]}</button>`).join('');
+  $('dlGrp').innerHTML = [['status','Status'],['company','Company'],['courier','Courier'],['none','None (one list)']].map(g => `<button type="button" class="sh-ch${DL.by === g[0] ? ' on' : ''}" data-g="${g[0]}">${g[1]}</button>`).join('');
+  $('dlCols').innerHTML = cfg.order.map(k => `<button type="button" class="sh-ch${cfg.on.includes(k) ? ' on' : ''}" data-c="${esc(k)}">${esc(dlLabel(cfg, k))}</button>`).join('') + '<button type="button" class="sh-ch add" data-c="+">+ Custom column</button>';
+  $('dlEd').hidden = !DL.ed; $('dlEdT').innerHTML = DL.ed ? '&#10003; Done editing' : '&#9998; Edit, reorder, rename';
+  if(DL.ed) $('dlEd').innerHTML = cfg.order.map((k, i) => `<div class="dl-r" draggable="true" data-i="${i}"><span class="hd" title="Drag to move">&#8942;&#8942;</span><input type="checkbox" data-k="${esc(k)}"${cfg.on.includes(k) ? ' checked' : ''}><input class="nm" data-k="${esc(k)}" value="${esc(dlLabel(cfg, k))}">${DLC[k] ? '' : '<span class="cu">custom · blank column</span><button type="button" class="rm" data-k="' + esc(k) + '">remove</button>'}</div>`).join('');
+  const f = [...DL.f], n = L.length;
+  $('dlHow').innerHTML = `<b>${n} order${n === 1 ? '' : 's'}</b> will download${f.length === 2 ? ' as 2 files (Excel + PDF)' : f[0] === 'pdf' ? ' as a PDF' : ' as an Excel file'}${DL.by !== 'none' ? ', grouped by ' + DL.by : ''}. ${dlCols(cfg).length} column${dlCols(cfg).length === 1 ? '' : 's'}. Your column choice is remembered for next time.`;
+  $('dlGo').innerHTML = '&#11015; Download ' + (f.length === 2 ? 'Excel + PDF' : f[0] === 'pdf' ? 'PDF' : 'Excel');
+  $('dlGo').disabled = !n || !f.length || !dlCols(cfg).length || !!DL.busy;
+}
+$('dlFmt').addEventListener('click', e => { const b = e.target.closest('.dl-f'); if(!b || !DL) return; const f = b.dataset.f; if(DL.f.has(f) && DL.f.size > 1) DL.f.delete(f); else DL.f.add(f); try { localStorage.setItem('boxup.dlfmt', JSON.stringify([...DL.f])); } catch(err){} dlRender(); });
+$('dlSt').addEventListener('click', e => { const b = e.target.closest('[data-s]'); if(!b) return; const k = b.dataset.s, keys = Object.keys(DL.cnt); if(k === '*') DL.xs = keys.every(x => DL.xs.has(x)) ? new Set() : new Set(keys); else DL.xs.has(k) ? DL.xs.delete(k) : DL.xs.add(k); dlRender(); });
+$('dlGrp').addEventListener('click', e => { const b = e.target.closest('[data-g]'); if(!b) return; DL.by = b.dataset.g; dlRender(); });
+function dlAddCustom(){
+  const nm = (prompt('Name of the new column (it will be blank in the file, for your notes):', 'Remarks') || '').trim(); if(!nm) return;
+  const k = 'cu:' + nm; if(DL.cfg.order.includes(k)) return;
+  DL.cfg.custom.push(k); DL.cfg.order.push(k); DL.cfg.on.push(k); dlCfgSave(DL.cfg); dlRender();
+}
+$('dlCols').addEventListener('click', e => { const b = e.target.closest('[data-c]'); if(!b) return; const k = b.dataset.c, c = DL.cfg;
+  if(k === '+') return dlAddCustom();
+  c.on = c.on.includes(k) ? c.on.filter(x => x !== k) : c.on.concat(k); dlCfgSave(c); dlRender(); });
+$('dlEdT').addEventListener('click', () => { DL.ed = !DL.ed; dlRender(); });
+$('dlEd').addEventListener('change', e => { const c = DL.cfg, k = e.target.dataset.k; if(!k) return;
+  if(e.target.type === 'checkbox'){ c.on = e.target.checked ? c.on.concat(k) : c.on.filter(x => x !== k); }
+  else { const v = e.target.value.trim(); if(v && v !== (DLC[k] ? DLC[k][0] : k.replace(/^cu:/, ''))) c.names[k] = v; else delete c.names[k]; }
+  dlCfgSave(c); dlRender(); });
+$('dlEd').addEventListener('click', e => { const b = e.target.closest('.rm'); if(!b) return; const c = DL.cfg, k = b.dataset.k; c.order = c.order.filter(x => x !== k); c.on = c.on.filter(x => x !== k); c.custom = c.custom.filter(x => x !== k); delete c.names[k]; dlCfgSave(c); dlRender(); });
+let dlDrag = -1;
+$('dlEd').addEventListener('dragstart', e => { const r = e.target.closest('.dl-r'); if(!r) return; dlDrag = +r.dataset.i; r.classList.add('drag'); e.dataTransfer.effectAllowed = 'move'; });
+$('dlEd').addEventListener('dragover', e => { const r = e.target.closest('.dl-r'); if(!r) return; e.preventDefault(); $('dlEd').querySelectorAll('.over').forEach(x => x.classList.remove('over')); r.classList.add('over'); });
+$('dlEd').addEventListener('drop', e => { const r = e.target.closest('.dl-r'); if(!r || dlDrag < 0) return; e.preventDefault(); const to = +r.dataset.i, o = DL.cfg.order, [k] = o.splice(dlDrag, 1); o.splice(to, 0, k); dlDrag = -1; dlCfgSave(DL.cfg); dlRender(); });
+$('dlEd').addEventListener('dragend', () => { dlDrag = -1; $('dlEd').querySelectorAll('.drag,.over').forEach(x => x.classList.remove('drag', 'over')); });
+$('dlReset').addEventListener('click', () => { DL.cfg = { order: Object.keys(DLC), on: DL_DEF.slice(), names: {}, custom: [] }; dlCfgSave(DL.cfg); dlRender(); });
+function dlClose(){ if(DL && DL.busy) return; $('dlOv').hidden = true; DL = null; }
+$('dlX').addEventListener('click', dlClose); $('dlCancel').addEventListener('click', dlClose);
+$('dlOv').addEventListener('click', e => { if(e.target.id === 'dlOv') dlClose(); });
+$('dlGo').addEventListener('click', async () => {
+  if(!DL) return; const L = dlList(), m = $('dlMsg');
+  DL.busy = true; dlRender(); m.textContent = 'Making the file…'; m.className = 'sh-msg';
+  try {
+    await dlRun(L, { xls: DL.f.has('xls'), pdf: DL.f.has('pdf'), by: DL.by, cols: dlCols(DL.cfg), name: dlSafe($('dlName').value) || 'BoxUp Orders', title: DL.title });
+    m.textContent = '✓ Downloaded'; m.className = 'sh-msg ok';
+  } catch(err){ m.textContent = 'Could not make the file: ' + (err.message || err); m.className = 'sh-msg bad'; }
+  finally { if(DL){ DL.busy = false; dlRender(); } }
+});
+
 /* Share tracking page link: the company's live page + access code, no file */
 function shSendTrack(){
   const num = shNumber(); if(num === null || !SH) return;
@@ -2127,7 +2309,7 @@ $('rsBtn').addEventListener('click', () => {
   applyFilters();
   window.scrollTo({top:0, behavior:'smooth'});
 });
-$('dlBtn').addEventListener('click', downloadExcel);
+$('dlBtn').addEventListener('click', dlOpen);
 $('reload').addEventListener('click', load);
 // default: last 30 days
 (function(){ const t = new Date(), f = new Date(Date.now() - 29*86400000); const iso = d => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); $('from').value = iso(f); $('to').value = iso(t); })();
