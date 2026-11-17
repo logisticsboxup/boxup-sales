@@ -276,7 +276,7 @@
   .sh-file .xl{flex:none;width:34px;height:40px;border-radius:5px;background:#1d7a44;color:#fff;font:800 11px 'Inter';display:flex;align-items:center;justify-content:center;}
   .sh-file.trk .xl{background:var(--forest);font-size:10px}
   .sh-file b{font-size:13px;word-break:break-word;} .sh-file small{display:block;color:var(--muted);font-size:12px;margin-top:2px;}
-  .sh-opts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+  .sh-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
   .sh-opt.xo.on{border-color:#1d6f42;background:#EEF7F1;box-shadow:0 0 0 1px #1d6f42 inset;}
   .xl-ic{display:inline-flex;width:22px;height:26px;border-radius:4px;background:#1d6f42;color:#fff;font:800 8px 'Inter';align-items:flex-end;justify-content:center;padding-bottom:3px;box-sizing:border-box;flex:none;}
   .sh-x{margin-top:4px;}
@@ -293,6 +293,9 @@
   .dl-f .fi{border-radius:4px;color:#fff;font:800 9px 'Inter';padding:7px 5px;flex:none;}
   .dl-f.on.x{border-color:#1d6f42;background:#EEF7F1;box-shadow:0 0 0 1px #1d6f42 inset;} .dl-f.on.x .tk{background:#1d6f42;border-color:#1d6f42;}
   .dl-f.on.p{border-color:#c0392b;background:#FDF1EF;box-shadow:0 0 0 1px #c0392b inset;} .dl-f.on.p .tk{background:#c0392b;border-color:#c0392b;}
+  .sh-opt #shVia .dl-f.on{border-color:#e3a050;background:#fff;box-shadow:0 0 0 1px #e3a050 inset;color:var(--ink);}
+  #shOv input#shMail,#shOv input#shSubj{border:1.5px solid #d8d2c0;border-radius:9px;padding:9px 11px;font:inherit;font-size:14px;box-sizing:border-box;}
+  #shGo.em{background:#1a56b8;border-color:#1a56b8;}
   .dl-mini{display:flex;gap:6px;margin-top:8px;} .dl-mini .dl-f{padding:5px 8px;font-size:12px;gap:6px;flex:1;} .dl-mini .dl-f b{font-size:12.5px;} .dl-mini .dl-f .fi{padding:4px 3px;font-size:8px;}
   .sh-ch.add{border-style:dashed;color:var(--forest);} .sh-ch.add::before{content:'';}
   .dl-ed{border:1px solid #e7e1d3;border-radius:10px;padding:8px;margin-top:8px;background:#FBFAF6;}
@@ -622,13 +625,13 @@
         <div><div class="lb">Customer (company)</div><input type="text" id="shCo" autocomplete="off"></div>
         <div><div class="lb">Contact person</div><input type="text" id="shWho" placeholder="e.g. Ritika" autocomplete="off"></div>
       </div>
-      <div class="lb">Customer WhatsApp number</div>
-      <div class="wa-row"><input type="text" class="cc" id="shCc" value="+91" aria-label="Country code" style="flex:0 0 70px;text-align:center;background:var(--cream);width:auto"><input type="tel" id="shNum" placeholder="10-digit mobile number"></div>
+      <div class="lb" id="shNumL">Customer WhatsApp number</div>
+      <div class="wa-row" id="shNumR"><input type="text" class="cc" id="shCc" value="+91" aria-label="Country code" style="flex:0 0 70px;text-align:center;background:var(--cream);width:auto"><input type="tel" id="shNum" placeholder="10-digit mobile number"></div>
+      <div id="shMailR" hidden><div class="lb">Customer email <small style="font-weight:400;text-transform:none;letter-spacing:0">(add more with a comma)</small></div><input type="text" id="shMail" placeholder="client@company.com" autocomplete="off" style="width:100%"></div>
       <div class="sh-msg" id="shSaved">Saved for this company, so next time it fills in by itself.</div>
       <div class="lb">How to send</div>
       <div class="sh-opts" id="shMode">
-        <label class="sh-opt on"><input type="radio" name="shMode" value="link" checked><span class="ico">&#128279;</span><span><b>Share tracking page link</b><small>Sends the company's own live tracking page and access code. No Google Drive file. Opens the customer's chat directly.</small></span></label>
-        <label class="sh-opt"><input type="radio" name="shMode" value="file"><span class="ico">&#128206;</span><span><b>Attach Excel file</b><small>The Excel file itself is attached in WhatsApp, with the message as its caption.</small></span></label>
+        <label class="sh-opt on"><input type="radio" name="shMode" value="link" checked><span class="ico">&#128279;</span><span><b>Share tracking page link</b><small>The company's own live tracking page and access code, by WhatsApp, email or both.</small><span class="dl-mini" id="shVia"><button type="button" class="dl-f on" data-v="wa"><span class="fi" style="background:#25a35a">WA</span><b>WhatsApp</b></button><button type="button" class="dl-f" data-v="em"><span class="fi" style="background:#1a56b8">@</span><b>Email</b></button></span></span></label>
         <label class="sh-opt xo"><input type="radio" name="shMode" value="xls"><span class="ico">&#11015;</span><span><b>Download file</b><small>Excel, PDF or both, only the statuses you pick.</small><span class="dl-mini" id="shFmt"><button type="button" class="dl-f x on" data-f="xls"><span class="fi" style="background:#1d6f42">XLS</span><b>Excel</b></button><button type="button" class="dl-f p" data-f="pdf"><span class="fi" style="background:#c0392b">PDF</span><b>PDF</b></button></span></span></label>
       </div>
       <div class="sh-x" id="shX2" hidden>
@@ -640,6 +643,8 @@
       <div class="sh-how" id="shHow"></div>
       <div class="lb" id="shTxtL">Message (you can edit)</div>
       <textarea id="shTxt" spellcheck="false"></textarea>
+      <div id="shEmR" hidden><div class="lb">Email subject</div><input type="text" id="shSubj" autocomplete="off" style="width:100%">
+      <div class="lb">Email (you can edit)</div><textarea id="shEmTxt" spellcheck="false" style="min-height:230px"></textarea></div>
       <div class="sh-msg" id="shStatus"></div>
     </div>
     <div class="wa-ft"><span class="nt" id="shNt">Then press Send in WhatsApp.</span><button type="button" id="shCancel">Cancel</button><button type="button" id="shCopy">&#128203; Copy message</button><button type="button" class="go" id="shGo">Send on WhatsApp &#10140;</button></div>
@@ -1119,6 +1124,26 @@ async function downloadExcel(){
 /* ---------- Share file with the customer on WhatsApp ---------- */
 var SH = null, SH_CONTACTS = null;
 const shMode = () => (document.querySelector('input[name=shMode]:checked') || {}).value || 'link';
+const shVia = () => (SH && SH.via) || new Set(['wa']);
+const shWa = () => shMode() !== 'link' || shVia().has('wa');
+const shEm = () => shMode() === 'link' && shVia().has('em');
+function shMails(){ const v = $('shMail').value.split(/[,;\s]+/).filter(Boolean); return v.every(x => /^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(x)) ? v : null; }
+function shEmailText(){
+  const n = SH.list.length, who = $('shWho').value.trim(), co = $('shCo').value.trim();
+  const k = SH.ct && SH.ct.key === coKey(co) ? SH.ct : null;
+  return [who ? `Dear ${who},` : `Dear ${co || 'Sir / Madam'} team,`, '',
+    'Greetings from BoxUp Luxury Gifting.', '',
+    `We are happy to share ${co ? co + "'s" : 'your company\'s'} own live tracking page. You can follow every gift we ship for you, from our warehouse to your recipients' doorstep.`, '',
+    `Tracking page: ${k && k.link ? k.link : '[getting the link...]'}`, `Access code: *${k && k.code ? k.code : '[getting the code...]'}*`, '',
+    'On the page you can see:',
+    `- Live status of each order${n ? ' (' + n + ' order' + (n > 1 ? 's' : '') + ' right now)' : ''}`,
+    '- Courier, AWB number and the full shipment journey',
+    '- Proof of delivery once a gift is delivered',
+    '- A downloadable report of all your orders', '',
+    `How to use it: open the link, enter the 9-character access code, and you will see only ${co || 'your'} orders. The code is meant for your team, so please keep it within your company.`, '',
+    'For any help, just reply to this email.', ''].join('\n');
+}
+const shSubject = () => `Track your BoxUp gift orders live - ${$('shCo').value.trim() || 'BoxUp'}`;
 const shToday = () => new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
 const shSafe = t => String(t||'').replace(/[\\/:*?"<>|]+/g,' ').replace(/\s+/g,' ').trim();
 function shLoadContacts(){
@@ -1133,7 +1158,7 @@ function shOpen(){
   const top = $('fCompany').value || Object.keys(cos).sort((a,b) => cos[b] - cos[a])[0] || '';
   const many = Object.keys(cos).length > 1 && !$('fCompany').value;
   SH = { list: VIEW.slice(), edited: false, xs: null, xc: null, xf: null };
-  $('shCo').value = top; $('shWho').value = ''; $('shNum').value = ''; $('shCc').value = '+91';
+  $('shCo').value = top; $('shWho').value = ''; $('shNum').value = ''; $('shCc').value = '+91'; $('shMail').value = ''; SH.via = new Set(['wa']); SH.emEdited = false;
   document.querySelector('input[name=shMode][value=link]').checked = true; $('shStatus').textContent = ''; $('shStatus').className = 'sh-msg';
   if(many) { $('shStatus').textContent = 'The orders on screen are for ' + Object.keys(cos).length + ' companies. Pick one in the Company filter to send only that customer\'s orders.'; $('shStatus').className = 'sh-msg bad'; }
   $('shOv').hidden = false;
@@ -1145,6 +1170,7 @@ function shFill(){
   $('shSaved').textContent = c ? 'Saved contact for this company filled in.' : 'Saved for this company, so next time it fills in by itself.';
   if(!c) return;
   if(!$('shWho').value) $('shWho').value = c.contact || '';
+  if(!$('shMail').value && c.email) $('shMail').value = c.email;
   if(!$('shNum').value && c.phone){
     const d = String(c.phone).replace(/\D/g,'');
     if(d.length > 10){ $('shCc').value = '+' + d.slice(0, d.length - 10); $('shNum').value = d.slice(-10); } else $('shNum').value = d;
@@ -1170,9 +1196,8 @@ function shText(link){
     const k = SH.ct && SH.ct.key === coKey(co) ? SH.ct : null;
     return [who ? `Dear ${who},` : `Hello ${co || 'there'} team,`, '',
       `You can now track all your BoxUp gift orders live${n ? ' (' + n + ' order' + (n > 1 ? 's' : '') + ' right now)' : ''}, from our warehouse to your recipients' doorstep.`, '',
-      `\u{1F517} Tracking page: ${k && k.link ? k.link : '[getting the link…]'}`, `\u{1F511} Access code: ${k && k.code ? k.code : '[getting the code…]'}`, '',
-      `Open the link, enter the code, and you will see only ${co || 'your'} orders: live status, shipment progress, proof of delivery and a downloadable report.`, '',
-      'Thanks,', 'Team BoxUp Luxury Gifting'].join('\n');
+      `\u{1F517} Tracking page: ${k && k.link ? k.link : '[getting the link…]'}`, `\u{1F511} Access code: *${k && k.code ? k.code : '[getting the code…]'}*`, '',
+      `Open the link, enter the code, and you will see only ${co || 'your'} orders: live status, shipment progress, proof of delivery and a downloadable report.`, ''].join('\n');
   }
   const couriers = [...new Set(L.map(o => o.courier).filter(Boolean))].join(', ');
   const boxes = L.reduce((a,o) => a + (o.boxes || 1), 0);
@@ -1201,8 +1226,12 @@ function shRefresh(){
   const couriers = [...new Set(SH.list.map(o => o.courier).filter(Boolean))].join(', ');
   const lk = shMode() === 'link', xo = shMode() === 'xls';
   $('shCard').classList.toggle('trk', lk); $('shIco').textContent = lk ? 'LINK' : 'XLS';
-  $('shX2').hidden = !xo; $('shTxt').hidden = xo; $('shTxtL').hidden = xo;
-  $('shCopy').hidden = xo; $('shNt').textContent = xo ? 'Saves the file to this computer.' : 'Then press Send in WhatsApp.';
+  const wa = shWa(), em = shEm();
+  $('shX2').hidden = !xo; $('shTxt').hidden = xo || !wa; $('shTxtL').hidden = xo || !wa; $('shTxtL').textContent = em ? 'WhatsApp message (you can edit)' : 'Message (you can edit)';
+  $('shNumL').hidden = $('shNumR').hidden = xo ? false : !wa; $('shMailR').hidden = !em; $('shEmR').hidden = !em;
+  $('shVia').querySelectorAll('.dl-f').forEach(b => b.classList.toggle('on', shVia().has(b.dataset.v)));
+  if(em){ if(!SH.emEdited){ $('shEmTxt').value = shEmailText(); $('shSubj').value = shSubject(); } }
+  $('shCopy').hidden = xo; $('shNt').textContent = xo ? 'Saves the file to this computer.' : wa && em ? 'Email is sent, then WhatsApp opens.' : em ? 'Sent from BoxUp, replies to logistics@.' : 'Then press Send in WhatsApp.';
   if(xo){
     shxChips();
     const L = shxList();
@@ -1223,14 +1252,20 @@ function shRefresh(){
     ? '<b>Then:</b> the file downloads to this computer. Excel: an <b>All</b> sheet plus one sheet per status. PDF: a BoxUp report with a section per status.'
     : m === 'file'
     ? '<b>Then:</b> the Windows share window opens with the Excel attached &rarr; pick <b>WhatsApp</b> &rarr; pick the customer\'s chat &rarr; <b>Send</b>. The message is also copied, so paste it (Ctrl+V) if WhatsApp does not show it.'
+    : wa && em ? '<b>Then:</b> the email goes straight to the customer (access code in <b>bold</b>), and WhatsApp opens on the customer\'s chat &rarr; press <b>Send</b> there. Words between *stars* show in bold in both.'
+    : em ? '<b>Then:</b> the email goes straight to the customer from BoxUp, with the access code in <b>bold</b> and the link clickable. Replies come to logistics@boxupgifting.com. Words between *stars* are sent in bold.'
     : '<b>Then:</b> WhatsApp opens on the customer\'s chat with the tracking link and access code ready &rarr; press <b>Send</b>.';
-  $('shGo').innerHTML = m === 'xls' ? '&#11015; Download ' + (SH.xf && SH.xf.size === 2 ? 'Excel + PDF' : SH.xf && SH.xf.has('pdf') ? 'PDF' : 'Excel') : m === 'file' ? '&#128206; Share on WhatsApp' : 'Send on WhatsApp &#10140;';
+  $('shGo').innerHTML = m === 'xls' ? '&#11015; Download ' + (SH.xf && SH.xf.size === 2 ? 'Excel + PDF' : SH.xf && SH.xf.has('pdf') ? 'PDF' : 'Excel') : m === 'file' ? '&#128206; Share on WhatsApp' : wa && em ? 'Send on WhatsApp + Email &#10140;' : em ? '&#9993;&#65039; Send by email &#10140;' : 'Send on WhatsApp &#10140;';
+  $('shGo').classList.toggle('em', m === 'link' && em && !wa);
   $('shGo').classList.toggle('xg', m === 'xls');
   if(!SH.edited) $('shTxt').value = shText('');
   const num = shNumber();
   if(m === 'xls'){ $('shGo').disabled = !!SH.busy || !shxList().length; return; }
-  $('shGo').disabled = num === null || SH.busy;
-  if(num === null && !SH.busy){ $('shStatus').textContent = 'Check the WhatsApp number (10 digits for India).'; $('shStatus').className = 'sh-msg bad'; }
+  const mails = em ? shMails() : [];
+  $('shGo').disabled = (wa && num === null) || (em && (!mails || !mails.length)) || SH.busy;
+  if(em && !mails && !SH.busy){ $('shStatus').textContent = 'Check the email address.'; $('shStatus').className = 'sh-msg bad'; }
+  else if($('shStatus').textContent.startsWith('Check the email')) $('shStatus').textContent = '';
+  if(wa && num === null && !SH.busy){ $('shStatus').textContent = 'Check the WhatsApp number (10 digits for India).'; $('shStatus').className = 'sh-msg bad'; }
   else if($('shStatus').textContent.startsWith('Check the WhatsApp')){ $('shStatus').textContent = ''; }
 }
 function shClose(){ if(SH && SH.busy) return; $('shOv').hidden = true; SH = null; }
@@ -1489,14 +1524,28 @@ $('dlGo').addEventListener('click', async () => {
 
 /* Share tracking page link: the company's live page + access code, no file */
 function shSendTrack(){
-  const num = shNumber(); if(num === null || !SH) return;
+  const wa = shWa(), em = shEm(), num = wa ? shNumber() : '', mails = em ? shMails() : [];
+  if(!SH || (wa && num === null) || (em && (!mails || !mails.length))) return;
   const k = SH.ct && SH.ct.key === coKey($('shCo').value) ? SH.ct : null, st = $('shStatus');
   if(!k || !k.code){ st.textContent = k && k.err ? k.err : 'Getting the tracking code, try again in a moment.'; st.className = 'sh-msg bad'; return; }
   const text = $('shTxt').value;
-  window.open((num ? 'https://wa.me/' + num : 'https://api.whatsapp.com/send') + '?text=' + encodeURIComponent(text), '_blank', 'noopener');
+  if(wa) window.open((num ? 'https://wa.me/' + num : 'https://api.whatsapp.com/send') + '?text=' + encodeURIComponent(text), '_blank', 'noopener');
+  if(em){
+    const btn = $('shGo'); SH.busy = true; btn.disabled = true;
+    fetch(LOG_URL, { method:'POST', headers:{ 'Content-Type':'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action:'mailshare', to: mails.join(','), subject: $('shSubj').value, text: $('shEmTxt').value, company: $('shCo').value.trim() }) })
+      .then(r => r.json()).then(d => {
+        if(d && d.ok){ st.textContent = '✓ Email sent to ' + mails.join(', ') + (wa ? '. WhatsApp opened, press Send there.' : '.'); st.className = 'sh-msg ok'; }
+        else throw new Error((d && d.error) || 'not sent');
+      }).catch(err => {
+        st.innerHTML = 'Email could not be sent from BoxUp (' + esc(err.message || 'no internet') + '). <a href="#" id="shMailto">Open it in my email app instead</a>'; st.className = 'sh-msg bad';
+        const l = $('shMailto'); if(l) l.onclick = ev => { ev.preventDefault(); location.href = 'mailto:' + mails.join(',') + '?subject=' + encodeURIComponent($('shSubj').value) + '&body=' + encodeURIComponent($('shEmTxt').value.replace(/\*([^*\n]+)\*/g, '$1')); };
+      }).finally(() => { if(SH){ SH.busy = false; shRefresh(); } });
+  }
   fetch(LOG_URL, { method:'POST', headers:{ 'Content-Type':'text/plain;charset=utf-8' },
-    body: JSON.stringify({ action:'salesshare', company: $('shCo').value.trim(), contact: $('shWho').value.trim(), phone: num ? '+' + num : '', fileName: '', file: '', orders: SH.list.length }) }).then(() => { SH_CONTACTS = null; }).catch(() => {});
-  st.textContent = '✓ WhatsApp opened with the tracking link and code. Press Send there.'; st.className = 'sh-msg ok';
+    body: JSON.stringify({ action:'salesshare', company: $('shCo').value.trim(), contact: $('shWho').value.trim(), phone: num ? '+' + num : '', email: (mails || []).join(', '), fileName: '', file: '', orders: SH.list.length }) }).then(() => { SH_CONTACTS = null; }).catch(() => {});
+  if(!em){ st.textContent = '✓ WhatsApp opened with the tracking link and code. Press Send there.'; st.className = 'sh-msg ok'; }
+  else { st.textContent = 'Sending the email…'; st.className = 'sh-msg'; }
 }
 /* Attach Excel file: the system share window gets the real .xlsx file + the message */
 async function shSendFile(){
@@ -1534,9 +1583,18 @@ $('shCo').addEventListener('input', () => { shFill(); shRefresh(); });
 ['shWho','shNum','shCc'].forEach(id => $(id).addEventListener('input', shRefresh));
 document.querySelectorAll('input[name=shMode]').forEach(r => r.addEventListener('change', () => { if(SH) SH.edited = false; shRefresh(); }));
 $('shTxt').addEventListener('input', () => { if(SH) SH.edited = true; });
+['shEmTxt','shSubj'].forEach(id => $(id).addEventListener('input', () => { if(SH) SH.emEdited = true; }));
+$('shMail').addEventListener('input', shRefresh);
+$('shVia').addEventListener('click', e => {
+  const b = e.target.closest('.dl-f'); if(!b || !SH) return; e.preventDefault(); e.stopPropagation();
+  document.querySelector('input[name=shMode][value=link]').checked = true;
+  if(!SH.via) SH.via = new Set(['wa']);
+  const v = b.dataset.v; if(SH.via.has(v) && SH.via.size > 1) SH.via.delete(v); else SH.via.add(v);
+  shRefresh();
+});
 $('shGo').addEventListener('click', shSend);
 $('shCopy').addEventListener('click', () => {
-  const t = $('shTxt').value, b = $('shCopy');
+  const t = shEm() && !shWa() ? 'Subject: ' + $('shSubj').value + '\n\n' + $('shEmTxt').value : $('shTxt').value, b = $('shCopy');
   (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => { b.innerHTML = '&#10003; Copied'; setTimeout(() => { b.innerHTML = '&#128203; Copy message'; }, 1500); }, () => { prompt('Copy this:', t); });
 });
 
