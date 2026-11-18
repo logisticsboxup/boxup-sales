@@ -728,6 +728,8 @@ function buildOrders(headers, rows){
     let link = g(r, ix.link);
     if(!link && trk && /shree\s*anjani/i.test(courier)) link = SA_LINK_PREFIX + trk.split(/[,\s]+/)[0];
     if(trk && /dtdc/i.test(courier) && (!link || /track-your-shipment\/?$/i.test(link))) link = 'https://www.dtdc.com/track-your-shipment/?awb=' + encodeURIComponent(trk.split(/[,\s]+/)[0]);
+    if(trk && /mark\s*express/i.test(courier) && !link) link = 'https://crm.markerp.in/Frm_DocTrackWeb.aspx?docno=' + encodeURIComponent(trk.split(/[,\s]+/)[0]);
+    if(trk && /fed\s*ex/i.test(courier) && !link) link = 'https://www.fedex.com/fedextrack/?trknbr=' + encodeURIComponent(trk.split(/[,\s]+/)[0]);
     const cat = g(r, ix.cat) || (/^boxup\s*\d/i.test(id) ? 'B2C' : 'B2B');
     // order journey: the saved Order Status, never behind what the gate or courier already show
     const osT = g(r, ix.os), prT = g(r, ix.pr);
@@ -1615,7 +1617,7 @@ function scNames(){
 /* ---------- Reship: a new order made from this one; BoxUp Labels prints it ---------- */
 const RS_WHY = ['Damaged in transit', 'Lost / not delivered', 'Returned (RTO)', 'Wrong / missing item', 'Customer request', 'New order', 'Other'];
 const RS_NOTES = ['REPLACEMENT', 'RESHIPMENT', 'FRAGILE', 'HANDLE WITH CARE', 'DIWALI GIFT', 'FESTIVE GIFT'];
-const RS_COURIERS = ['Shree Anjani', 'Porter', 'In-house', 'DTDC', 'Blue Dart', 'Delhivery', 'Professional Couriers', 'Trackon', 'DHL', 'India Post'];
+const RS_COURIERS = ['Shree Anjani', 'Mark Express', 'Porter', 'In-house', 'DTDC', 'Blue Dart', 'Delhivery', 'Professional Couriers', 'Trackon', 'DHL', 'FedEx', 'India Post'];
 const LABELS_URL = 'https://logisticsboxup.github.io/boxup-labels/';
 var RS = null;
 const rsIsSA = c => /shree\s*anjani/i.test(c || ''), rsIsPor = c => /porter|in-?house|self/i.test(c || '');
