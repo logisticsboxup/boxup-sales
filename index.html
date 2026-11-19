@@ -504,8 +504,8 @@
     <input type="search" id="q" placeholder="&#128269; Search Order ID, Estimate, sender company, recipient, phone or AWB" autocomplete="off">
     <span class="dold"><span class="lbl">From</span><input type="date" id="from">
     <span class="lbl">To</span><input type="date" id="to">
-    <select id="qDate" title="Quick dates"><option value="">Quick dates</option><option value="today">Today</option><option value="yday">Yesterday</option><option value="7">Last 7 days</option><option value="30">Last 30 days</option><option value="month">This month</option><option value="all">All dates</option></select></span>
-    <div class="dr"><button type="button" id="drBtn" class="drb">&#128197; <span id="drTxt">All dates</span> <span class="cv">&#8964;</span></button><div class="drp" id="drPop" hidden></div></div>
+    <select id="qDate" title="Quick dates"><option value="">Quick dates</option><option value="today">Today</option><option value="yday">Yesterday</option><option value="7">Last 7 days</option><option value="30">Last 30 days</option><option value="month">This month</option><option value="all">All time</option></select></span>
+    <div class="dr"><button type="button" id="drBtn" class="drb">&#128197; <span id="drTxt">All time</span> <span class="cv">&#8964;</span></button><div class="drp" id="drPop" hidden></div></div>
     <button type="button" id="goBtn" class="gob">Go</button>
     <button type="button" id="rsBtn" class="rsb" title="Clear search and filters, back to the first page">&#8634; Reset</button>
     <div class="row2">
@@ -840,7 +840,7 @@ function render(){
 const VKEY = 'boxup.sales.view';
 // Grid / List is picked by the screen each time the page opens (PC: Grid, phone: List); the buttons still switch it. Company / Individual is remembered.
 const AUTO_LAY = () => (window.matchMedia && matchMedia('(max-width:640px)').matches) ? 'list' : 'grid';
-let VM = (() => { let by = 'in'; try { const v = JSON.parse(localStorage.getItem(VKEY) || 'null'); if(v && /^(co|in)$/.test(v.by)) by = v.by; } catch(e){} return {by, lay: AUTO_LAY()}; })();
+let VM = {by: 'co', lay: 'grid'};   // page always opens on Company + Grid; the buttons change it
 let OPENCO = '', FROMCO = null;   // FROMCO: the company view to go back to after "View orders"
 const coKey = s => { const n = String(s || '').toLowerCase().replace(/&/g, 'and').replace(/\b(pvt|private|ltd|limited|llp|inc|llc|co|company|india|the)\b\.?/g, '').replace(/[^a-z0-9]/g, ''); return n || String(s || '').trim().toLowerCase(); };
 const ini = s => (String(s).replace(/[^A-Za-z0-9 ]/g, ' ').trim().split(/\s+/).map(w => w[0]).join('').slice(0, 2) || '?').toUpperCase();
@@ -2330,7 +2330,7 @@ const drIso = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, 
 const drDmy = d => String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear();
 const drDay = d => new Date(d.getFullYear(), d.getMonth(), d.getDate());
 const drParse = v => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v || ''); return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null; };
-const DR_PRE = [['today', 'Today'], ['yday', 'Yesterday'], ['7', 'Last 7 days'], ['30', 'Last 30 days'], ['month', 'This Month'], ['lmonth', 'Last Month'], ['custom', 'Custom']];
+const DR_PRE = [['all', 'All time'], ['today', 'Today'], ['yday', 'Yesterday'], ['7', 'Last 7 days'], ['30', 'Last 30 days'], ['month', 'This Month'], ['lmonth', 'Last Month'], ['custom', 'Custom']];
 function drRange(k){
   const t = drDay(new Date()), add = n => new Date(t.getFullYear(), t.getMonth(), t.getDate() + n);
   if(k === 'today') return [t, t];
@@ -2343,13 +2343,13 @@ function drRange(k){
 }
 function drPreset(){
   const f = $('from').value, to = $('to').value;
-  if(!f && !to) return '';
+  if(!f && !to) return 'all';
   for(const [k] of DR_PRE){ const r = drRange(k); if(r && drIso(r[0]) === f && drIso(r[1]) === to) return k; }
   return 'custom';
 }
 function drLabel(){
   const f = drParse($('from').value), t = drParse($('to').value);
-  $('drTxt').textContent = f && t ? (drIso(f) === drIso(t) ? drDmy(f) : drDmy(f) + ' – ' + drDmy(t)) : f ? 'From ' + drDmy(f) : t ? 'Up to ' + drDmy(t) : 'All dates';
+  $('drTxt').textContent = f && t ? (drIso(f) === drIso(t) ? drDmy(f) : drDmy(f) + ' – ' + drDmy(t)) : f ? 'From ' + drDmy(f) : t ? 'Up to ' + drDmy(t) : 'All time';
 }
 function drSet(f, t){ $('from').value = f ? drIso(f) : ''; $('to').value = t ? drIso(t) : ''; $('qDate').value = ''; drLabel(); applyFilters(); }
 function drList(cur){
@@ -2396,7 +2396,7 @@ $('drBtn').addEventListener('click', e => { e.stopPropagation(); DR.open ? drClo
 $('drPop').addEventListener('click', e => {
   e.stopPropagation();
   const p = e.target.closest('[data-p]');
-  if(p){ const k = p.dataset.p; if(k === 'custom') return drOpen(true); const r = drRange(k); drClose(); return drSet(r[0], r[1]); }
+  if(p){ const k = p.dataset.p; if(k === 'custom') return drOpen(true); if(k === 'all'){ drClose(); return drSet(null, null); } const r = drRange(k); drClose(); return drSet(r[0], r[1]); }
   const nav = e.target.closest('[data-nav]');
   if(nav && !nav.disabled){ DR.left = new Date(DR.left.getFullYear(), DR.left.getMonth() + +nav.dataset.nav, 1); return drRender(); }
   const d = e.target.closest('[data-d]');
@@ -2413,10 +2413,10 @@ document.addEventListener('keydown', e => { if(e.key === 'Escape' && DR.open) dr
 $('rsBtn').addEventListener('click', () => {
   if(typeof drClose === 'function' && DR.open) drClose();
   $('q').value = ''; $('fCompany').value = ''; $('fCourier').value = '';
-  const r = drRange('30'); $('from').value = drIso(r[0]); $('to').value = drIso(r[1]); $('qDate').value = '';
+  $('from').value = ''; $('to').value = ''; $('qDate').value = '';   // All time
   FILTER = 'all'; $('fStatus').value = ''; $('fType').value = '';
   FROMCO = null; OPENCO = ''; SEL = null;
-  VM = {by:'in', lay:'list'}; try { localStorage.setItem(VKEY, JSON.stringify(VM)); } catch(e){}
+  VM = {by:'co', lay:'grid'}; try { localStorage.setItem(VKEY, JSON.stringify(VM)); } catch(e){}
   if(!$('rfM').hidden && !RF){ $('rfM').hidden = true; }
   applyFilters();
   window.scrollTo({top:0, behavior:'smooth'});
@@ -2424,7 +2424,7 @@ $('rsBtn').addEventListener('click', () => {
 $('dlBtn').addEventListener('click', dlOpen);
 $('reload').addEventListener('click', load);
 // default: last 30 days
-(function(){ const t = new Date(), f = new Date(Date.now() - 29*86400000); const iso = d => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); $('from').value = iso(f); $('to').value = iso(t); })();
+$('from').value = ''; $('to').value = '';   // page opens on All time
 /* open instantly with the last data this browser saw, then refresh in the background */
 (function(){
   try{
