@@ -726,10 +726,19 @@ function buildOrders(headers, rows){
     else st = statusTxt ? 'other' : 'held';
     const trk = g(r, ix.trk);
     let link = g(r, ix.link);
-    if(!link && trk && /shree\s*anjani/i.test(courier)) link = SA_LINK_PREFIX + trk.split(/[,\s]+/)[0];
-    if(trk && /dtdc/i.test(courier) && (!link || /track-your-shipment\/?$/i.test(link))) link = 'https://www.dtdc.com/track-your-shipment/?awb=' + encodeURIComponent(trk.split(/[,\s]+/)[0]);
-    if(trk && /mark\s*express/i.test(courier) && !link) link = 'https://crm.markerp.in/Frm_DocTrackWeb.aspx?docno=' + encodeURIComponent(trk.split(/[,\s]+/)[0]);
-    if(trk && /fed\s*ex/i.test(courier) && !link) link = 'https://www.fedex.com/fedextrack/?trknbr=' + encodeURIComponent(trk.split(/[,\s]+/)[0]);
+    // the saved link must belong to the current courier and AWB; after a courier/AWB change, build the right one
+    {
+      const a1 = trk ? trk.split(/[,\s]+/)[0] : '';
+      const C = [[/shree\s*anjani/i, 'shreeanjani', a => SA_LINK_PREFIX + a],
+                 [/shree\s*maru/i, 'shreemaruti', a => 'https://tracking.shreemaruti.com/' + encodeURIComponent(a)],
+                 [/dtdc/i, 'dtdc.com', a => 'https://www.dtdc.com/track-your-shipment/?awb=' + encodeURIComponent(a)],
+                 [/delhivery/i, 'delhivery.com', a => 'https://www.delhivery.com/track-v2/package/' + encodeURIComponent(a)],
+                 [/mark\s*express/i, 'markerp', a => 'https://crm.markerp.in/Frm_DocTrackWeb.aspx?docno=' + encodeURIComponent(a)],
+                 [/fed\s*ex/i, 'fedex.com', a => 'https://www.fedex.com/fedextrack/?trknbr=' + encodeURIComponent(a)]]
+        .find(x => x[0].test(courier));
+      if(a1 && C && (!link || link.indexOf(C[1]) < 0 || link.indexOf(a1) < 0 || /track-your-shipment\/?$/i.test(link))) link = C[2](a1);
+      else if(a1 && link && !C && link.indexOf(a1) < 0 && /shreeanjani|shreemaruti|dtdc|delhivery|fedex|markerp/i.test(link)) link = '';
+    }
     const cat = g(r, ix.cat) || (/^boxup\s*\d/i.test(id) ? 'B2C' : 'B2B');
     // order journey: the saved Order Status, never behind what the gate or courier already show
     const osT = g(r, ix.os), prT = g(r, ix.pr);
@@ -919,15 +928,15 @@ let RF = null;
 async function refreshCompany(){
   if(RF) return;
   const list = VIEW.slice(), co = FROMCO ? FROMCO.name : '', where = co ? 'for ' + co : 'in this view';
-  const kind = o => /anjani/i.test(o.courier) ? 'sa' : /maru/i.test(o.courier) ? 'sm' : /delhivery/i.test(o.courier) ? 'dl' : /dtdc/i.test(o.courier) ? 'dt' : '';
+  const kind = o => /anjani/i.test(o.courier) ? 'sa' : /mark\s*exp/i.test(o.courier) ? 'mx' : /maru/i.test(o.courier) ? 'sm' : /delhivery/i.test(o.courier) ? 'dl' : /dtdc/i.test(o.courier) ? 'dt' : '';
   const open = list.filter(o => o.trk && o.st !== 'delivered' && o.problem !== 'RTO');
-  const todo = open.filter(o => ['sa','sm','dl'].includes(kind(o)));
+  const todo = open.filter(o => ['sa','sm','dl','mx'].includes(kind(o)));
   const dtdc = open.filter(o => kind(o) === 'dt').length;
-  const CN = {sa:'Shree Anjani', sm:'Shree Maruthi', dl:'Delhivery'};
+  const CN = {sa:'Shree Anjani', sm:'Shree Maruthi', dl:'Delhivery', mx:'Mark Express'};
   const b = $('rfBtn'), bar = $('rfP'), msg = $('rfM');
   if(todo.length > 300){
     const mins = Math.max(1, Math.round(todo.length / 3 / 60));
-    if(!confirm(`Check ${todo.length} open orders ${where} (Shree Anjani, Shree Maruthi, Delhivery)?\n\nIt takes about ${mins} minute${mins > 1 ? 's' : ''}. Keep this page open; you can press Stop any time.\n\nTip: pick a shorter date range or one company to make it quicker.`)) return;
+    if(!confirm(`Check ${todo.length} open orders ${where} (Shree Anjani, Shree Maruthi, Delhivery, Mark Express)?\n\nIt takes about ${mins} minute${mins > 1 ? 's' : ''}. Keep this page open; you can press Stop any time.\n\nTip: pick a shorter date range or one company to make it quicker.`)) return;
   }
   RF = {done:0, changed:0, del:0, fail:0, total:todo.length, stop:false, by:{}};
   todo.forEach(o => { const k = kind(o); RF.by[k] = RF.by[k] || {n:0, d:0, c:0}; RF.by[k].n++; });
@@ -1060,7 +1069,7 @@ function showDetail(o){
     'Delivered': k >= 5 ? esc(fmtD(o.delivOn) || o.delivTxt || 'Delivered') : 'waiting for courier update'
   };
   const pi = o.problem && PROB_INFO[o.problem];
-  const saTrack = /shree\s*anjani/i.test(o.courier) && o.trk;
+  const saTrack = /shree\s*anjani|mark\s*exp/i.test(o.courier) && o.trk;
   const rsNew = ORDERS.filter(x => x.reOf && x.reOf === o.id && x !== o);
   $('det').innerHTML = `<button class="rsbtn" id="rsShip" title="Send this order again, or make a new order from it">&#8635; Reship</button><button class="updbtn" id="updBtn">&#9998; Update</button><h3>${esc(o.id)}</h3>
     <div class="sub">${esc([o.sender ? 'Sender: ' + o.sender : '', o.co, o.name, o.phone].filter(Boolean).join(' · '))}</div>
@@ -1826,14 +1835,55 @@ async function updSave(){
 
 /* ---------- Track on courier site: confirm, then live status from Shree Anjani ---------- */
 function trkConfirm(o){
-  const awb = o.trk.split(/[,\s]+/)[0];
-  ov(`<div class="udlg sm"><div class="uh"><span class="ic">&#128279;</span><div><h3>Track with Shree Anjani?</h3><div class="s">AWB ${esc(awb)} · ${esc(o.id)}</div></div></div>
-    <div class="cfb">BoxUp will check the live status on the Shree Anjani tracking system:
+  const awb = o.trk.split(/[,\s]+/)[0], isMx = /mark\s*exp/i.test(o.courier), CNm = isMx ? 'Mark Express' : 'Shree Anjani';
+  ov(`<div class="udlg sm"><div class="uh"><span class="ic">&#128279;</span><div><h3>Track with ${CNm}?</h3><div class="s">AWB ${esc(awb)} · ${esc(o.id)}</div></div></div>
+    <div class="cfb">BoxUp will check the live status on the ${CNm} tracking system:
       <ul><li><b>&#10003;</b>Shows where the parcel is now, with every scan</li><li><b>&#10003;</b>Updates the order status in the Label Log</li><li><b>&#10003;</b>Opens the courier website only if you ask</li></ul>
-      <div class="safe">&#128274; Safe: only the AWB number is sent. No login, no payment. Shree Anjani never asks for bank details, OTP or UPI payment.</div></div>
+      <div class="safe">&#128274; Safe: only the AWB number is sent. No login, no payment. ${CNm} never asks for bank details, OTP or UPI payment.</div></div>
     <div class="cff"><button class="btn" id="tNo">Cancel</button><button class="btn g" id="tOk">OK, track now</button></div></div>`);
   $('tNo').onclick = () => ov('');
-  $('tOk').onclick = () => trkLive(o, awb);
+  $('tOk').onclick = () => isMx ? mxLive(o, awb) : trkLive(o, awb);
+}
+/* Mark Express live tracking: read through the BoxUp script (action=ctrack), same look as Shree Anjani */
+const MX_LINK = 'https://crm.markerp.in/Frm_DocTrackWeb.aspx?docno=';
+const mxD = t => t ? new Date(t).toLocaleString('en-IN', {day:'2-digit', month:'short', year:'numeric', hour:'numeric', minute:'2-digit'}) : '';
+const mxRoute = r => { const s = String(r || ''); let m = /^From:\s*(.*?)\s+To:\s*(.*)$/i.exec(s); if(m) return {at:m[2], sub:'from ' + tc(m[1])}; m = /^Out To\s*(.*?)\s+From:\s*(.*)$/i.exec(s); if(m) return {at:m[2], sub:'to ' + tc(m[1])}; return {at:s, sub:''}; };
+async function mxLive(o, awb){
+  const head = `<div class="uh"><span class="lg" style="color:#b3261e">MARK EXPRESS</span><div><h3>Live tracking · ${esc(awb)}</h3><div class="s">${esc([o.id, o.co || o.name, o.boxes + ' box' + (o.boxes > 1 ? 'es' : '')].filter(Boolean).join(' · '))}</div></div><button class="x" id="tX">&#10005;</button></div>`;
+  ov(`<div class="udlg">${head}<div class="lload"><span class="lspin"></span>Checking Mark Express…</div></div>`);
+  $('tX').onclick = () => ov('');
+  let r = null;
+  try { r = await fetch(LOG_URL + '?' + new URLSearchParams({action:'ctrack', courier:o.courier, awb, id:o.id, t:Date.now()})).then(x => x.json()); } catch(e){}
+  if(!r || !r.ok || !r.mx){
+    ov(`<div class="udlg">${head}<div class="ub"><div class="lload" style="flex-direction:column">${esc((r && r.error) || 'Could not reach Mark Express right now.')}<br><small>If the parcel was handed over today, Mark Express may not have booked it yet. You can still open their website.</small></div></div>
+      <div class="ufoot"><span class="hint"></span><a class="btn" href="${esc(MX_LINK + awb)}" target="_blank" rel="noopener">&#8599; Open courier website</a><button class="btn g" id="tDone">Done</button></div></div>`);
+    $('tX').onclick = $('tDone').onclick = () => ov(''); return;
+  }
+  const d = r.mx, m = r.mapped || {};
+  const cls = m.step === 'Delivered' ? 'del' : m.problem ? 'bad' : '';
+  const shown = m.problem || m.step;
+  const raw = m.step === 'Delivered' ? 'DELIVERED' : m.problem === 'RTO' ? 'RTO' : String(m.step || 'Booked').toUpperCase();
+  const dl = (d.dl || []).slice().reverse().map((x, i) => `<div class="lev${i === 0 ? ' first' : ''}"><b>${esc(tc(x.status) || 'Delivery update')}${x.branch ? ' · ' + esc(tc(x.branch)) : ''}</b><small>${x.receiver ? 'received by ' + esc(x.receiver) + ' · ' : ''}${esc(x.at ? mxD(x.at) : x.when)}</small></div>`).join('');
+  const ev = (d.ev || []).slice().reverse().map((x, i) => { const rt = mxRoute(x.route); return `<div class="lev${!dl && i === 0 ? ' first' : ''}"><b>${esc(/out/i.test(x.type) ? 'Out from ' : 'In · ')}${esc(tc(rt.at))}</b><small>${rt.sub ? esc(rt.sub) + ' · ' : ''}${esc(x.at ? mxD(x.at) : x.date + ' ' + x.time)}</small></div>`; }).join('');
+  const reached = m.step === 'Delivered' ? 'delivered' : ['At Destination', 'Out for Delivery'].includes(m.step) ? 'reached' : 'on the way';
+  ov(`<div class="udlg">${head}<div class="ub">
+      <div class="lnow"><div class="stc ${cls}"><div class="l">Current status</div><div class="v">${esc(raw)}</div>${r.saved && shown ? `<div class="u">&#10003; Label Log updated: ${esc(shown)}</div>` : `<div class="u" style="color:#7a776c">Not saved: order not found in the Label Log</div>`}</div>
+        <div class="rt"><div class="c"><small>From center</small><b>${esc(tc(d.from))}</b><span>${esc(d.bookedAt ? mxD(d.bookedAt) : d.booked)}</span></div><span class="ar">&#10140;</span>
+          <div class="c"><small>To center</small><b>${esc(tc(d.to))}</b><span>${reached}</span></div></div></div>
+      <div class="lsec">Transit detail</div><div class="ltl">${dl}${ev}<div class="lev"><b>Booked</b><small>${esc(tc(d.from))} · ${esc(d.bookedAt ? mxD(d.bookedAt) : d.booked)}</small></div></div>
+      ${d.status ? `<div class="lsec">Mark Express says</div><div class="lcn">&#128666;<div><b>${esc(d.status)}</b>${d.consignee ? ' · Consignee ' + esc(tc(d.consignee)) : ''}</div></div>` : ''}
+    </div>
+    <div class="ufoot"><span class="hint">&#8635; Checked ${esc(r.at || 'just now')}. Open Mark Express orders are also checked in the background.</span>
+      <a class="btn" href="${esc(MX_LINK + awb)}" target="_blank" rel="noopener">&#8599; Open courier website</a><button class="btn" id="tWa">&#128172; Share on WhatsApp</button><button class="btn g" id="tDone">Done</button></div></div>`);
+  if(r.saved && m.step){
+    if(STEPS.indexOf(m.step) > STEPS.indexOf(o.step)) o.step = m.step;
+    if(m.problem || m.step === 'Delivered') o.problem = m.problem;
+    o.cs = 'Mark Express: ' + (d.status || raw) + ' · ' + (r.at || '');
+    o.st = o.step === 'Delivered' ? 'delivered' : o.problem === 'RTO' ? 'returned' : o.step === 'Ready' ? 'ready' : 'transit';
+    applyFilters();
+  }
+  $('tX').onclick = $('tDone').onclick = () => ov('');
+  $('tWa').onclick = () => { ov(''); waOpen(o); };
 }
 const saD = t => { const d = t ? new Date(t) : null; return d && !isNaN(d) ? d.toLocaleString('en-IN', {day:'2-digit', month:'short', year:'numeric', hour:'numeric', minute:'2-digit'}) : ''; };
 const tc = t => String(t || '').toLowerCase().replace(/-/g, ' ').replace(/\s+/g, ' ').trim().replace(/\b\w/g, c => c.toUpperCase());
