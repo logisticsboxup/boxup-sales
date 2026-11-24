@@ -361,6 +361,12 @@
   .oc .r1{display:flex;justify-content:space-between;align-items:center;gap:6px}
   .oc .id{font:700 13.5px 'Inter'}.oc .nm{font-size:14px;font-weight:600;margin:7px 0 2px}
   .oc .co{font-size:12px;color:var(--muted)}
+  .podtag{background:#e1f5ee;color:#085041;border:1px solid #5dcaa5;border-radius:6px;padding:0 6px;font-size:10.5px;font-weight:800;margin-left:6px;vertical-align:1px}
+  .podbx{border-radius:14px;padding:12px 14px;margin:12px 0}.podbx.has{background:#e1f5ee;border:1.5px solid #5dcaa5}.podbx.no{background:#f6f4ee;border:1.5px dashed #c9c4b6}
+  .podbx .ph{display:flex;align-items:center;gap:8px;font:800 14.5px 'Inter';color:#085041}.podbx.no .ph{color:#3d3d3a}.podbx .ph .n{margin-left:auto;font-size:11.5px;background:#fff;color:#0f6e56;border-radius:10px;padding:2px 9px}
+  .podbx .th{display:flex;gap:10px;margin-top:10px;align-items:center;flex-wrap:wrap}.podbx .th a{width:74px;height:74px;border-radius:8px;background:#fff;border:1px solid #9fe1cb;display:flex;align-items:center;justify-content:center;overflow:hidden;font:800 13px 'Inter';color:#a32d2d;text-decoration:none}.podbx .th img{width:100%;height:100%;object-fit:cover}
+  .podbx .who{font-size:12.5px;color:#0f6e56;line-height:1.55}.podbx .msg{font-size:13px;color:#7a776c;margin-top:4px}
+  .podtoast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#16311F;color:#fff;padding:10px 16px;border-radius:10px;font:600 13px 'Inter';z-index:9999}
   .oc .r3{display:flex;justify-content:space-between;gap:6px;margin-top:9px;font-size:12px;color:#555;border-top:1px dashed #e4ded0;padding-top:8px}
   .ctb{width:100%;border-collapse:collapse;font-size:13px}
   .ctb th{background:var(--forest);color:#fff;text-align:left;padding:9px 10px;font-size:11px;position:sticky;top:0;z-index:1;white-space:nowrap}
@@ -706,7 +712,7 @@ function buildOrders(headers, rows){
     boxes: col('Total Boxes'), batch: col('Batch ID'), status: col('Dispatch Status'), cat: find(/^(category|order category|b2b ?\/ ?b2c)$/),
     dd: find(/^dispatch(ed)? date$/), dt: find(/^dispatch(ed)? time$/), dat: find(/^dispatched (at|on)$/),
     deliv: find(/^deliver(y|ed)( status)?$/), delivOn: find(/^delivered (on|date|at)$/),
-    os: col('Order Status'), pr: col('Problem'), note: col('Status Note'), upd: col('Status Updated'), cs: col('Courier Status'), pod: col('POD')
+    os: col('Order Status'), pr: col('Problem'), note: col('Status Note'), upd: col('Status Updated'), cs: col('Courier Status'), pod: col('POD'), precv: col('Partner Received By'), pup: col('Partner Updated'), pby: col('Partner By'), pst: col('Partner Status')
   };
   const g = (r, i) => i >= 0 ? String(r[i] == null ? '' : r[i]).trim() : '';
   return rows.map((r, n) => {
@@ -750,7 +756,7 @@ function buildOrders(headers, rows){
     else if(problem === 'RTO') st = 'returned';
     else if(step !== 'Ready' && st !== 'partly') st = 'transit';
     return {
-      step, problem, pod: g(r, ix.pod), note: g(r, ix.note), upd: g(r, ix.upd), cs: g(r, ix.cs),
+      step, problem, pod: g(r, ix.pod), precv: g(r, ix.precv), pup: g(r, ix.pup), pby: g(r, ix.pby), pst: g(r, ix.pst), note: g(r, ix.note), upd: g(r, ix.upd), cs: g(r, ix.cs),
       reOf: ((/^reship of\s+([^\s·]+)/i.exec(g(r, ix.src)) || [])[1] || ''), reWhy: ((/^reship of\s+[^\s·]+\s*·\s*(.+)$/i.exec(g(r, ix.src)) || [])[1] || ''),
       n, id, at: parseDate(g(r, ix.at)), atText: g(r, ix.at), src: g(r, ix.src), hub: g(r, ix.hub), name: g(r, ix.name), co: g(r, ix.co), sender: g(r, ix.sender), client: g(r, ix.sender) || g(r, ix.co),
       phone: g(r, ix.phone), alt: g(r, ix.alt), addr: g(r, ix.addr), city: g(r, ix.city), state: g(r, ix.state), pin: g(r, ix.pin),
@@ -889,7 +895,7 @@ function renderView(){
     if(!FROMCO) $('cardT').textContent = 'Orders';
     const shown = VIEW.slice(0, 300);
     box.innerHTML = shown.length ? `<div class="og">${shown.map(o => `<div class="oc${SEL === o ? ' sel' : ''}" data-n="${o.n}">
-        <div class="r1"><span class="id">${esc(o.id)}${o.reOf ? '<span class="rstag">RESHIP</span>' : ''}</span>${stChip(o)}</div>
+        <div class="r1"><span class="id">${esc(o.id)}${o.reOf ? '<span class="rstag">RESHIP</span>' : ''}${o.pod ? '<span class="podtag">POD</span>' : ''}</span>${stChip(o)}</div>
         <div class="nm">${esc(o.name || '-')}</div><div class="co">${esc([o.client, o.city].filter(Boolean).join(' · ') || o.cat)}</div>
         <div class="r3"><span>&#128666; ${esc(o.courier || 'Not set')}${o.trk ? ' · ' + esc(o.trk.split(/[,\s]+/)[0]) : ''}</span><span>${esc(o.at ? o.at.toLocaleDateString('en-IN', {day:'2-digit', month:'short'}) : '')}</span></div></div>`).join('')}</div>`
       + (VIEW.length > 300 ? `<div class="alt-empty">Showing the newest 300. Narrow the search or dates to see more.</div>` : '')
@@ -1055,6 +1061,45 @@ $('ctCp').onclick = () => {
   (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => { b.innerHTML = '&#10003; Copied'; setTimeout(() => { b.innerHTML = '&#10697; Copy message'; }, 1500); }, () => { prompt('Copy this:', t); });
 };
 
+
+/* ---------- POD (proof of delivery): uploaded on the Partner page, or here ---------- */
+const PARTNER_URL = 'https://logisticsboxup.github.io/boxup-partner/';
+const podLinks = o => String(o.pod || '').split(/\s*,\s*/).filter(Boolean);
+const driveId = u => ((/\/d\/([\w-]{10,})/.exec(u) || /[?&]id=([\w-]{10,})/.exec(u) || [])[1] || '');
+function podToast(t){ const d = document.createElement('div'); d.className = 'podtoast'; d.innerHTML = t; document.body.appendChild(d); setTimeout(() => d.remove(), 3200); }
+function podHtml(o){
+  const L = podLinks(o);
+  if(!L.length) return `<div class="podbx no"><div class="ph">&#128196; Proof of delivery (POD)</div>
+    <div class="msg">Not uploaded yet. The courier partner uploads it from the Partner page.</div>
+    <div class="btns"><label class="btn" style="display:inline-flex;align-items:center;gap:4px">&#11014; Upload POD<input type="file" id="podUp" accept="image/*,application/pdf" hidden></label><button class="btn" id="podAsk">&#128172; Ask partner for POD</button></div>
+    <div class="msg" id="podMsg"></div></div>`;
+  const th = L.map((u, i) => { const id = driveId(u); return `<a href="${esc(u)}" target="_blank" rel="noopener" title="POD ${i + 1}">${id ? `<img src="https://drive.google.com/thumbnail?id=${esc(id)}&sz=w200" alt="POD ${i + 1}" onerror="this.replaceWith(document.createTextNode('POD ${i + 1}'))">` : 'POD ' + (i + 1)}</a>`; }).join('');
+  const who = [o.pby ? 'by <b>' + esc(o.pby) + '</b>' : '', o.pup ? esc(o.pup) : '', o.precv ? 'Received by ' + esc(o.precv) : ''].filter(Boolean).join('<br>');
+  return `<div class="podbx has"><div class="ph">&#128196; Proof of delivery (POD)<span class="n">${L.length} file${L.length > 1 ? 's' : ''}</span></div>
+    <div class="th">${th}<div class="who">${/order tracker|boxup team/i.test(o.pby || '') ? 'Uploaded by BoxUp' : 'Uploaded from Partner page'}${who ? '<br>' + who : ''}</div></div>
+    <div class="btns"><a class="btn" href="${esc(L[0])}" target="_blank" rel="noopener">&#128065; View POD</a><button class="btn" id="podDl">&#11015; Download</button><button class="btn" id="podSh">&#128172; Share POD</button><label class="btn" style="display:inline-flex;align-items:center;gap:4px">&#10133; Add another<input type="file" id="podUp" accept="image/*,application/pdf" hidden></label></div>
+    <div class="msg" id="podMsg" style="color:#0f6e56"></div></div>`;
+}
+function podWire(o){
+  const L = podLinks(o);
+  if($('podDl')) $('podDl').onclick = () => L.forEach(u => { const id = driveId(u); window.open(id ? 'https://drive.google.com/uc?export=download&id=' + id : u, '_blank'); });
+  if($('podSh')) $('podSh').onclick = () => { const t = `Proof of delivery for order ${o.id}${o.name ? ' (' + o.name + ')' : ''}${o.trk ? ', AWB ' + o.trk.split(/[,\s]+/)[0] : ''}:\n` + L.join('\n') + '\n\nBoxUp Luxury Gifting'; window.open('https://wa.me/?text=' + encodeURIComponent(t), '_blank'); };
+  if($('podAsk')) $('podAsk').onclick = () => { const t = `Hi, please upload the POD (proof of delivery) for order ${o.id}${o.name ? ' (' + o.name + ', ' + (o.city || '') + ')' : ''}${o.trk ? ', AWB ' + o.trk.split(/[,\s]+/)[0] : ''} on the BoxUp Partner page:\n${PARTNER_URL}?q=${encodeURIComponent(o.id)}\n\nThank you, BoxUp Luxury Gifting`; window.open('https://wa.me/?text=' + encodeURIComponent(t), '_blank'); };
+  if($('podUp')) $('podUp').onchange = async e => {
+    const f = e.target.files[0]; if(!f) return;
+    const m = $('podMsg'); m.textContent = 'Uploading ' + f.name + '…';
+    try {
+      if(f.size > 12 * 1024 * 1024) throw new Error('File is too big (max 12 MB)');
+      const data = await new Promise((ok, no) => { const r = new FileReader(); r.onload = () => ok(String(r.result).split(',')[1]); r.onerror = () => no(new Error('Could not read the file')); r.readAsDataURL(f); });
+      const d = await fetch(LOG_URL, { method:'POST', headers:{ 'Content-Type':'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action:'pt', op:'set', id: o.id, awb: (o.trk || '').split(/[,\s]+/)[0] || '', st:'', pod:{ name: f.name, mime: f.type || 'image/jpeg', data }, via:'Order Tracker · BoxUp team' }) }).then(r => r.json());
+      if(!d || !d.ok) throw new Error((d && d.error) || 'Not saved');
+      o.pod = d.pod || o.pod; o.pup = d.pup || o.pup; o.pby = d.by || 'BoxUp team';
+      podToast('&#10004; POD uploaded for ' + esc(o.id));
+      showDetail(o); if(typeof renderView === 'function') renderView();
+    } catch(err) { m.textContent = 'Not uploaded: ' + err.message; }
+  };
+}
 function showDetail(o){
   SEL = o;
   if(!o){ $('det').innerHTML = '<div class="empty">Click an order to see its details and timeline.</div>'; return; }
@@ -1082,6 +1127,7 @@ function showDetail(o){
     ${o.upd ? `<div class="csl">&#9998; Updated ${esc(o.upd)}</div>` : ''}
     ${o.reOf ? `<div class="rsof" id="rsOf">&#8635; Reship of <b>${esc(o.reOf)}</b>${o.reWhy ? ' · ' + esc(o.reWhy) : ''}</div>` : ''}
     <div class="tl">${STEPS.map((s, i) => `<div class="${i <= k ? 'ok' : ''}"><b>${s === 'Ready' ? 'Label printed' : s === 'Dispatched' ? (o.st === 'partly' ? 'Partly dispatched' : 'Dispatched from gate') : s}</b><small>${sub[s]}</small></div>`).join('')}${rsNew.map(x => `<div class="ok rsx"><b>&#8635; Reshipped as <a href="#" data-rsn="${x.n}">${esc(x.id)}</a></b><small>${esc([fmtD(x.at), x.reWhy, x.boxes + ' box' + (x.boxes > 1 ? 'es' : ''), x.trk ? 'AWB ' + x.trk.split(/[,\s]+/)[0] : ''].filter(Boolean).join(' · '))}</small></div>`).join('')}</div>
+    ${podHtml(o)}
     <div class="btns">
       ${saTrack ? `<button class="btn" id="trkBtn">&#128279; Track on courier site</button>` : o.link ? `<a class="btn" href="${esc(o.link)}" target="_blank" rel="noopener">&#128279; Track on courier site</a>` : `<button class="btn" disabled>&#128279; Track on courier site</button>`}
       <button class="btn" id="cpBtn" ${o.link || o.trk ? '' : 'disabled'}>&#128203; Copy tracking link</button>
@@ -1093,6 +1139,7 @@ function showDetail(o){
   $('det').querySelectorAll('[data-rsn]').forEach(a => a.onclick = e => { e.preventDefault(); const x = ORDERS.find(y => y.n === +a.dataset.rsn); if(x){ showDetail(x); if(typeof renderView === 'function') renderView(); } });
   if($('trkBtn')) $('trkBtn').onclick = () => trkConfirm(o);
   $('waBtn').onclick = () => waOpen(o);
+  podWire(o);
   const cp = $('cpBtn');
   if(cp) cp.onclick = () => { const t = o.link || o.trk; (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => { cp.textContent = '✓ Copied'; }, () => { prompt('Copy this:', t); }); };
   document.querySelectorAll('tr.row').forEach(tr => tr.classList.toggle('sel', +tr.dataset.n === o.n));
