@@ -1760,6 +1760,31 @@ function rsDraw2(){
   $('rsBoxes').onchange = () => { rsKeep(); rsDraw(); };
   $('rsId').onchange = () => { rsKeep(); rsDraw(); };
   $('rsGo').onclick = rsGo;
+  $('rsPin').oninput = () => rsPinLookup();
+}
+/* reship: city and state filled from the pincode (India Post, backup zippopotam) */
+const RS_PINS = {};
+async function rsPinInfo(pin){
+  if(pin in RS_PINS) return RS_PINS[pin];
+  let info = null;
+  try { const d = await fetch('https://api.postalpincode.in/pincode/' + pin).then(r => r.json());
+    if(d && d[0] && d[0].Status === 'Success' && d[0].PostOffice && d[0].PostOffice.length){ const po = d[0].PostOffice[0]; info = { city: po.District || po.Block || '', state: po.State || '' }; } } catch(e){}
+  if(!info){ try { const d = await fetch('https://api.zippopotam.us/in/' + pin).then(r => r.ok ? r.json() : null);
+    if(d && d.places && d.places.length) info = { city: d.places[0]['place name'] || '', state: d.places[0].state || '' }; } catch(e){} }
+  if(info) RS_PINS[pin] = info;
+  return info;
+}
+async function rsPinLookup(){
+  const el = $('rsPin'); if(!el) return;
+  const pin = el.value.replace(/\D/g, ''); if(el.value !== pin) el.value = pin;
+  const er = $('rsErr');
+  if(pin.length !== 6) return;
+  if(er) er.textContent = 'Finding city and state for ' + pin + '…';
+  const info = await rsPinInfo(pin);
+  if(!$('rsPin') || $('rsPin').value.replace(/\D/g, '') !== pin) return;   // pincode changed while looking up
+  if(info){ $('rsCity').value = info.city; $('rsState').value = info.state; if(er) er.textContent = '';
+    [$('rsCity'), $('rsState')].forEach(x => { x.style.background = '#e3f4e8'; setTimeout(() => x.style.background = '', 1200); }); }
+  else if(er) er.textContent = 'Pincode ' + pin + ' not found. Check it, or type the city and state.';
 }
 function rsGo(){
   rsKeep();
