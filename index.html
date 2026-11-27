@@ -1092,10 +1092,10 @@ function podWire(o){
       if(f.size > 12 * 1024 * 1024) throw new Error('File is too big (max 12 MB)');
       const data = await new Promise((ok, no) => { const r = new FileReader(); r.onload = () => ok(String(r.result).split(',')[1]); r.onerror = () => no(new Error('Could not read the file')); r.readAsDataURL(f); });
       const d = await fetch(LOG_URL, { method:'POST', headers:{ 'Content-Type':'text/plain;charset=utf-8' },
-        body: JSON.stringify({ action:'pt', op:'set', id: o.id, awb: (o.trk || '').split(/[,\s]+/)[0] || '', st:'', pod:{ name: f.name, mime: f.type || 'image/jpeg', data }, via:'Order Tracker · BoxUp team' }) }).then(r => r.json());
+        body: JSON.stringify({ action:'pt', op:'set', id: o.id, awb: (o.trk || '').split(/[,\s]+/)[0] || '', st: o.step === 'Delivered' ? '' : 'delivered', pod:{ name: f.name, mime: f.type || 'image/jpeg', data }, via:'Order Tracker · BoxUp team' }) }).then(r => r.json());
       if(!d || !d.ok) throw new Error((d && d.error) || 'Not saved');
-      o.pod = d.pod || o.pod; o.pup = d.pup || o.pup; o.pby = d.by || 'BoxUp team';
-      podToast('&#10004; POD uploaded for ' + esc(o.id));
+      o.pod = d.pod || o.pod; o.pup = d.pup || o.pup; o.pby = d.by || 'BoxUp team'; if(o.step !== 'Delivered'){ o.step = 'Delivered'; o.st = 'delivered'; o.delivOn = o.delivOn || new Date(); }
+      podToast('&#10004; POD uploaded · ' + esc(o.id) + ' marked Delivered');
       showDetail(o); if(typeof renderView === 'function') renderView();
     } catch(err) { m.textContent = 'Not uploaded: ' + err.message; }
   };
