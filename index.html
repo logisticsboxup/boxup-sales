@@ -1679,6 +1679,7 @@ var RS = null;
 const rsIsSA = c => /shree\s*anjani|mark\s*express/i.test(c || ''), rsIsMX = c => /mark\s*express/i.test(c || ''), rsIsPor = c => /porter|in-?house|self/i.test(c || '');
 function rsNextId(id){ let k = 1; while(ORDERS.some(x => x.id.toLowerCase() === (id + '-R' + k).toLowerCase())) k++; return id + '-R' + k; }
 function rsOpen(o){
+  RS_PINLAST.pin = String((o && o.pin) || '').replace(/\D/g, '');   // keep the order's own city unless the pincode is changed
   const auto = rsNextId(o.id);
   RS = { o, auto, why: 'Damaged in transit', notes: ['REPLACEMENT'], noteTyped: null, awb: rsIsSA(o.courier) ? 'sa' : rsIsPor(o.courier) ? 'none' : 'type', oldNote: true,
     f: { id: auto, boxes: o.boxes, courier: RS_COURIERS.find(c => c.toLowerCase() === String(o.courier || '').toLowerCase()) || (rsIsSA(o.courier) ? 'Shree Anjani' : o.courier || ''),
@@ -1760,15 +1761,16 @@ function rsDraw2(){
   $('rsBoxes').onchange = () => { rsKeep(); rsDraw(); };
   $('rsId').onchange = () => { rsKeep(); rsDraw(); };
   $('rsGo').onclick = rsGo;
-  $('rsPin').oninput = () => rsPinLookup();
+  ['input','change','paste','keyup','blur'].forEach(ev => $('rsPin').addEventListener(ev, () => setTimeout(rsPinLookup, ev === 'paste' ? 30 : 0)));   // any courier: pincode fills city and state
 }
 /* reship: city and state filled from the pincode (India Post, backup zippopotam) */
-const RS_PINS = {};
+const RS_PINS = {}, RS_PINLAST = { pin: '' };
+const RS_CITYNEW = { 'allahabad': 'Prayagraj', 'gurgaon': 'Gurugram', 'bangalore': 'Bengaluru', 'bangalore urban': 'Bengaluru', 'bengaluru urban': 'Bengaluru', 'mysore': 'Mysuru', 'belgaum': 'Belagavi', 'gulbarga': 'Kalaburagi', 'faizabad': 'Ayodhya', 'hoshangabad': 'Narmadapuram', 'aurangabad(maharashtra)': 'Chhatrapati Sambhajinagar', 'osmanabad': 'Dharashiv', 'ahmednagar': 'Ahilyanagar' };
 async function rsPinInfo(pin){
   if(pin in RS_PINS) return RS_PINS[pin];
   let info = null;
   try { const d = await fetch('https://api.postalpincode.in/pincode/' + pin).then(r => r.json());
-    if(d && d[0] && d[0].Status === 'Success' && d[0].PostOffice && d[0].PostOffice.length){ const po = d[0].PostOffice[0]; info = { city: po.District || po.Block || '', state: po.State || '' }; } } catch(e){}
+    if(d && d[0] && d[0].Status === 'Success' && d[0].PostOffice && d[0].PostOffice.length){ const po = d[0].PostOffice[0]; const c = po.District || po.Block || ''; info = { city: RS_CITYNEW[c.toLowerCase()] || c, state: po.State || '' }; } } catch(e){}
   if(!info){ try { const d = await fetch('https://api.zippopotam.us/in/' + pin).then(r => r.ok ? r.json() : null);
     if(d && d.places && d.places.length) info = { city: d.places[0]['place name'] || '', state: d.places[0].state || '' }; } catch(e){} }
   if(info) RS_PINS[pin] = info;
@@ -1778,10 +1780,13 @@ async function rsPinLookup(){
   const el = $('rsPin'); if(!el) return;
   const pin = el.value.replace(/\D/g, ''); if(el.value !== pin) el.value = pin;
   const er = $('rsErr');
-  if(pin.length !== 6) return;
+  if(pin.length !== 6){ RS_PINLAST.pin = ''; return; }
+  if(RS_PINLAST.pin === pin) return;   // already filled for this pincode
+  RS_PINLAST.pin = pin;
   if(er) er.textContent = 'Finding city and state for ' + pin + '…';
   const info = await rsPinInfo(pin);
-  if(!$('rsPin') || $('rsPin').value.replace(/\D/g, '') !== pin) return;   // pincode changed while looking up
+  if(!$('rsPin') || $('rsPin').value.replace(/\D/g, '') !== pin){ return; }   // pincode changed while looking up
+  if(!info) RS_PINLAST.pin = '';
   if(info){ $('rsCity').value = info.city; $('rsState').value = info.state; if(er) er.textContent = '';
     [$('rsCity'), $('rsState')].forEach(x => { x.style.background = '#e3f4e8'; setTimeout(() => x.style.background = '', 1200); }); }
   else if(er) er.textContent = 'Pincode ' + pin + ' not found. Check it, or type the city and state.';
